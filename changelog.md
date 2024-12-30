@@ -1,4 +1,1 @@
-- rebrand mod to "magnetic"
-  - the old "telekinesis.json" config file has to be copied manually
-  - the enchantment is now identified by "magnetic:magnetic"
-- do not register telekinesis enchantment if "needEnchantment" is false
+- only support the latest stable version from now on

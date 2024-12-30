@@ -96,7 +96,7 @@ public abstract class BlockMixin {
         method = "tryDropExperience",
         at = @At(
             value = "INVOKE",
-            target = /*? if >=1.21 {*/ "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;processBlockExperience(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;I)I" /*?} else {*/ /*"Lnet/minecraft/util/valueproviders/IntProvider;sample(Lnet/minecraft/util/RandomSource;)I" *//*?}*/
+            target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;processBlockExperience(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;I)I"
         )
     )
     private int modifyExp(

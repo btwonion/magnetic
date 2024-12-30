@@ -15,12 +15,12 @@ public class AbstractHorseMixin {
         method = "dropEquipment",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/  "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     public boolean modifyEquipmentDrop(
         AbstractHorse instance,
-        /*$ serverLevel {*/ /*$}*/
+        ServerLevel serverLevel,
         ItemStack stack
     ) {
         return MixinHelper.entityDropEquipmentSingle(instance, stack);
@@ -30,14 +30,14 @@ public class AbstractHorseMixin {
         method = "dropEquipment",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/  "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     public boolean modifyEquipmentDrops(
         AbstractHorse instance,
-        /*$ serverLevel {*//*$}*/
-        ItemStack itemStack
+        ServerLevel serverLevel,
+        ItemStack stack
     ) {
-        return MixinHelper.entityDropEquipmentSingle(instance, itemStack);
+        return MixinHelper.entityDropEquipmentSingle(instance, stack);
     }
 }

@@ -22,12 +22,12 @@ public class AllayMixin {
         method = "dropEquipment",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/animal/allay/Allay;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/  "Lnet/minecraft/world/entity/animal/allay/Allay;spawnAtLocation(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/animal/allay/Allay;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     public boolean modifyEquipmentDrop(
         Allay instance,
-        /*$ serverLevel {*//*$}*/
+        ServerLevel serverLevel,
         ItemStack stack
     ) {
         return MixinHelper.entityDropEquipmentSingle(instance, stack);

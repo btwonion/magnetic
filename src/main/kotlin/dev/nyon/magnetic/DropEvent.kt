@@ -22,7 +22,7 @@ object DropEvent {
     @Suppress("unused", "KotlinConstantConditions")
     private val listener = event.register { items, exp, player, tool ->
         if (config.needSneak && !player.isCrouching) return@register
-        if (config.needEnchantment && /*? if >=1.21 {*/ !EnchantmentHelper.hasTag(tool, magneticEffectId)/*?} else {*/ /*EnchantmentHelper.getItemEnchantmentLevel(magnetic, tool) == 0 *//*?}*/) return@register
+        if (config.needEnchantment && !EnchantmentHelper.hasTag(tool, magneticEffectId)) return@register
 
         if (config.itemsAllowed) items.removeIf(player::addItem)
         if (config.expAllowed) {

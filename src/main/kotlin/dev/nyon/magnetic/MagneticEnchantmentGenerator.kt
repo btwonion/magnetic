@@ -2,7 +2,6 @@ package dev.nyon.magnetic
 
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
-/*? if >=1.21 {*/
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider.EnchantmentTagProvider
@@ -12,25 +11,25 @@ import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.EnchantmentTags
+import net.minecraft.tags.TagKey
 import net.minecraft.world.entity.EquipmentSlotGroup
 import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.Enchantment.EnchantmentDefinition
 import net.minecraft.world.item.enchantment.Enchantment.dynamicCost
 import java.util.concurrent.CompletableFuture
-/*?}*/
+
+val magneticEffectId: TagKey<Enchantment> = TagKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath("magnetic", "auto_move"))
+val magneticEnchantmentId: ResourceLocation = ResourceLocation.fromNamespaceAndPath("magnetic", "magnetic")
 
 class MagneticEnchantmentGenerator : DataGeneratorEntrypoint {
     override fun onInitializeDataGenerator(generator: FabricDataGenerator) {
-        /*? if >=1.21 {*/
         val pack = generator.createPack()
 
         pack.addProvider(::EnchantmentProvider)
         pack.addProvider(::MagneticEnchantmentTagProvider)
-        /*?}*/
     }
 }
 
-/*? if >=1.21 {*/
 private class MagneticEnchantmentTagProvider(
     output: FabricDataOutput, completableFuture: CompletableFuture<HolderLookup.Provider>
 ) : EnchantmentTagProvider(output, completableFuture) {
@@ -71,4 +70,3 @@ private class EnchantmentProvider(
         entries.add(ResourceKey.create(Registries.ENCHANTMENT, magneticEnchantmentId), enchantment)
     }
 }
-/*?}*/

@@ -1,21 +1,33 @@
 @file:Suppress("SpellCheckingInspection", "UnstableApiUsage")
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
 import net.fabricmc.loom.configuration.FabricApiExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.time.Instant
 
 plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.serialization") version "2.0.21"
-    id("fabric-loom") version "1.8-SNAPSHOT"
+    kotlin("jvm") version "2.1.0"
+    kotlin("plugin.serialization") version "2.1.0"
+    id("fabric-loom") version "1.9-SNAPSHOT"
 
-    id("me.modmuss50.mod-publish-plugin") version "0.7.+"
+    id("me.modmuss50.mod-publish-plugin") version "0.8.+"
 
     `maven-publish`
 }
 
 val beta: Int? = null // Pattern is '1.0.0-beta1-1.20.6-pre.2'
-val featureVersion = "3.2.0${if (beta != null) "-beta$beta" else ""}"
+val featureVersion = "3.3.0${if (beta != null) "-beta$beta" else ""}"
 val mcVersion = property("mcVersion")!!.toString()
 val mcVersionRange = property("mcVersionRange")!!.toString()
 val mcVersionName = property("versionName")!!.toString()
@@ -29,20 +41,15 @@ base {
 }
 
 loom {
-    if (stonecutter.current.isActive) {
-        runConfigs.all {
-            ideConfigGenerated(true)
-            runDir("../../run")
-        }
-    }
-
     accessWidenerPath = rootDir.resolve("src/main/resources/magnetic.accesswidener")
     mixin { useLegacyMixinAp = false }
 }
 
-// Enable data generation for >1.20.6
-val dataGen = stonecutter.eval(mcVersion, ">1.20.6")
-if (dataGen) fabricApi(FabricApiExtension::configureDataGeneration)
+fabricApi {
+    configureDataGeneration {
+        client = true
+    }
+}
 
 repositories {
     mavenCentral()
@@ -63,7 +70,7 @@ dependencies {
     implementation("org.vineflower:vineflower:1.10.1")
     modImplementation("net.fabricmc:fabric-loader:0.16.9")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fapi")!!}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.12.3+kotlin.2.0.21")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.0+kotlin.2.1.0")
 
     modImplementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
     modImplementation("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
@@ -71,7 +78,6 @@ dependencies {
     include(modImplementation("dev.nyon:konfig:2.0.2-1.20.4")!!)
 }
 
-val javaVersion = if (stonecutter.eval(mcVersion, ">=1.20.6")) 21 else 17
 tasks {
     processResources {
         val modId = "magnetic"
@@ -101,18 +107,77 @@ tasks {
         dependsOn("publish")
     }
 
+    register("postUpdate") {
+        group = "publishing"
+
+        val url = providers.environmentVariable("DISCORD_WEBHOOK").orNull ?: return@register
+        val roleId = providers.environmentVariable("DISCORD_ROLE_ID").orNull ?: return@register
+        val changelogText = rootProject.file("changelog.md").readText()
+        val webhook = DiscordWebhook(
+            username = "${rootProject.name} Release Notifier",
+            avatarUrl = "https://raw.githubusercontent.com/btwonion/magnetic/master/src/main/resources/assets/magnetic/icon.png",
+            embeds = listOf(
+                Embed(
+                    title = "v$featureVersion of ${rootProject.name} released!",
+                    description = "# Changelog\n$changelogText",
+                    timestamp = Instant.now().toString(),
+                    color = 0xff0080,
+                    fields = listOf(
+                        Field(
+                            "Supported versions",
+                            property("supportedMcVersions")!!.toString().split(',').joinToString(),
+                            false
+                        ),
+                        Field("Modrinth", "https://modrinth.com/mod/magnetic", true),
+                        Field("GitHub", "https://github.com/btwonion/magnetic", true)
+                    ),
+                )
+            )
+        )
+
+        @OptIn(ExperimentalSerializationApi::class)
+        val embedsJson = buildJsonArray {
+            webhook.embeds.map { embed ->
+                add(buildJsonObject {
+                    put("title", embed.title)
+                    put("description", embed.description)
+                    put("timestamp", embed.timestamp)
+                    put("color", embed.color)
+                    putJsonArray("fields") {
+                        addAll(embed.fields.map { field ->
+                            buildJsonObject {
+                                put("name", field.name)
+                                put("value", field.value)
+                                put("inline", field.inline)
+                            }
+                        })
+                    }
+                })
+            }
+        }
+
+        val json = buildJsonObject {
+            put("username", webhook.username)
+            put("avatar_url", webhook.avatarUrl)
+            put("content", "<@&$roleId>")
+            put("embeds", embedsJson)
+        }
+
+        val jsonString = Json.encodeToString(json)
+        HttpClient.newHttpClient().send(
+            HttpRequest.newBuilder(URI.create(url)).header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonString)).build(), HttpResponse.BodyHandlers.ofString()
+        )
+    }
+
     withType<JavaCompile> {
-        options.release = javaVersion.toInt()
+        options.release = 21
     }
 
     withType<KotlinCompile> {
         compilerOptions {
-            jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
+            jvmTarget = JvmTarget.fromTarget("21")
         }
-    }
-
-    build {
-        if (dataGen) dependsOn("runDatagen")
     }
 }
 
@@ -173,9 +238,18 @@ publishing {
 java {
     withSourcesJar()
 
-    javaVersion.toInt().let { JavaVersion.values()[it - 1] }.let {
+    JavaVersion.VERSION_21.let {
         sourceCompatibility = it
         targetCompatibility = it
     }
 }
 
+data class Field(val name: String, val value: String, val inline: Boolean)
+
+data class Embed(
+    val title: String, val description: String, val timestamp: String, val color: Int, val fields: List<Field>
+)
+
+data class DiscordWebhook(
+    val username: String, val avatarUrl: String, val embeds: List<Embed>
+)
