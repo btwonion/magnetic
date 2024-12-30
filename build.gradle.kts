@@ -2,12 +2,7 @@
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
-import net.fabricmc.loom.configuration.FabricApiExtension
+import kotlinx.serialization.json.*
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URI
@@ -78,11 +73,15 @@ dependencies {
     include(modImplementation("dev.nyon:konfig:2.0.2-1.20.4")!!)
 }
 
+val supportedMcVersions: List<String> =
+    property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
+
 tasks {
     processResources {
         val modId = "magnetic"
         val modName = "magnetic"
-        val modDescription = "Magnetically moves items and experience into your inventory. Also known as telekinesis from Hypixel Skyblock."
+        val modDescription =
+            "Magnetically moves items and experience into your inventory. Also known as telekinesis from Hypixel Skyblock."
 
         val props = mapOf(
             "id" to modId,
@@ -124,9 +123,7 @@ tasks {
                     color = 0xff0080,
                     fields = listOf(
                         Field(
-                            "Supported versions",
-                            property("supportedMcVersions")!!.toString().split(',').joinToString(),
-                            false
+                            "Supported versions", supportedMcVersions.joinToString(), false
                         ),
                         Field("Modrinth", "https://modrinth.com/mod/magnetic", true),
                         Field("GitHub", "https://github.com/btwonion/magnetic", true)
@@ -185,9 +182,6 @@ val changelogText = buildString {
     append("# v${project.version}\n")
     rootProject.file("changelog.md").readText().also(::append)
 }
-
-val supportedMcVersions: List<String> =
-    property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
 
 publishMods {
     displayName = "v${project.version}"
