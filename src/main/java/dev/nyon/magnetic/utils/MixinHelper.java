@@ -79,7 +79,8 @@ public class MixinHelper {
         ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList,
+            .invoke(
+                mutableList,
                 new MutableInt(0),
                 player,
                 Objects.requireNonNullElseGet(source.getWeaponItem(), player::getMainHandItem)
@@ -98,7 +99,8 @@ public class MixinHelper {
         ArrayList<ItemStack> mutableList = new ArrayList<>(items);
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList,
+            .invoke(
+                mutableList,
                 new MutableInt(0),
                 player,
                 Objects.requireNonNullElseGet(source.getWeaponItem(), player::getMainHandItem)

@@ -39,10 +39,8 @@ public abstract class BlockMixin {
         BlockState state,
         Level level,
         BlockPos pos,
-        @Nullable
-        BlockEntity blockEntity,
-        @Nullable
-        Entity entity,
+        @Nullable BlockEntity blockEntity,
+        @Nullable Entity entity,
         ItemStack tool
     ) {
         if (!(entity instanceof ServerPlayer player)) return original;
@@ -72,10 +70,8 @@ public abstract class BlockMixin {
         BlockState state,
         Level level,
         BlockPos pos,
-        @Nullable
-        BlockEntity blockEntity,
-        @Nullable
-        Entity entity,
+        @Nullable BlockEntity blockEntity,
+        @Nullable Entity entity,
         ItemStack tool
     ) {
         if (!(entity instanceof ServerPlayer player)) {

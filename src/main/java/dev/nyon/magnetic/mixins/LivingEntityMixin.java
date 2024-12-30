@@ -44,8 +44,12 @@ public abstract class LivingEntityMixin {
     }
 
     @Unique
-    private Consumer<ItemStack> replaceConsumer(LootParams params, Consumer<ItemStack> original) {
-        DamageSource source = params.contextMap().getOptional(LootContextParams.DAMAGE_SOURCE);
+    private Consumer<ItemStack> replaceConsumer(
+        LootParams params,
+        Consumer<ItemStack> original
+    ) {
+        DamageSource source = params.contextMap()
+            .getOptional(LootContextParams.DAMAGE_SOURCE);
         if (source == null || !(source.getEntity() instanceof ServerPlayer player)) return original;
 
         return item -> {
@@ -81,7 +85,11 @@ public abstract class LivingEntityMixin {
             target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V"
         )
     )
-    public Consumer<ItemStack> redirectDropConsumer(Consumer<ItemStack> original, @Local(ordinal = 0) LootParams params) {
+    public Consumer<ItemStack> redirectDropConsumer(
+        Consumer<ItemStack> original,
+        @Local(ordinal = 0)
+        LootParams params
+    ) {
         return replaceConsumer(params, original);
     }
 }

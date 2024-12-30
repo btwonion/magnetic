@@ -23,7 +23,9 @@ public class PiglinMixin {
     )
     public List<ItemStack> redirectDrops(
         List<ItemStack> original,
-        ServerLevel serverLevel, DamageSource damageSource, boolean bl
+        ServerLevel serverLevel,
+        DamageSource damageSource,
+        boolean bl
     ) {
         return MixinHelper.entityCustomDeathLootMultiple(damageSource, original);
     }

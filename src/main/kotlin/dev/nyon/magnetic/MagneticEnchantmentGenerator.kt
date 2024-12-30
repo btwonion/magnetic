@@ -18,7 +18,8 @@ import net.minecraft.world.item.enchantment.Enchantment.EnchantmentDefinition
 import net.minecraft.world.item.enchantment.Enchantment.dynamicCost
 import java.util.concurrent.CompletableFuture
 
-val magneticEffectId: TagKey<Enchantment> = TagKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath("magnetic", "auto_move"))
+val magneticEffectId: TagKey<Enchantment> =
+    TagKey.create(Registries.ENCHANTMENT, ResourceLocation.fromNamespaceAndPath("magnetic", "auto_move"))
 val magneticEnchantmentId: ResourceLocation = ResourceLocation.fromNamespaceAndPath("magnetic", "magnetic")
 
 class MagneticEnchantmentGenerator : DataGeneratorEntrypoint {

@@ -22,7 +22,10 @@ public abstract class WitherBossMixin {
         )
     )
     protected void redirectEquipmentDrop(
-        Args args, ServerLevel serverLevel, DamageSource damageSource, boolean bl
+        Args args,
+        ServerLevel serverLevel,
+        DamageSource damageSource,
+        boolean bl
     ) {
         ItemLike original = args.get(0);
 
