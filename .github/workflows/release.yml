@@ -21,11 +21,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build with Gradle
-        uses: Wandalen/wretry.action@master
-        with:
-          command: ./gradlew buildAllVersions --stacktrace
+        run: ./gradlew build --stacktrace
       - name: Release with Gradle
-        run: ./gradlew releaseAllVersions postUpdate --stacktrace
+        run: ./gradlew release postUpdate --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_API_KEY: ${{ secrets.MODRINTH_API_KEY }}
