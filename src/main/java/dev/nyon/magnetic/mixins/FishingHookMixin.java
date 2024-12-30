@@ -20,6 +20,10 @@ import java.util.List;
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin {
 
+    @Shadow
+    @Final
+    private RandomSource syncronizedRandom;
+
     @ModifyReceiver(
         method = "retrieve",
         at = @At(
@@ -48,8 +52,4 @@ public abstract class FishingHookMixin {
     @Shadow
     @Nullable
     public abstract Player getPlayerOwner();
-
-    @Shadow
-    @Final
-    private RandomSource syncronizedRandom;
 }

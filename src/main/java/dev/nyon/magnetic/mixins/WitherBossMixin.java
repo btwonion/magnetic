@@ -18,11 +18,14 @@ public abstract class WitherBossMixin {
         method = "dropCustomDeathLoot",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/boss/wither/WitherBoss;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/  "Lnet/minecraft/world/entity/boss/wither/WitherBoss;spawnAtLocation(Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/boss/wither/WitherBoss;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     protected void redirectEquipmentDrop(
-        Args args, /*? if >=1.21 {*/ ServerLevel serverLevel, DamageSource damageSource, boolean bl /*?} else {*/ /*DamageSource damageSource, int looting, boolean hitByPlayer *//*?}*/
+        Args args,
+        ServerLevel serverLevel,
+        DamageSource damageSource,
+        boolean bl
     ) {
         ItemLike original = args.get(0);
 

@@ -9,11 +9,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.player.Player;
-//? if >=1.20.4
 import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.ArrayList;
@@ -22,18 +20,6 @@ import java.util.Objects;
 
 public class MixinHelper {
     public static final ThreadLocal<ServerPlayer> threadLocal = new ThreadLocal<>();
-
-    public static Item modifyExpressionValueOldVehicle(Item original, DamageSource damageSource) {
-        if (!(damageSource.getEntity() instanceof ServerPlayer player)) return original;
-
-        ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(new ItemStack(original)));
-        DropEvent.INSTANCE.getEvent()
-            .invoker()
-            .invoke(mutableList, new MutableInt(0), player, player.getMainHandItem());
-
-        if (mutableList.isEmpty()) return Items.AIR;
-        else return original;
-    }
 
     public static boolean wrapWithConditionPlayerItemSingle(
         ServerPlayer player,
@@ -93,10 +79,11 @@ public class MixinHelper {
         ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList,
+            .invoke(
+                mutableList,
                 new MutableInt(0),
                 player,
-                Objects.requireNonNullElseGet(/*? if >=1.21 {*/source.getWeaponItem() /*?} else {*/ /*player.getMainHandItem() *//*?}*/, player::getMainHandItem)
+                Objects.requireNonNullElseGet(source.getWeaponItem(), player::getMainHandItem)
             );
 
         return !mutableList.isEmpty();
@@ -112,16 +99,16 @@ public class MixinHelper {
         ArrayList<ItemStack> mutableList = new ArrayList<>(items);
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList,
+            .invoke(
+                mutableList,
                 new MutableInt(0),
                 player,
-                Objects.requireNonNullElseGet(/*? if >=1.21 {*/source.getWeaponItem() /*?} else {*/ /*player.getMainHandItem() *//*?}*/, player::getMainHandItem)
+                Objects.requireNonNullElseGet(source.getWeaponItem(), player::getMainHandItem)
             );
 
         return mutableList;
     }
 
-    /*? if >=1.20.4 {*/
     public static void prepareVehicleServerPlayer(
         VehicleEntity instance,
         Item item,
@@ -141,7 +128,6 @@ public class MixinHelper {
             threadLocal.set(previous);
         }
     }
-    /*?}*/
 
     public static void prepareShearableServerPlayer(
         Shearable instance,
@@ -149,17 +135,6 @@ public class MixinHelper {
         Operation<Void> original,
         Player _player
     ) {
-        if (!(_player instanceof ServerPlayer player)) {
-            original.call(instance, source);
-            return;
-        }
 
-        ServerPlayer previous = threadLocal.get();
-        threadLocal.set(player);
-        try {
-            original.call(instance, source);
-        } finally {
-            threadLocal.set(previous);
-        }
     }
 }

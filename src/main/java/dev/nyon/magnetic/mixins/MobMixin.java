@@ -16,32 +16,32 @@ public class MobMixin {
         method = "dropCustomDeathLoot",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/Mob;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/  "Lnet/minecraft/world/entity/Mob;spawnAtLocation(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/Mob;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     public boolean modifyCustomDeathLoot(
         Mob instance,
-        /*$ serverLevel {*//*$}*/
+        ServerLevel serverLevel,
         ItemStack itemStack,
-        /*? if >=1.21 {*/ ServerLevel serverLevel, DamageSource damageSource, boolean bl /*?} else {*/ /*DamageSource damageSource, int looting, boolean hitByPlayer *//*?}*/
+        ServerLevel world,
+        DamageSource damageSource,
+        boolean playerKill
     ) {
         return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack);
     }
 
-    /*? if >=1.21 {*/
     @WrapWithCondition(
-        method = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/Mob;dropPreservedEquipment(Lnet/minecraft/server/level/ServerLevel;Ljava/util/function/Predicate;)Ljava/util/Set;"*//*?} else {*/  "dropPreservedEquipment(Ljava/util/function/Predicate;)Ljava/util/Set;" /*?}*/,
+        method = "dropPreservedEquipment(Lnet/minecraft/server/level/ServerLevel;Ljava/util/function/Predicate;)Ljava/util/Set;",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/Mob;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/  "Lnet/minecraft/world/entity/Mob;spawnAtLocation(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/Mob;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     public boolean modifyPreservedEquipment(
         Mob instance,
-        /*$ serverLevel {*//*$}*/
+        ServerLevel serverLevel,
         ItemStack itemStack
     ) {
         return MixinHelper.entityDropEquipmentSingle(instance, itemStack);
     }
-    /*?}*/
 }

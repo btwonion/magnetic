@@ -16,12 +16,12 @@ public class StriderMixin {
         method = "dropEquipment",
         at = @At(
             value = "INVOKE",
-            target =  /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/monster/Strider;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/  "Lnet/minecraft/world/entity/monster/Strider;spawnAtLocation(Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/monster/Strider;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     public boolean redirectEquipmentDrop(
         Strider instance,
-        /*$ serverLevel {*/ /*$}*/
+        ServerLevel serverLevel,
         ItemLike item
     ) {
         return MixinHelper.entityDropEquipmentSingle(instance, new ItemStack(item));

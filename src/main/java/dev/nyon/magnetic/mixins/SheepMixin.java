@@ -2,79 +2,62 @@ package dev.nyon.magnetic.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.nyon.magnetic.utils.MixinHelper;
+import dev.nyon.magnetic.DropEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-
-/*? if <1.21.2 {*/
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import net.minecraft.world.level.block.Block;
-import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
-/*?} else {*/
-/*import dev.nyon.magnetic.DropEvent;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-*//*?}*/
+
+import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(Sheep.class)
 public abstract class SheepMixin {
+
+    @Unique
+    private Sheep instance = (Sheep) (Object) this;
 
     @WrapOperation(
         method = "mobInteract",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/animal/Sheep;shear(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/sounds/SoundSource;Lnet/minecraft/world/item/ItemStack;)V"
-            *//*?} else {*/
-            "Lnet/minecraft/world/entity/animal/Sheep;shear(Lnet/minecraft/sounds/SoundSource;)V" 
-            /*?}*/
+            target = "Lnet/minecraft/world/entity/animal/Sheep;shear(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/sounds/SoundSource;Lnet/minecraft/world/item/ItemStack;)V"
         )
     )
     private void prepareThreadLocalForShearing(
         Sheep instance,
-        /*$ serverLevel {*//*$}*/
+        ServerLevel world,
         SoundSource source,
-        /*? if >=1.21.2 {*/
-        /*ItemStack itemStack,
-        *//*?}*/
+        ItemStack stack,
         Operation<Void> original,
         Player player,
         InteractionHand hand
     ) {
-        MixinHelper.prepareShearableServerPlayer(instance, source, original, player);
-    }
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            original.call(instance, world, source, stack);
+            return;
+        }
 
-    /*? if <1.21.2 {*/
-    @ModifyExpressionValue(
-        method = "shear",
-        at = @At(
-            value = "INVOKE",
-            target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"
-        )
-    )
-    private Object modifyShearDrops(Object original) {
-        ServerPlayer player = threadLocal.get();
-        if (!(original instanceof Block block)) return original;
-        if (player == null) return original;
-
-        if (MixinHelper.wrapWithConditionPlayerItemSingle(player, new ItemStack(block))) return original;
-        else return ItemStack.EMPTY;
+        ServerPlayer previous = threadLocal.get();
+        threadLocal.set(serverPlayer);
+        try {
+            original.call(instance, world, source, stack);
+        } finally {
+            threadLocal.set(previous);
+        }
     }
-    /*?} else {*/
-    
-    /*@Unique
-    private Sheep instance = (Sheep) (Object) this;
 
     @ModifyArg(
         method = "shear",
@@ -97,5 +80,4 @@ public abstract class SheepMixin {
             if (!mutableList.isEmpty()) original.accept(world, item);
         };
     }
-    *//*?}*/
 }

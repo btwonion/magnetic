@@ -16,12 +16,12 @@ public class AbstractChestedHorseMixin {
         method = "dropEquipment",
         at = @At(
             value = "INVOKE",
-            target = /*? if needsWorldNow {*//*"Lnet/minecraft/world/entity/animal/horse/AbstractChestedHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"*//*?} else {*/ "Lnet/minecraft/world/entity/animal/horse/AbstractChestedHorse;spawnAtLocation(Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;" /*?}*/
+            target = "Lnet/minecraft/world/entity/animal/horse/AbstractChestedHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/ItemLike;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
     public boolean modifyEquipmentDrop(
         AbstractChestedHorse instance,
-        /*$ serverLevel {*//*$}*/
+        ServerLevel serverLevel,
         ItemLike item
     ) {
         return MixinHelper.entityDropEquipmentSingle(instance, new ItemStack(item));

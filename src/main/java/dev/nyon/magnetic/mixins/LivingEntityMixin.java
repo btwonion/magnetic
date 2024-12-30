@@ -1,8 +1,6 @@
 package dev.nyon.magnetic.mixins;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.utils.MixinHelper;
@@ -24,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -33,27 +30,26 @@ public abstract class LivingEntityMixin {
         method = "dropExperience",
         at = @At(
             value = "INVOKE",
-            target = /*? if >=1.21 {*/ "Lnet/minecraft/world/entity/LivingEntity;getExperienceReward(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)I" /*?} else {*/ /*"Lnet/minecraft/world/entity/LivingEntity;getExperienceReward()I" *//*?}*/
+            target = "Lnet/minecraft/world/entity/LivingEntity;getExperienceReward(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;)I"
         )
     )
     public int redirectExp(
-        int original
-        /*? if >=1.21.2 {*//*,ServerLevel level*//*?}*/
-        /*? if >=1.21*/, Entity entity
+        int original,
+        ServerLevel level,
+        Entity entity
     ) {
-        /*? if >=1.21 {*/
         if (!(entity instanceof ServerPlayer player)) return original;
-        /*?} else {*/
-        /*ServerPlayer player = threadLocal.get();
-        if (player == null) return original;
-        *//*?}*/
 
         return MixinHelper.modifyExpressionValuePlayerExp(player, original);
     }
 
     @Unique
-    private Consumer<ItemStack> replaceConsumer(LootParams params, Consumer<ItemStack> original) {
-        DamageSource source = params/*? if <1.21.2 {*/.getParamOrNull(LootContextParams.DAMAGE_SOURCE) /*?} else {*//*.contextMap().getOptional(LootContextParams.DAMAGE_SOURCE) *//*?}*/;
+    private Consumer<ItemStack> replaceConsumer(
+        LootParams params,
+        Consumer<ItemStack> original
+    ) {
+        DamageSource source = params.contextMap()
+            .getOptional(LootContextParams.DAMAGE_SOURCE);
         if (source == null || !(source.getEntity() instanceof ServerPlayer player)) return original;
 
         return item -> {
@@ -67,7 +63,7 @@ public abstract class LivingEntityMixin {
     }
 
     @ModifyArg(
-        method = /*? if >=1.21.2 {*/ /*"dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;Z)V" *//*?} else {*/ "dropFromLootTable"/*?}*/,
+        method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;Z)V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;JLjava/util/function/Consumer;)V"
@@ -82,44 +78,18 @@ public abstract class LivingEntityMixin {
         return replaceConsumer(params, original);
     }
 
-    /*? if >=1.21.2 {*/
-    /*@ModifyArg(
+    @ModifyArg(
         method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/resources/ResourceKey;Ljava/util/function/Function;Ljava/util/function/BiConsumer;)Z",
         at = @At(
             value = "INVOKE",
             target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V"
         )
     )
-    public Consumer<ItemStack> redirectDropConsumer(Consumer<ItemStack> original, @Local(ordinal = 0) LootParams params) {
+    public Consumer<ItemStack> redirectDropConsumer(
+        Consumer<ItemStack> original,
+        @Local(ordinal = 0)
+        LootParams params
+    ) {
         return replaceConsumer(params, original);
     }
-    *//*?}*/
-
-    /*? if <1.21 {*/
-    /*@WrapOperation(
-        method = "dropAllDeathLoot",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;dropExperience()V"
-        )
-    )
-    private void cachePlayer(
-        LivingEntity instance,
-        Operation<Void> original,
-        DamageSource damageSource
-    ) {
-        if (!(damageSource.getEntity() instanceof ServerPlayer player)) {
-            original.call(instance);
-            return;
-        }
-
-        ServerPlayer previous = threadLocal.get();
-        threadLocal.set(player);
-        try {
-            original.call(instance);
-        } finally {
-            threadLocal.set(previous);
-        }
-    }
-    *//*?}*/
 }
