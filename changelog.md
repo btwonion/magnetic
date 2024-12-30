@@ -1,1 +1,2 @@
 - only support the latest stable version from now on
+- fix bug, where players were not able to shear with this mod
