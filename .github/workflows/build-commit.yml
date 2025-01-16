@@ -8,7 +8,7 @@ on:
       - ".gitignore"
       - "changelog.md"
       - ".editorconfig"
-      - "src/*/resources/lang/*"
+      - "../../fabric/src/*/resources/lang/*"
   pull_request:
     paths-ignore:
       - "README.md"
@@ -16,7 +16,7 @@ on:
       - ".gitignore"
       - "changelog.md"
       - ".editorconfig"
-      - "src/*/resources/lang/*"
+      - "../../fabric/src/*/resources/lang/*"
   workflow_dispatch:
 
 jobs:
@@ -39,4 +39,4 @@ jobs:
         run: ./gradlew build --stacktrace
       - uses: actions/upload-artifact@v4
         with:
-          path: build/libs/*.jar
+          path: ./**/build/libs/*.jar

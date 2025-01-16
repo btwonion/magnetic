@@ -1,2 +1,2 @@
-- only support the latest stable version from now on
-- fix bug, where players were not able to shear with this mod
+- support Paper, Folia and PurPur
+- now also respect offhand during magnetic validation
