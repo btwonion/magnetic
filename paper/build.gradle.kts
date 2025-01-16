@@ -82,8 +82,8 @@ val changelogText = buildString {
 
 publishMods {
     displayName = "v${project.version}"
-    file(tasks.jar.get().archiveFile)
     changelog = changelogText
+    file = tasks.jar.get().archiveFile
     type = if (beta != null) BETA else STABLE
     modLoaders.addAll("paper", "folia", "purpur")
 
