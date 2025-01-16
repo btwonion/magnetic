@@ -20,7 +20,7 @@ plugins {
 
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.14" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
-    id("net.minecrell.plugin-yml.bukkit") version "0.6.0" apply false
+    id("xyz.jpenilla.resource-factory-paper-convention") version "1.2.0" apply false
 }
 
 repositories {

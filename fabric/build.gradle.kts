@@ -18,7 +18,7 @@ val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$be
 val mcVersion = property("mcVersion")!!.toString()
 val mcVersionRange = property("mcVersionRange")!!.toString()
 val mcVersionName = property("versionName")!!.toString()
-version = "$featureVersion-$mcVersionName-fabric"
+version = "$featureVersion-$mcVersionName+fabric"
 
 group = "dev.nyon"
 val githubRepo = "btwonion/magnetic"
@@ -67,12 +67,11 @@ dependencies {
 
 val supportedMcVersions: List<String> =
     property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
+val modId = property("modId").toString()
+val modDescription = property("description").toString()
 
 tasks {
     processResources {
-        val modId = property("modId").toString()
-        val modDescription = property("description").toString()
-
         val props = mapOf(
             "id" to modId,
             "name" to modId,

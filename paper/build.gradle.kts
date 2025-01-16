@@ -8,7 +8,7 @@ plugins {
     kotlin("plugin.serialization")
     id("io.papermc.paperweight.userdev")
     id("xyz.jpenilla.run-paper")
-    id("net.minecrell.plugin-yml.bukkit")
+    id("xyz.jpenilla.resource-factory-paper-convention")
 
     id("me.modmuss50.mod-publish-plugin")
 
@@ -19,7 +19,7 @@ val beta: Int? = property("beta").toString().toIntOrNull() // Pattern is '1.0.0-
 val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
 val mcVersion = property("mcVersion")!!.toString()
 val mcVersionName = property("versionName")!!.toString()
-version = "$featureVersion-$mcVersionName-paper"
+version = "$featureVersion-$mcVersionName+paper"
 
 group = "dev.nyon"
 val githubRepo = "btwonion/magnetic"
@@ -34,12 +34,23 @@ repositories {
     maven("https://repo.nyon.dev/releases")
 }
 
+paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
+
 dependencies {
-    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    paperweight.foliaDevBundle("$mcVersion-R0.1-SNAPSHOT")
 
-    library(kotlin("stdlib"))
+    compileOnly("dev.nyon:konfig:2.0.2-1.20.4")
+}
 
-    implementation("dev.nyon:konfig:2.0.2-1.20.4")
+val modId = property("modId").toString()
+paperPluginYaml {
+    name = modId
+
+    main = "dev.nyon.magnetic.Main"
+    bootstrapper = "dev.nyon.magnetic.MagneticBootstrapper"
+    loader = "dev.nyon.magnetic.MagneticLoader"
+
+    apiVersion = "1.21"
 }
 
 tasks {
@@ -48,10 +59,6 @@ tasks {
 
         dependsOn("publishMods")
         dependsOn("publish")
-    }
-
-    assemble {
-        dependsOn(reobfJar)
     }
 
     withType<JavaCompile> {
@@ -82,23 +89,6 @@ publishMods {
         accessToken = providers.environmentVariable("MODRINTH_API_KEY")
         minecraftVersions.addAll(
             listOf(
-                "1.17",
-                "1.17.1",
-                "1.18",
-                "1.18.1",
-                "1.18.2",
-                "1.19",
-                "1.19.1",
-                "1.19.2",
-                "1.19.3",
-                "1.19.4",
-                "1.20",
-                "1.20.1",
-                "1.20.2",
-                "1.20.3",
-                "1.20.4",
-                "1.20.5",
-                "1.20.6",
                 "1.21",
                 "1.21.1",
                 "1.21.2",
