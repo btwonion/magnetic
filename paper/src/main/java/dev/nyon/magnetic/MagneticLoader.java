@@ -14,13 +14,24 @@ public class MagneticLoader implements PluginLoader {
     public void classloader(@NotNull PluginClasspathBuilder builder) {
         final MavenLibraryResolver resolver = new MavenLibraryResolver();
 
-        resolver.addRepository(new RemoteRepository.Builder("nyonReleases", "default", "https://repo.nyon.dev/releases").build());
-        resolver.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build());
+        resolver.addRepository(new RemoteRepository.Builder(
+            "nyonReleases",
+            "default",
+            "https://repo.nyon.dev/releases"
+        ).build());
+        resolver.addRepository(new RemoteRepository.Builder(
+            "central",
+            "default",
+            "https://repo1.maven.org/maven2/"
+        ).build());
 
-        resolver.addDependency(new Dependency(new DefaultArtifact("dev.nyon:konfig:2.0.2-1.20.4"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("dev.nyon:konfig:2.1.0"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.1.0"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1"), null));
+        resolver.addDependency(new Dependency(
+            new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0"), null));
+        resolver.addDependency(new Dependency(
+            new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"), null));
+
+        builder.addLibrary(resolver);
     }
 }

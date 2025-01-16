@@ -21,6 +21,9 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +32,8 @@ public class MagneticBootstrapper implements PluginBootstrap {
     @Override
     public void bootstrap(@NotNull BootstrapContext context) {
         LifecycleEventManager<@NotNull BootstrapContext> manager = context.getLifecycleManager();
+
+        if (!needsEnchantment()) return;
 
         final TagKey<ItemType> TOOLS = TagKey.create(RegistryKey.ITEM, Key.key("magnetic:tools"));
 
@@ -79,5 +84,18 @@ public class MagneticBootstrapper implements PluginBootstrap {
                 registrar.addToTag(EnchantmentTagKeys.IN_ENCHANTING_TABLE, Set.of(MAGNETIC));
             }
         );
+    }
+
+    private boolean needsEnchantment() {
+        try {
+            List<String> configText = Files.readAllLines(Path.of("./plugins/magnetic.json"));
+            String importantLine = configText.stream()
+                .filter(line -> line.contains("needEnchantment"))
+                .findFirst()
+                .orElse("true");
+            return importantLine.contains("true");
+        } catch (Exception e) {
+            return true;
+        }
     }
 }
