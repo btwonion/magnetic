@@ -23,7 +23,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --stacktrace
       - name: Release with Gradle
-        run: ./gradlew release postUpdate --stacktrace
+        run: ./gradlew releaseAllPlatforms postUpdate --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_API_KEY: ${{ secrets.MODRINTH_API_KEY }}
