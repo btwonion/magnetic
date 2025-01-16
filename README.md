@@ -26,7 +26,10 @@ enchanted on tools.
 ## Configuration
 
 The configuration file can be found in the client/server directory.
--> `/config/magnetic.json`
+
+-> `/config/magnetic.json` (fabric) 
+
+-> `/plugins/magnetic.json` (paper) 
 
 <details>
 <summary>magnetic.json</summary>
