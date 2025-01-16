@@ -8,7 +8,6 @@ import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.TypedKey;
 import io.papermc.paper.registry.data.EnchantmentRegistryEntry;
 import io.papermc.paper.registry.event.RegistryEvents;
-import io.papermc.paper.registry.keys.ItemTypeKeys;
 import io.papermc.paper.registry.keys.tags.EnchantmentTagKeys;
 import io.papermc.paper.registry.keys.tags.ItemTypeTagKeys;
 import io.papermc.paper.registry.tag.TagKey;
@@ -45,9 +44,7 @@ public class MagneticBootstrapper implements PluginBootstrap {
                             ItemTypeTagKeys.ENCHANTABLE_CROSSBOW,
                             ItemTypeTagKeys.ENCHANTABLE_FISHING,
                             ItemTypeTagKeys.CREEPER_IGNITERS,
-                            ItemTypeTagKeys.ENCHANTABLE_TRIDENT,
-                            TagKey.create(RegistryKey.ITEM, ItemTypeKeys.BRUSH),
-                            TagKey.create(RegistryKey.ITEM, ItemTypeKeys.SHIELD)
+                            ItemTypeTagKeys.ENCHANTABLE_TRIDENT
                         )
                         .stream()
                         .map(TagEntry::tagEntry)
@@ -63,7 +60,7 @@ public class MagneticBootstrapper implements PluginBootstrap {
             .newHandler(event -> event.registry()
                 .register(
                     MAGNETIC,
-                    builder -> builder.description(Component.translatable("enchantment.magnetic.magnetic.name"))
+                    builder -> builder.description(Component.text("Magnetic"))
                         .supportedItems(event.getOrCreateTag(TOOLS))
                         .weight(2)
                         .maxLevel(1)
