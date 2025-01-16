@@ -13,8 +13,10 @@ With this mod you can automatically pick up drops, including experience, from mo
 ## Can I use the functionality without the enchantment?
 
 Yes, in the [config](#Configuration) you can change the `needEnchantment` option to `false`. If you want to only apply
-this
-functionality while sneaking, you can also enable `needSneak`.
+this functionality while sneaking, you can also enable `needSneak`.
+
+Nevertheless, if you play with the enchantment enabled, you will have to hold a magnetic-enchanted tool in your main- or
+offhand.
 
 ## Where can I find the enchantment?
 
