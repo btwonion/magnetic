@@ -5,6 +5,7 @@ import dev.nyon.magnetic.mixins.invokers.ExperienceOrbInvoker
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.ExperienceOrb
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.EnchantmentHelper
@@ -22,7 +23,14 @@ object DropEvent {
     @Suppress("unused", "KotlinConstantConditions")
     private val listener = event.register { items, exp, player, tool ->
         if (config.needSneak && !player.isCrouching) return@register
-        if (config.needEnchantment && !EnchantmentHelper.hasTag(tool, magneticEffectId)) return@register
+        if (config.needEnchantment && !EnchantmentHelper.hasTag(
+                tool,
+                magneticEffectId
+            ) && !EnchantmentHelper.hasTag(
+                if (player.usedItemHand == InteractionHand.OFF_HAND) player.mainHandItem else player.offhandItem,
+                magneticEffectId
+            )
+        ) return@register
 
         if (config.itemsAllowed) items.removeIf(player::addItem)
         if (config.expAllowed) {
