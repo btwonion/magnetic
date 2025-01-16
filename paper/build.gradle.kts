@@ -50,6 +50,7 @@ paperPluginYaml {
     bootstrapper = "dev.nyon.magnetic.MagneticBootstrapper"
     loader = "dev.nyon.magnetic.MagneticLoader"
 
+    foliaSupported = true
     apiVersion = "1.21"
 }
 
