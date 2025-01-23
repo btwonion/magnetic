@@ -56,7 +56,7 @@ public abstract class LivingEntityMixin {
             ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
             DropEvent.INSTANCE.getEvent()
                 .invoker()
-                .invoke(mutableList, new MutableInt(0), player, player.getMainHandItem());
+                .invoke(mutableList, new MutableInt(0), player);
 
             if (!mutableList.isEmpty()) original.accept(item);
         };

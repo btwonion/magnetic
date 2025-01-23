@@ -5,7 +5,6 @@ import dev.nyon.magnetic.mixins.invokers.ExperienceOrbInvoker
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.ExperienceOrb
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.EnchantmentHelper
@@ -13,23 +12,20 @@ import org.apache.commons.lang3.mutable.MutableInt
 
 object DropEvent {
     val event: Event<DropEventConsumer> = EventFactory.createArrayBacked(DropEventConsumer::class.java) { listeners ->
-        DropEventConsumer { items, exp, player, tool ->
+        DropEventConsumer { items, exp, player ->
             listeners.forEach {
-                it(items, exp, player, tool)
+                it(items, exp, player)
             }
         }
     }
 
     @Suppress("unused", "KotlinConstantConditions")
-    private val listener = event.register { items, exp, player, tool ->
+    private val listener = event.register { items, exp, player ->
         if (config.needSneak && !player.isCrouching) return@register
         if (config.needEnchantment && !EnchantmentHelper.hasTag(
-                tool,
+                player.mainHandItem,
                 magneticEffectId
-            ) && !EnchantmentHelper.hasTag(
-                if (player.usedItemHand == InteractionHand.OFF_HAND) player.mainHandItem else player.offhandItem,
-                magneticEffectId
-            )
+            ) && !EnchantmentHelper.hasTag(player.offhandItem, magneticEffectId)
         ) return@register
 
         if (config.itemsAllowed) items.removeIf(player::addItem)
@@ -44,5 +40,5 @@ object DropEvent {
 }
 
 fun interface DropEventConsumer {
-    operator fun invoke(items: MutableList<ItemStack>, exp: MutableInt, player: ServerPlayer, tool: ItemStack)
+    operator fun invoke(items: MutableList<ItemStack>, exp: MutableInt, player: ServerPlayer)
 }

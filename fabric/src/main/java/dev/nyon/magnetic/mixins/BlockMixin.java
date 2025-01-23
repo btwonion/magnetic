@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.DropEvent;
+import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,7 +49,7 @@ public abstract class BlockMixin {
         ArrayList<ItemStack> mutableList = new ArrayList<>(original);
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList, new MutableInt(0), player, tool);
+            .invoke(mutableList, new MutableInt(0), player);
 
         return mutableList;
     }
@@ -105,11 +106,6 @@ public abstract class BlockMixin {
         ServerPlayer player = threadLocal.get();
         if (player == null) return original;
 
-        MutableInt mutableInt = new MutableInt(original);
-        DropEvent.INSTANCE.getEvent()
-            .invoker()
-            .invoke(new ArrayList<>(), mutableInt, player, heldItem);
-
-        return mutableInt.getValue();
+        return MixinHelper.modifyExpressionValuePlayerExp(player, original);
     }
 }

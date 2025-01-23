@@ -42,7 +42,7 @@ public abstract class FishingHookMixin {
             ArrayList<ItemStack> singleList = new ArrayList<>(List.of(item));
             DropEvent.INSTANCE.getEvent()
                 .invoker()
-                .invoke(singleList, new MutableInt(syncronizedRandom.nextInt(6) + 1), player, fishingHook);
+                .invoke(singleList, new MutableInt(syncronizedRandom.nextInt(6) + 1), player);
             return singleList.isEmpty();
         });
 

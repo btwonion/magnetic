@@ -41,7 +41,7 @@ public class SpawnerBlockMixin {
         MutableInt mutableInt = new MutableInt((int) args.get(2));
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(new ArrayList<>(), mutableInt, player, stack);
+            .invoke(new ArrayList<>(), mutableInt, player);
 
         args.set(2, mutableInt.getValue());
     }
