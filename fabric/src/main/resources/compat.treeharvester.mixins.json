@@ -1,0 +1,13 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "plugin": "dev.nyon.magnetic.mixins.compat.th.TreeHarvesterMixinPlugin",
+    "package": "dev.nyon.magnetic.mixins.compat.th",
+    "compatibilityLevel": "JAVA_17",
+    "client": [
+        "TreeCutEventsMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

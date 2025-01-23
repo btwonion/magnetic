@@ -1,1 +1,2 @@
 - fix Wither not dropping skull in every case
+- add tree harvester compatibility

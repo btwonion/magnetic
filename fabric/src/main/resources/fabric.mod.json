@@ -43,7 +43,8 @@
         ]
     },
     "mixins": [
-        "magnetic.mixins.json"
+        "magnetic.mixins.json",
+        "compat.treeharvester.mixins.json"
     ],
     "accessWidener": "magnetic.accesswidener",
     "custom": {

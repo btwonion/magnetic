@@ -44,6 +44,16 @@ repositories {
     maven("https://maven.quiltmc.org/repository/release/")
     maven("https://repo.nyon.dev/releases")
     maven("https://maven.isxander.dev/releases")
+
+    // Use CurseMaven as long as Modrinth doesn't fix the description bug https://github.com/modrinth/code/issues/3152
+    exclusiveContent {
+        forRepository {
+            maven("https://cursemaven.com")
+        }
+        filter {
+            includeGroup("curse.maven")
+        }
+    }
 }
 
 dependencies {
@@ -61,6 +71,9 @@ dependencies {
 
     modImplementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
     modImplementation("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
+
+    // Compatibility mods
+    modImplementation("curse.maven:tree-harvester-367178:5967367")
 
     include(modImplementation("dev.nyon:konfig:2.0.2-1.20.4")!!)
 }
