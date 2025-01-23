@@ -48,7 +48,7 @@ tasks {
         val changelogText = rootProject.file("changelog.md").readText()
         val webhook = DiscordWebhook(
             username = "${rootProject.name} Release Notifier",
-            avatarUrl = "https://raw.githubusercontent.com/btwonion/magnetic/master/src/main/resources/assets/magnetic/icon.png",
+            avatarUrl = "https://raw.githubusercontent.com/btwonion/magnetic/master/fabric/src/main/resources/assets/magnetic/icon.png",
             embeds = listOf(
                 Embed(
                     title = "v$featureVersion of ${rootProject.name} released!",
