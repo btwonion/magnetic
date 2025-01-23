@@ -55,7 +55,6 @@ The configuration file can be found in the client/server directory.
 
 ### Other
 
-Only the latest stable version of Minecraft will have feature updates. From 1.21.4 on, there will be only bug fixes to
-older versions of Minecraft.
+Only the latest stable version of Minecraft will have feature updates and bug fixes. 
 
 If you need help with any of my mods, join my [discord server](https://nyon.dev/discord).
