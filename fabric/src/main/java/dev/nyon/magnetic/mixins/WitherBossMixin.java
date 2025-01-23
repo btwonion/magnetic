@@ -27,9 +27,9 @@ public abstract class WitherBossMixin {
         DamageSource damageSource,
         boolean bl
     ) {
-        ItemLike original = args.get(0);
+        ItemLike original = args.get(1);
 
         if (MixinHelper.entityCustomDeathLootSingle(damageSource, new ItemStack(original))) return;
-        args.set(0, Items.AIR);
+        args.set(1, Items.AIR);
     }
 }

@@ -1,2 +1,1 @@
-- support Paper, Folia and PurPur
-- now also respect offhand during magnetic validation
+- fix Wither not dropping skull in every case
