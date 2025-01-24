@@ -65,7 +65,7 @@ dependencies {
     })
 
     implementation("org.vineflower:vineflower:1.10.1")
-    modImplementation("net.fabricmc:fabric-loader:0.16.9")
+    modImplementation("net.fabricmc:fabric-loader:0.16.10")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fapi")!!}")
     modImplementation("net.fabricmc:fabric-language-kotlin:1.13.0+kotlin.2.1.0")
 
@@ -75,7 +75,7 @@ dependencies {
     // Compatibility mods
     modImplementation("curse.maven:tree-harvester-367178:5967367")
 
-    include(modImplementation("dev.nyon:konfig:2.0.2-1.20.4")!!)
+    include(implementation("dev.nyon:konfig:2.1.0")!!)
 }
 
 val supportedMcVersions: List<String> =
