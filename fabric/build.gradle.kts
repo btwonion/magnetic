@@ -74,6 +74,7 @@ dependencies {
 
     // Compatibility mods
     modImplementation("curse.maven:tree-harvester-367178:5967367")
+    modImplementation("curse.maven:collective-342584:5967340")
 
     include(implementation("dev.nyon:konfig:2.1.0")!!)
 }

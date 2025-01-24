@@ -1,2 +1,2 @@
-- fix Wither not dropping skull in every case
-- add tree harvester compatibility
+- update dependencies
+- fix crash with treeharvester - reported by faultyfocus
