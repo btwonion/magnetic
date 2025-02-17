@@ -34,6 +34,7 @@ class Main : JavaPlugin() {
         listen<BlockBreakEvent> {
             if (!internalConfig.expAllowed) return@listen
             if (!player.isEligible()) return@listen
+            if (expToDrop == 0) return@listen
             player.giveExp(expToDrop, true)
             expToDrop = 0
         }
