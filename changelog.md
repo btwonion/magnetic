@@ -1,2 +1,1 @@
-- update dependencies
-- fix crash with treeharvester - reported by faultyfocus
+- paper: fix log spam when added exp is 0
