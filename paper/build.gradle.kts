@@ -2,6 +2,7 @@
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 
 plugins {
     kotlin("jvm")
@@ -29,6 +30,7 @@ base {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.nyon.dev/releases")
@@ -42,6 +44,8 @@ dependencies {
     implementation("dev.nyon:konfig:2.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+
+    compileOnly("de.miraculixx:veinminer:2.3.2")
 }
 
 val modId = property("modId").toString()
@@ -54,6 +58,8 @@ paperPluginYaml {
 
     foliaSupported = true
     apiVersion = "1.21"
+
+    dependencies.server("Veinminer", PaperPluginYaml.Load.BEFORE, false, true)
 }
 
 tasks {
