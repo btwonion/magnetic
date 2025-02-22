@@ -74,7 +74,6 @@ class Main : JavaPlugin() {
 
         // Add Veinminer integration
         if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) {
-            Main::class.java.classes.map(Class<*>::getPackageName).filter { it.contains("de.miraculixx") }.forEach(::println)
             listen<de.miraculixx.veinminer.VeinMinerEvent.VeinminerDropEvent> {
                 if (!player.isEligible()) return@listen
 
