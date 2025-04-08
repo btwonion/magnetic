@@ -19,7 +19,7 @@ inline fun <reified T : Event> listen(crossinline eventCallback: T.() -> Unit) {
         T::class.java,
         listener,
         EventPriority.NORMAL,
-        { _, event -> runCatching { listener.onEvent(event as T) } },
+        { _, event -> (event as? T)?.let { listener.onEvent(it) } },
         Plugin
     )
 }
