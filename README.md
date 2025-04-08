@@ -1,4 +1,4 @@
-[![Minecraft Storage article banner](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/banner_mcstorage)](https://minecraftstorage.com/mods/magnetic-telekinesis)
+[![Minecraft Storage article banner](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/banner_mcstorage.png)](https://minecraftstorage.com/mods/magnetic-telekinesis)
 
 # magnetic (pka. telekinesis)
 
