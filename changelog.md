@@ -1,1 +1,15 @@
 - paper: fix log spam when added exp is 0
+- fabric: update to 1.21.5
+- fabric: add support for the following entities:
+  - Armadillo
+  - Bogged
+  - Creeper
+  - Fox
+  - Item Frame
+  - Painting
+  - Panda
+  - Skeleton
+  - Snow Golem
+  - Wither Skeleton
+  - Wolf
+  - Zombie

@@ -23,8 +23,7 @@ public class TreeHarvesterMixinPlugin implements IMixinConfigPlugin {
         String targetClassName,
         String mixinClassName
     ) {
-        return FabricLoader.getInstance()
-            .isModLoaded("treeharvester");
+        return FabricLoader.getInstance().isModLoaded("treeharvester");
     }
 
     @Override

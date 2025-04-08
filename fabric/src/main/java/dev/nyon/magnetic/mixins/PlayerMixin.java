@@ -30,15 +30,12 @@ public class PlayerMixin {
         Inventory inventory,
         Operation<Void> original
     ) {
-
-        for (List<ItemStack> list : inventory.compartments) {
-            for (int i = 0; i < list.size(); ++i) {
-                ItemStack itemStack = list.get(i);
-                if (!itemStack.isEmpty()) {
-                    ArrayList<ItemStack> singleItem = new ArrayList<>(List.of(itemStack));
-                    List<ItemStack> processedItems = MixinHelper.entityDropEquipmentMultiple(instance, singleItem);
-                    if (processedItems.isEmpty()) list.set(i, ItemStack.EMPTY);
-                }
+        for(int i = 0; i < inventory.items.size(); ++i) {
+            ItemStack itemStack = inventory.items.get(i);
+            if (!itemStack.isEmpty()) {
+                ArrayList<ItemStack> singleItem = new ArrayList<>(List.of(itemStack));
+                List<ItemStack> processedItems = MixinHelper.entityDropEquipmentMultiple(instance, singleItem);
+                if (processedItems.isEmpty()) inventory.setItem(i, ItemStack.EMPTY);
             }
         }
 
