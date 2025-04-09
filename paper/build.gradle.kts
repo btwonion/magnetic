@@ -30,10 +30,18 @@ base {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.nyon.dev/releases")
+
+    exclusiveContent {
+        forRepository {
+            maven("https://api.modrinth.com/maven")
+        }
+        filter {
+            includeGroup("maven.modrinth")
+        }
+    }
 }
 
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
@@ -45,7 +53,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
 
-    compileOnly("de.miraculixx:veinminer:2.3.2")
+    compileOnly("maven.modrinth:veinminer:2.4.3")
 }
 
 val modId = property("modId").toString()
