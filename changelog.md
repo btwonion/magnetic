@@ -21,7 +21,6 @@
   - all growing plants: 
     - Vines
     - Kelp
-  - Dripleaf Stem
   - Chorus Flower/Plant
   - Hanging Moss
   - Pointed Dripstone

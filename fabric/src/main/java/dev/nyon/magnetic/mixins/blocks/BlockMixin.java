@@ -3,22 +3,29 @@ package dev.nyon.magnetic.mixins.blocks;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,5 +114,32 @@ public abstract class BlockMixin {
         if (player == null) return original;
 
         return MixinHelper.modifyExpressionValuePlayerExp(player, original);
+    }
+
+    @Inject(
+        method = "playerDestroy",
+        at = @At("HEAD")
+    )
+    private void assignPlayerToBreakChainedBlocks(
+        Level world,
+        Player player,
+        BlockPos pos,
+        BlockState state,
+        BlockEntity blockEntity,
+        ItemStack stack,
+        CallbackInfo ci
+    ) {
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+
+        for (Direction direction : Direction.values()) {
+            BlockPos checkBlockPos = pos.relative(direction);
+            BlockState checkBlockState = world.getBlockState(checkBlockPos);
+            System.out.println(checkBlockState.is(Blocks.BIG_DRIPLEAF));
+            if (checkBlockState.isAir()) continue;
+            Block checkBlock = checkBlockState.getBlock();
+            if (checkBlock instanceof BreakChainedPlayerHolder) {
+                ((BreakChainedPlayerHolder) checkBlock).setInitialBreaker(serverPlayer);
+            }
+        }
     }
 }
