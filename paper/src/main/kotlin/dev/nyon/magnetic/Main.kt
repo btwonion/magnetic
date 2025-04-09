@@ -3,6 +3,7 @@ package dev.nyon.magnetic
 import dev.nyon.magnetic.extensions.isEligible
 import dev.nyon.magnetic.extensions.listen
 import io.papermc.paper.event.block.PlayerShearBlockEvent
+import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
@@ -68,6 +69,19 @@ class Main : JavaPlugin() {
             if (internalConfig.expAllowed && expToDrop != 0) {
                 player.giveExp(expToDrop, true)
                 expToDrop = 0
+            }
+        }
+
+        // Add Veinminer integration
+        if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) {
+            listen<de.miraculixx.veinminer.VeinMinerEvent.VeinminerDropEvent> {
+                if (!player.isEligible()) return@listen
+
+                if (internalConfig.itemsAllowed) items.removeIf { player.inventory.addItem(it).isEmpty() }
+                if (internalConfig.expAllowed && exp > 0) {
+                    player.giveExp(exp, true)
+                    exp = 0
+                }
             }
         }
     }
