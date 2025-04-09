@@ -1,4 +1,5 @@
 - paper: fix log spam when added exp is 0
+- paper: add veinminer support
 - fabric: update to 1.21.5
 - fabric: add support for the following entities:
   - Armadillo
