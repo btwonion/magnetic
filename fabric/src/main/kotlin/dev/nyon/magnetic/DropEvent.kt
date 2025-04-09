@@ -1,7 +1,7 @@
 package dev.nyon.magnetic
 
 import dev.nyon.magnetic.config.config
-import dev.nyon.magnetic.mixins.invokers.ExperienceOrbInvoker
+import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.server.level.ServerPlayer

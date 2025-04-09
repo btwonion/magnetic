@@ -13,3 +13,15 @@
   - Wither Skeleton
   - Wolf
   - Zombie
+- fabric: add support for the following break-chained blocks:
+  - Sugar Cane
+  - Bamboo
+  - Cactus
+  - all growing plants: 
+    - Vines
+    - Kelp
+  - Dripleaf Stem
+  - Chorus Flower/Plant
+  - Hanging Moss
+  - Pointed Dripstone
+  - Scaffolding
