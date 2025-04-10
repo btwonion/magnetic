@@ -12,13 +12,13 @@ import java.net.http.HttpResponse
 import java.time.Instant
 
 plugins {
-    kotlin("jvm") version "2.1.0"
-    kotlin("plugin.serialization") version "2.1.0"
+    kotlin("jvm") version "2.1.20"
+    kotlin("plugin.serialization") version "2.1.20"
     id("me.modmuss50.mod-publish-plugin") version "0.8.+"
 
-    id("fabric-loom") version "1.9-SNAPSHOT" apply false
+    id("fabric-loom") version "1.10-SNAPSHOT" apply false
 
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.14" apply false
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.16" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false
     id("xyz.jpenilla.resource-factory-paper-convention") version "1.2.0" apply false
 }

@@ -1,2 +1,39 @@
-- paper: fix log spam when added exp is 0
-- paper: add veinminer support
+### Paper
+- fix log spam when added exp is 0
+- add veinminer support
+
+### Fabric
+- update to 1.21.5
+- add magnetic to the following entities:
+  - Armadillo
+  - Armor Stand
+  - Bogged
+  - Creeper
+  - Fox
+  - Item Frame
+  - Mushroom Cow
+  - Painting
+  - Panda
+  - Skeleton
+  - Snow Golem
+  - Wither Skeleton
+  - Wolf
+  - Zombie
+- add magnetic to the following break-chained blocks:
+  - Bamboo
+  - Big Dripleaf
+  - Cactus
+  - Chorus Flower/Plant
+  - Hanging Moss
+  - Pointed Dripstone
+  - Scaffolding
+  - Sugar Cane
+  - all growing plants: 
+    - Vines
+    - Kelp
+  - all blocks relying on another block, e.g., crops, flowers, banners
+- add magnetic to the following item interactions:
+  - all hoe interactions
+  - Beehive
+  - Cave Vines
+  - brushable blocks
