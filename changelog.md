@@ -1,7 +1,10 @@
-- paper: fix log spam when added exp is 0
-- paper: add veinminer support
-- fabric: update to 1.21.5
-- fabric: add support for the following entities:
+### Paper
+- fix log spam when added exp is 0
+- add veinminer support
+
+### Fabric
+- update to 1.21.5
+- add magnetic to the following entities:
   - Armadillo
   - Armor Stand
   - Bogged
@@ -16,7 +19,7 @@
   - Wither Skeleton
   - Wolf
   - Zombie
-- fabric: add support for the following break-chained blocks:
+- add magnetic to the following break-chained blocks:
   - Bamboo
   - Big Dripleaf
   - Cactus
@@ -29,7 +32,7 @@
     - Vines
     - Kelp
   - all blocks relying on another block, e.g., crops, flowers, banners
-- fabric: add support for the following item interactions:
+- add magnetic to the following item interactions:
   - all hoe interactions
   - Beehive
   - Cave Vines
