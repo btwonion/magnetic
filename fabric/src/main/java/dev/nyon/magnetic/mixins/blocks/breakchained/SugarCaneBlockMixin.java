@@ -1,19 +1,18 @@
-package dev.nyon.magnetic.mixins.breakchained;
+package dev.nyon.magnetic.mixins.blocks.breakchained;
 
 import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(BambooStalkBlock.class)
-public class BambooStalkBlockMixin implements BreakChainedPlayerHolder {
-
+@Mixin(SugarCaneBlock.class)
+public class SugarCaneBlockMixin implements BreakChainedPlayerHolder {
     @Unique
     @Nullable ServerPlayer initialBreaker = null;
 

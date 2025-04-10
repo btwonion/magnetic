@@ -1,4 +1,4 @@
-package dev.nyon.magnetic.mixins.breakchained;
+package dev.nyon.magnetic.mixins.blocks.breakchained;
 
 import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import net.minecraft.core.BlockPos;

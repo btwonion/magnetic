@@ -1,18 +1,18 @@
-package dev.nyon.magnetic.mixins.breakchained;
+package dev.nyon.magnetic.mixins.blocks.breakchained;
 
 import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.HangingMossBlock;
+import net.minecraft.world.level.block.ChorusFlowerBlock;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(HangingMossBlock.class)
-public class HangingMossBlockMixin  implements BreakChainedPlayerHolder {
+@Mixin(ChorusFlowerBlock.class)
+public class ChorusFlowerBlockMixin implements BreakChainedPlayerHolder {
 
     @Unique
     @Nullable ServerPlayer initialBreaker = null;
