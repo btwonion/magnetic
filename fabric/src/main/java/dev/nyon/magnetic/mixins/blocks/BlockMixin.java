@@ -134,7 +134,6 @@ public abstract class BlockMixin {
         for (Direction direction : Direction.values()) {
             BlockPos checkBlockPos = pos.relative(direction);
             BlockState checkBlockState = world.getBlockState(checkBlockPos);
-            System.out.println(checkBlockState.is(Blocks.BIG_DRIPLEAF));
             if (checkBlockState.isAir()) continue;
             Block checkBlock = checkBlockState.getBlock();
             if (checkBlock instanceof BreakChainedPlayerHolder) {

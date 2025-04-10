@@ -3,10 +3,12 @@
 - fabric: update to 1.21.5
 - fabric: add support for the following entities:
   - Armadillo
+  - Armor Stand
   - Bogged
   - Creeper
   - Fox
   - Item Frame
+  - Mushroom Cow
   - Painting
   - Panda
   - Skeleton
@@ -25,3 +27,8 @@
   - Hanging Moss
   - Pointed Dripstone
   - Scaffolding
+- fabric: add support for the following item interactions:
+  - all hoe interactions
+  - Beehive
+  - Cave Vines
+  - brushable blocks

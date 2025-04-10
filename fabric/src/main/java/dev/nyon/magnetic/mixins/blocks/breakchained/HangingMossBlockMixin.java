@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(HangingMossBlock.class)
-public class HangingMossBlockMixin  implements BreakChainedPlayerHolder {
+public class HangingMossBlockMixin implements BreakChainedPlayerHolder {
 
     @Unique
     @Nullable ServerPlayer initialBreaker = null;

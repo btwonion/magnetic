@@ -35,9 +35,8 @@ public class ShearableMixinHelper {
         }
     }
 
-    public static BiConsumer<ServerLevel, ItemStack> changeConsumer(LivingEntity instance, BiConsumer<ServerLevel, ItemStack> original) {
-        DamageSource source = instance.getLastDamageSource();
-        if (source == null || !(source.getEntity() instanceof ServerPlayer player)) return original;
+    public static BiConsumer<ServerLevel, ItemStack> changeConsumer(BiConsumer<ServerLevel, ItemStack> original) {
+        ServerPlayer player = threadLocal.get();
 
         return (world, item) -> {
             ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));

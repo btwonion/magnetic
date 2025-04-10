@@ -10,7 +10,6 @@ import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
@@ -18,9 +17,6 @@ import java.util.function.BiConsumer;
 
 @Mixin(SnowGolem.class)
 public class SnowGolemMixin {
-
-    @Unique
-    private SnowGolem instance = (SnowGolem) (Object) this;
 
     @WrapOperation(
         method = "mobInteract",
@@ -50,6 +46,6 @@ public class SnowGolemMixin {
         index = 3
     )
     private BiConsumer<ServerLevel, ItemStack> changeOriginalDropConsumer(BiConsumer<ServerLevel, ItemStack> original) {
-        return ShearableMixinHelper.changeConsumer(instance, original);
+        return ShearableMixinHelper.changeConsumer(original);
     }
 }
