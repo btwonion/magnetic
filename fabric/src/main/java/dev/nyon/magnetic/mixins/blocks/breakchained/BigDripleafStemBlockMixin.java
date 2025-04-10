@@ -3,13 +3,13 @@ package dev.nyon.magnetic.mixins.blocks.breakchained;
 import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.HangingMossBlock;
+import net.minecraft.world.level.block.BigDripleafStemBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(HangingMossBlock.class)
-public class HangingMossBlockMixin {
+@Mixin(BigDripleafStemBlock.class)
+public class BigDripleafStemBlockMixin {
 
     @Redirect(
         method = "tick",

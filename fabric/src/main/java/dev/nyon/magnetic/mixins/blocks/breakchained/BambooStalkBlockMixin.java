@@ -3,29 +3,13 @@ package dev.nyon.magnetic.mixins.blocks.breakchained;
 import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.BambooStalkBlock;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(BambooStalkBlock.class)
-public class BambooStalkBlockMixin implements BreakChainedPlayerHolder {
-
-    @Unique
-    @Nullable ServerPlayer initialBreaker = null;
-
-    @Override
-    public @Nullable ServerPlayer getInitialBreaker() {
-        return initialBreaker;
-    }
-
-    @Override
-    public void setInitialBreaker(@Nullable ServerPlayer player) {
-        initialBreaker = player;
-    }
+public class BambooStalkBlockMixin {
 
     @Redirect(
         method = "tick",
@@ -39,6 +23,6 @@ public class BambooStalkBlockMixin implements BreakChainedPlayerHolder {
         BlockPos blockPos,
         boolean b
     ) {
-        return instance.destroyBlock(blockPos, b, getInitialBreaker());
+        return instance.destroyBlock(blockPos, b, ((BreakChainedPlayerHolder) this).getInitialBreaker());
     }
 }

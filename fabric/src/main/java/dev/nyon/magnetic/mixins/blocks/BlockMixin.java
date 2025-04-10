@@ -7,33 +7,29 @@ import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(Block.class)
-public abstract class BlockMixin {
+public abstract class BlockMixin implements BreakChainedPlayerHolder {
 
     @ModifyExpressionValue(
         method = "dropResources(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;)V",
@@ -116,29 +112,35 @@ public abstract class BlockMixin {
         return MixinHelper.modifyExpressionValuePlayerExp(player, original);
     }
 
-    @Inject(
-        method = "playerDestroy",
-        at = @At("HEAD")
+    @Redirect(
+        method = "updateOrDestroy(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;II)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/LevelAccessor;destroyBlock(Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/entity/Entity;I)Z"
+        )
     )
-    private void assignPlayerToBreakChainedBlocks(
-        Level world,
-        Player player,
-        BlockPos pos,
-        BlockState state,
-        BlockEntity blockEntity,
-        ItemStack stack,
-        CallbackInfo ci
+    private static boolean useDestroyBlockWithPlayerOnUpdate(
+        LevelAccessor instance,
+        BlockPos blockPos,
+        boolean b,
+        Entity entity,
+        int maxUpdateDepth
     ) {
-        if (!(player instanceof ServerPlayer serverPlayer)) return;
+        Block toDestroy = instance.getBlockState(blockPos).getBlock();
+        ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) toDestroy).getInitialBreaker();
+        return instance.destroyBlock(blockPos, b, initialBreaker, maxUpdateDepth);
+    }
 
-        for (Direction direction : Direction.values()) {
-            BlockPos checkBlockPos = pos.relative(direction);
-            BlockState checkBlockState = world.getBlockState(checkBlockPos);
-            if (checkBlockState.isAir()) continue;
-            Block checkBlock = checkBlockState.getBlock();
-            if (checkBlock instanceof BreakChainedPlayerHolder) {
-                ((BreakChainedPlayerHolder) checkBlock).setInitialBreaker(serverPlayer);
-            }
-        }
+    @Unique
+    @Nullable ServerPlayer initialBreaker = null;
+
+    @Override
+    public @Nullable ServerPlayer getInitialBreaker() {
+        return initialBreaker;
+    }
+
+    @Override
+    public void setInitialBreaker(@Nullable ServerPlayer player) {
+        initialBreaker = player;
     }
 }

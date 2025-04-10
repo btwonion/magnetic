@@ -17,16 +17,18 @@
   - Wolf
   - Zombie
 - fabric: add support for the following break-chained blocks:
-  - Sugar Cane
   - Bamboo
+  - Big Dripleaf
   - Cactus
-  - all growing plants: 
-    - Vines
-    - Kelp
   - Chorus Flower/Plant
   - Hanging Moss
   - Pointed Dripstone
   - Scaffolding
+  - Sugar Cane
+  - all growing plants: 
+    - Vines
+    - Kelp
+  - all blocks relying on another block, e.g., crops, flowers, banners
 - fabric: add support for the following item interactions:
   - all hoe interactions
   - Beehive
