@@ -30,6 +30,6 @@ public class PaintingMixin {
         @Nullable Entity entity
     ) {
         if (!(entity instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, new ItemStack(itemLike));
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, new ItemStack(itemLike), instance.blockPosition());
     }
 }

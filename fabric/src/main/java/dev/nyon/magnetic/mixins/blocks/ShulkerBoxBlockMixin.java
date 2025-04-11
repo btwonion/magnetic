@@ -32,6 +32,6 @@ public class ShulkerBoxBlockMixin {
         Player player
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem());
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem(), pos);
     }
 }

@@ -71,7 +71,7 @@ public class MushroomCowMixin {
                 );
                 cow.dropFromShearingLootTable(
                     world, BuiltInLootTables.SHEAR_MOOSHROOM, stack, (level, dropStack) -> {
-                        if (MixinHelper.wrapWithConditionPlayerItemSingle(threadLocal.get(), dropStack)) {
+                        if (MixinHelper.wrapWithConditionPlayerItemSingle(threadLocal.get(), dropStack, cow.blockPosition())) {
                             // Check in the original function for correct usage every version
                             for (int i = 0; i < dropStack.getCount(); i++) {
                                 level.addFreshEntity(new ItemEntity(

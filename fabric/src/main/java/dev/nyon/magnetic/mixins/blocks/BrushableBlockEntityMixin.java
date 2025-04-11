@@ -30,6 +30,10 @@ public class BrushableBlockEntityMixin {
         ItemStack stack
     ) {
         if (!(livingEntity instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem());
+        return MixinHelper.wrapWithConditionPlayerItemSingle(
+            serverPlayer,
+            ((ItemEntity) entity).getItem(),
+            ((BrushableBlockEntity) (Object) this).getBlockPos()
+        );
     }
 }

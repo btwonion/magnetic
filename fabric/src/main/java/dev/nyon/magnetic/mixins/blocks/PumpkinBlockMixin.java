@@ -38,6 +38,6 @@ public class PumpkinBlockMixin {
         BlockHitResult hitResult
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, new ItemStack(Items.PUMPKIN_SEEDS, 4));
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, new ItemStack(Items.PUMPKIN_SEEDS, 4), pos);
     }
 }

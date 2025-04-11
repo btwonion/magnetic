@@ -40,7 +40,7 @@ public class BeehiveBlockMixin {
         BlockHitResult hitResult
     ) {
         if (!(entity instanceof ServerPlayer player)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(player, new ItemStack(Items.HONEYCOMB, 3));
+        return MixinHelper.wrapWithConditionPlayerItemSingle(player, new ItemStack(Items.HONEYCOMB, 3), pos);
     }
 
     @WrapWithCondition(
@@ -59,6 +59,6 @@ public class BeehiveBlockMixin {
         Player player
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem());
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem(), pos);
     }
 }

@@ -52,7 +52,7 @@ public abstract class BlockMixin implements BreakChainedPlayerHolder {
         ArrayList<ItemStack> mutableList = new ArrayList<>(original);
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList, new MutableInt(0), player);
+            .invoke(mutableList, new MutableInt(0), player, pos);
 
         return mutableList;
     }
@@ -109,7 +109,7 @@ public abstract class BlockMixin implements BreakChainedPlayerHolder {
         ServerPlayer player = threadLocal.get();
         if (player == null) return original;
 
-        return MixinHelper.modifyExpressionValuePlayerExp(player, original);
+        return MixinHelper.modifyExpressionValuePlayerExp(player, original, pos);
     }
 
     @Redirect(

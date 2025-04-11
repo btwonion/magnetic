@@ -34,7 +34,6 @@ public class SweetBerryBushBlockMixin {
         BlockHitResult blockHitResult
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, itemStack);
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, itemStack, blockPos);
     }
 }

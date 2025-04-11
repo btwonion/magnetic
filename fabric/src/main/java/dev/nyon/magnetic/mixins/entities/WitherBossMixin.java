@@ -29,7 +29,7 @@ public abstract class WitherBossMixin {
     ) {
         ItemLike original = args.get(1);
 
-        if (MixinHelper.entityCustomDeathLootSingle(damageSource, new ItemStack(original))) return;
+        if (MixinHelper.entityCustomDeathLootSingle(damageSource, new ItemStack(original), ((WitherBoss) (Object) this).blockPosition())) return;
         args.set(1, Items.AIR);
     }
 }

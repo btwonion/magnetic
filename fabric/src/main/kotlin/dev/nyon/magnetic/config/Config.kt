@@ -15,5 +15,7 @@ data class Config(
     var needEnchantment: Boolean = true,
     var needSneak: Boolean = false,
     var expAllowed: Boolean = true,
-    var itemsAllowed: Boolean = true
+    var itemsAllowed: Boolean = true,
+    var animation: Boolean = true,
+    var animationSpeedInMs: Int = 500
 )

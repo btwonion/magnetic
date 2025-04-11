@@ -30,6 +30,6 @@ public class VehicleEntityMixin {
         ServerPlayer player = threadLocal.get();
         if (player == null) return true;
 
-        return MixinHelper.wrapWithConditionPlayerItemSingle(player, itemStack);
+        return MixinHelper.wrapWithConditionPlayerItemSingle(player, itemStack, instance.blockPosition());
     }
 }

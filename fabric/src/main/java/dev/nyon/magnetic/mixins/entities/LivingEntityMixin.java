@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.utils.MixinHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -25,6 +27,9 @@ import java.util.function.Consumer;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
+
+    @Shadow
+    private BlockPos lastPos;
 
     @ModifyExpressionValue(
         method = "dropExperience",
@@ -40,7 +45,7 @@ public abstract class LivingEntityMixin {
     ) {
         if (!(entity instanceof ServerPlayer player)) return original;
 
-        return MixinHelper.modifyExpressionValuePlayerExp(player, original);
+        return MixinHelper.modifyExpressionValuePlayerExp(player, original, lastPos);
     }
 
     @Unique
@@ -56,7 +61,7 @@ public abstract class LivingEntityMixin {
             ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
             DropEvent.INSTANCE.getEvent()
                 .invoker()
-                .invoke(mutableList, new MutableInt(0), player);
+                .invoke(mutableList, new MutableInt(0), player, lastPos);
 
             if (!mutableList.isEmpty()) original.accept(item);
         };

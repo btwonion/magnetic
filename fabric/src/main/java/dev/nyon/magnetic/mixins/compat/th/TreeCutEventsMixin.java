@@ -44,7 +44,7 @@ public class TreeCutEventsMixin {
 
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(drops, new MutableInt(0), serverPlayer);
+            .invoke(drops, new MutableInt(0), serverPlayer, blockPos);
 
         drops.forEach(item -> Block.popResource(serverLevel, blockPos, item));
         serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);

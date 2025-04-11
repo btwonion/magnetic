@@ -24,6 +24,6 @@ public class AbstractChestedHorseMixin {
         ServerLevel serverLevel,
         ItemLike item
     ) {
-        return MixinHelper.entityDropEquipmentSingle(instance, new ItemStack(item));
+        return MixinHelper.entityDropEquipmentSingle(instance, new ItemStack(item), instance.blockPosition());
     }
 }
