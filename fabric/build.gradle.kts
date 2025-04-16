@@ -143,6 +143,17 @@ publishMods {
         optional { slug = "modmenu" }
     }
 
+    curseforge {
+        projectId = "1244695"
+        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+        minecraftVersions.addAll(supportedMcVersions)
+
+        requires { slug = "fabric-api" }
+        requires { slug = "fabric-language-kotlin" }
+        requires { slug = "yacl" }
+        optional { slug = "modmenu" }
+    }
+
     github {
         repository = githubRepo
         accessToken = providers.environmentVariable("GITHUB_TOKEN")

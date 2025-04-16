@@ -60,6 +60,7 @@ tasks {
                             "Supported versions", supportedMcVersions.joinToString(), false
                         ),
                         Field("Modrinth", "https://modrinth.com/mod/magnetic", true),
+                        Field("CurseForge", "https://www.curseforge.com/minecraft/mc-mods/magnetic-telekinesis", true),
                         Field("GitHub", "https://github.com/btwonion/magnetic", true)
                     ),
                 )
