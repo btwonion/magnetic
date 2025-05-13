@@ -1,5 +1,7 @@
 package dev.nyon.magnetic
 
+import dev.nyon.konfig.config.config
+import dev.nyon.konfig.config.loadConfig
 import dev.nyon.magnetic.extensions.isEligible
 import dev.nyon.magnetic.extensions.listen
 import io.papermc.paper.event.block.PlayerShearBlockEvent
@@ -22,7 +24,8 @@ class Main : JavaPlugin() {
 
     override fun onLoad() {
         INSTANCE = this
-        internalConfig
+        config(Bukkit.getPluginsFolder().toPath().resolve("magnetic.json"), 1, Config()) { _, _ -> null }
+        internalConfig = loadConfig()
     }
 
     override fun onEnable() {
@@ -84,10 +87,6 @@ class Main : JavaPlugin() {
                 }
             }
         }
-    }
-
-    override fun onDisable() {
-        dev.nyon.konfig.config.saveConfig(internalConfig)
     }
 }
 
