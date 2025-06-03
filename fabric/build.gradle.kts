@@ -45,7 +45,16 @@ repositories {
     maven("https://repo.nyon.dev/releases")
     maven("https://maven.isxander.dev/releases")
 
-    // Use CurseMaven as long as Modrinth doesn't fix the description bug https://github.com/modrinth/code/issues/3152
+    exclusiveContent {
+        forRepository {
+            maven("https://api.modrinth.com/maven")
+        }
+        filter {
+            includeGroup("maven.modrinth")
+        }
+    }
+
+    // Use CurseMaven for Serilum mods as long as Modrinth doesn't fix the description bug https://github.com/modrinth/code/issues/3152
     exclusiveContent {
         forRepository {
             maven("https://cursemaven.com")
@@ -75,6 +84,7 @@ dependencies {
     // Compatibility mods
     modImplementation("curse.maven:tree-harvester-367178:6355493")
     modImplementation("curse.maven:collective-342584:6390780")
+    modImplementation("maven.modrinth:rightclickharvest:9jOYB5rp")
 
     include(implementation("dev.nyon:konfig:2.1.0")!!)
 }

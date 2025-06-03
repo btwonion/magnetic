@@ -26,6 +26,13 @@ public class MixinHelper {
         return !mutableList.isEmpty();
     }
 
+    public static boolean wrapWithConditionPlayerExp(
+        ServerPlayer player,
+        int exp
+    ) {
+        return modifyExpressionValuePlayerExp(player, exp) != 0;
+    }
+
     public static int modifyExpressionValuePlayerExp(
         ServerPlayer player,
         int exp
