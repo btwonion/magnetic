@@ -4,21 +4,19 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.ShearableMixinHelper;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.animal.MushroomCow;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+
+import java.util.function.BiConsumer;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
@@ -45,48 +43,20 @@ public class MushroomCowMixin {
     }
 
     @ModifyArgs(
-        method = "shear",
+        method = "method_63648",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/animal/MushroomCow;convertTo(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/ConversionParams;Lnet/minecraft/world/entity/ConversionParams$AfterConversion;)Lnet/minecraft/world/entity/Mob;"
+            target = "Lnet/minecraft/world/entity/animal/MushroomCow;dropFromShearingLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/item/ItemStack;Ljava/util/function/BiConsumer;)V"
         )
     )
-    private void changeOriginalDropConsumer(
-        Args args,
-        ServerLevel world,
-        SoundSource soundCategory,
-        ItemStack stack
-    ) {
+    private void redirectMushroom(Args args) {
+        ServerPlayer serverPlayer = threadLocal.get();
+        if (serverPlayer == null) return;
+        BiConsumer<ServerLevel, ItemStack> original = args.get(3);
+
         args.set(
-            2, (ConversionParams.AfterConversion<MushroomCow>) cow -> {
-                // Check in the original function for correct usage every version
-                world.sendParticles(
-                    ParticleTypes.EXPLOSION,
-                    cow.getX(),
-                    cow.getY(0.5),
-                    cow.getZ(),
-                    1,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0
-                );
-                cow.dropFromShearingLootTable(
-                    world, BuiltInLootTables.SHEAR_MOOSHROOM, stack, (level, dropStack) -> {
-                        ServerPlayer player = threadLocal.get();
-                        if (player == null || MixinHelper.wrapWithConditionPlayerItemSingle(threadLocal.get(), dropStack)) {
-                            for (int i = 0; i < dropStack.getCount(); i++) {
-                                level.addFreshEntity(new ItemEntity(
-                                    cow.level(),
-                                    cow.getX(),
-                                    cow.getY(1.0),
-                                    cow.getZ(),
-                                    dropStack.copyWithCount(1)
-                                ));
-                            }
-                        }
-                    }
-                );
+            3, (BiConsumer<ServerLevel, ItemStack>) (world, stack) -> {
+                if (MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack)) original.accept(world, stack);
             }
         );
     }

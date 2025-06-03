@@ -64,19 +64,19 @@ dependencies {
         officialMojangMappings()
     })
 
-    implementation("org.vineflower:vineflower:1.10.1")
-    modImplementation("net.fabricmc:fabric-loader:0.16.10")
+    implementation("org.vineflower:vineflower:1.11.1")
+    modImplementation("net.fabricmc:fabric-loader:0.16.14")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fapi")!!}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.0+kotlin.2.1.0")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.3+kotlin.2.1.21")
 
     modImplementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
-    modImplementation("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
+    modCompileOnly("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
 
     // Compatibility mods
-    modImplementation("curse.maven:tree-harvester-367178:6355493")
-    modImplementation("curse.maven:collective-342584:6390780")
+    modCompileOnly("curse.maven:tree-harvester-367178:6355493")
+    modCompileOnly("curse.maven:collective-342584:6390780")
 
-    include(implementation("dev.nyon:konfig:2.1.0")!!)
+    include(implementation("dev.nyon:konfig:3.0.0")!!)
 }
 
 val supportedMcVersions: List<String> =
