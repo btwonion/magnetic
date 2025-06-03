@@ -5,30 +5,36 @@ import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(Wolf.class)
-public class WolfMixin {
+@Mixin(Entity.class)
+public class EntityMixin {
 
     @WrapWithCondition(
-        method = "mobInteract",
+        method = "attemptToShearEquipment",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/animal/wolf/Wolf;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
+            target = "Lnet/minecraft/world/entity/Entity;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
-    private boolean modifyArmorDrop(
-        Wolf instance,
+    private boolean redirectShearDrops(
+        Entity instance,
         ServerLevel serverLevel,
-        ItemStack stack,
+        ItemStack itemStack,
+        Vec3 vec3,
         Player player,
-        InteractionHand hand
+        InteractionHand hand,
+        ItemStack tool,
+        Mob mob
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack);
+
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, itemStack);
     }
 }

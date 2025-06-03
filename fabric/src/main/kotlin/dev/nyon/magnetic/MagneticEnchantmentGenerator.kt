@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider.EnchantmentTagProvider
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.registries.Registries
@@ -33,14 +33,14 @@ class MagneticEnchantmentGenerator : DataGeneratorEntrypoint {
 
 private class MagneticEnchantmentTagProvider(
     output: FabricDataOutput, completableFuture: CompletableFuture<HolderLookup.Provider>
-) : EnchantmentTagProvider(output, completableFuture) {
+) : FabricTagProvider<Enchantment>(output, Registries.ENCHANTMENT, completableFuture) {
     override fun addTags(registries: HolderLookup.Provider) {
         val enchantmentResourceKey = ResourceKey.create(Registries.ENCHANTMENT, magneticEnchantmentId)
         listOf(
-            getOrCreateTagBuilder(magneticEffectId),
-            getOrCreateTagBuilder(EnchantmentTags.TRADEABLE),
-            getOrCreateTagBuilder(EnchantmentTags.IN_ENCHANTING_TABLE),
-            getOrCreateTagBuilder(EnchantmentTags.TREASURE)
+            builder(magneticEffectId),
+            builder(EnchantmentTags.TRADEABLE),
+            builder(EnchantmentTags.IN_ENCHANTING_TABLE),
+            builder(EnchantmentTags.TREASURE)
         ).forEach {
             it.addOptional(enchantmentResourceKey)
         }

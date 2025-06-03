@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import net.fabricmc.loader.api.FabricLoader
 
 val config: Config by lazy {
-    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 1, Config()) { _, _ -> null }
+    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 1, Config()) { _, _, _ -> null }
     loadConfig()
 }
 
