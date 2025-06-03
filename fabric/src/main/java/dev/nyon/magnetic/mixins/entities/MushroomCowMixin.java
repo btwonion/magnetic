@@ -6,6 +6,7 @@ import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.ShearableMixinHelper;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ConversionParams;
@@ -58,6 +59,7 @@ public class MushroomCowMixin {
     ) {
         args.set(
             2, (ConversionParams.AfterConversion<MushroomCow>) cow -> {
+                // Check in the original function for correct usage every version
                 world.sendParticles(
                     ParticleTypes.EXPLOSION,
                     cow.getX(),
@@ -71,8 +73,8 @@ public class MushroomCowMixin {
                 );
                 cow.dropFromShearingLootTable(
                     world, BuiltInLootTables.SHEAR_MOOSHROOM, stack, (level, dropStack) -> {
-                        if (MixinHelper.wrapWithConditionPlayerItemSingle(threadLocal.get(), dropStack)) {
-                            // Check in the original function for correct usage every version
+                        ServerPlayer player = threadLocal.get();
+                        if (player == null || MixinHelper.wrapWithConditionPlayerItemSingle(threadLocal.get(), dropStack)) {
                             for (int i = 0; i < dropStack.getCount(); i++) {
                                 level.addFreshEntity(new ItemEntity(
                                     cow.level(),

@@ -5,9 +5,7 @@ import dev.nyon.magnetic.DropEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -37,6 +35,7 @@ public class ShearableMixinHelper {
 
     public static BiConsumer<ServerLevel, ItemStack> changeConsumer(BiConsumer<ServerLevel, ItemStack> original) {
         ServerPlayer player = threadLocal.get();
+        if (player == null) return original;
 
         return (world, item) -> {
             ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
