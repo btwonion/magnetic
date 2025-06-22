@@ -24,7 +24,7 @@ class Main : JavaPlugin() {
 
     override fun onLoad() {
         INSTANCE = this
-        config(Bukkit.getPluginsFolder().toPath().resolve("magnetic.json"), 1, Config()) { _, _ -> null }
+        config(Bukkit.getPluginsFolder().toPath().resolve("magnetic.json"), 1, Config()) { _, _, _ -> null }
         internalConfig = loadConfig()
     }
 

@@ -38,13 +38,13 @@ repositories {
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 dependencies {
-    paperweight.foliaDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
 
-    implementation("dev.nyon:konfig:2.1.0")
+    implementation("dev.nyon:konfig:3.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
 
-    compileOnly("de.miraculixx:veinminer:2.4.3")
+    compileOnly("de.miraculixx:veinminer:2.4.7")
 }
 
 val modId = property("modId").toString()
@@ -97,14 +97,7 @@ publishMods {
         accessToken = providers.environmentVariable("MODRINTH_API_KEY")
         minecraftVersions.addAll(
             listOf(
-                "1.21",
-                "1.21.1",
-                "1.21.2",
-                "1.21.3",
-                "1.21.4",
-                "1.21.5",
-                "1.21.6-pre1",
-                "1.21.6-pre2"
+                "1.21.6"
             )
         )
     }

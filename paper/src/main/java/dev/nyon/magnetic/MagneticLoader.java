@@ -22,11 +22,11 @@ public class MagneticLoader implements PluginLoader {
         resolver.addRepository(new RemoteRepository.Builder(
             "central",
             "default",
-            "https://repo1.maven.org/maven2/"
+            MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR
         ).build());
 
-        resolver.addDependency(new Dependency(new DefaultArtifact("dev.nyon:konfig:2.1.0"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.1.0"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("dev.nyon:konfig:3.0.0"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.1.21"), null));
         resolver.addDependency(new Dependency(
             new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0"), null));
         resolver.addDependency(new Dependency(

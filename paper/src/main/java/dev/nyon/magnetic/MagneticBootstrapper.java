@@ -61,7 +61,7 @@ public class MagneticBootstrapper implements PluginBootstrap {
         // Add enchantment
         final TypedKey<Enchantment> MAGNETIC = TypedKey.create(RegistryKey.ENCHANTMENT, Key.key("magnetic:magnetic"));
 
-        manager.registerEventHandler(RegistryEvents.ENCHANTMENT.freeze()
+        manager.registerEventHandler(RegistryEvents.ENCHANTMENT.compose()
             .newHandler(event -> event.registry()
                 .register(
                     MAGNETIC,
