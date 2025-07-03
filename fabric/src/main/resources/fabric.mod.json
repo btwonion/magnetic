@@ -7,7 +7,7 @@
         "issues": "https://github.com/btwonion/magnetic/issues",
         "sources": "https://github.com/btwonion/magnetic"
     },
-    "icon": "icon.png",
+    "icon": "assets/magnetic/icon.png",
     "authors": [
         "btwonion"
     ],

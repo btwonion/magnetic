@@ -5,6 +5,7 @@ import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.stats.Stats
 import net.minecraft.world.entity.ExperienceOrb
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.EnchantmentHelper
@@ -23,12 +24,17 @@ object DropEvent {
     private val listener = event.register { items, exp, player ->
         if (config.needSneak && !player.isCrouching) return@register
         if (config.needEnchantment && !EnchantmentHelper.hasTag(
-                player.mainHandItem,
-                magneticEffectId
+                player.mainHandItem, magneticEffectId
             ) && !EnchantmentHelper.hasTag(player.offhandItem, magneticEffectId)
         ) return@register
 
-        if (config.itemsAllowed) items.removeIf(player::addItem)
+        if (config.itemsAllowed) {
+            items.removeIf { item ->
+                if (!player.addItem(item)) return@removeIf false
+                player.awardStat(Stats.ITEM_PICKED_UP.get(item.item), item.count)
+                true
+            }
+        }
         if (config.expAllowed) {
             val fakeExperienceOrb = ExperienceOrb(player.level(), 0.0, 0.0, 0.0, exp.value)
             player.take(fakeExperienceOrb, 1)

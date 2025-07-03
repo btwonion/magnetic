@@ -1,2 +1,8 @@
-### Paper
-- update to 1.21.6
+# Fabric and Paper
+- add picked-up items to vanilla statistics
+
+# Fabric
+- fix icon
+
+# Paper
+- improve event handling
