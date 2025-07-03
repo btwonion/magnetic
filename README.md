@@ -1,38 +1,46 @@
-# magnetic (pka. telekinesis)
+# Magnetic (Telekinesis for Minecraft)
 
-> Magnetically moves items and experience into your inventory. Also known as telekinesis from Hypixel Skyblock.
+**Magnetically move items and experience directly into your inventory! Inspired by the Hypixel Skyblock Telekinesis enchantment.**  
+No more running around to collect drops—just break, kill, or mine, and let the loot fly to you!
 
-## Functionality
+---
 
-**Block drop auto-pickup preview**
+## ✨ Features
+
+- 🧲 **Automatic Pickup**: Items and experience orbs zip straight into your inventory.
+- ⚙️ **Configurable**: Fine-tune exactly how magnetism works for you.
+- 🚀 **Performance-Friendly**: Lightweight, designed for both servers and single-player.
+- 🔄 **Flexible**: Easy toggling and customizability.
+
+---
+
+## 🎬 Demo
 
 ![Block drop auto-pickup preview](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-showcase-cave.gif)
 
-With this mod you can automatically pick up drops, including experience, from mobs, blocks and other entities.
+*Watch items and XP zip right to you!*
 
-## Can I use the functionality without the enchantment?
+---
 
-Yes, in the [config](#Configuration) you can change the `needEnchantment` option to `false`. If you want to only apply
-this functionality while sneaking, you can also enable `needSneak`.
+## ❓ FAQ
 
-Nevertheless, if you play with the enchantment enabled, you will have to hold a magnetic-enchanted tool in your main- or
-offhand.
+- **Does this work in multiplayer?**  
+  Yes, both on servers and singleplayer!
 
-## Where can I find the enchantment?
+- **Is it compatible with other mods/plugins?**  
+  Designed for broad compatibility, but let us know if you find issues!
 
-You can trade the enchantment with villagers, enchant it in an enchanting table or you can find it in treasures
-enchanted on tools.
+- **Where can I find the enchantment?**
+  The enchantment can be found like any vanilla enchantment. By trading, in treasures or via the enchantment table.
 
-## Configuration
+- **Do I need to use the enchantment?**
+  No, just toggle the `needEnchantment` option! Like this, the enchantment will be removed completely.
 
-The configuration file can be found in the client/server directory.
+---
 
--> `/config/magnetic.json` (fabric) 
+## ⚙️ Configuration
 
--> `/plugins/magnetic.json` (paper) 
-
-<details>
-<summary>magnetic.json</summary>
+Configuration is handled via the `magnetic.json` file:
 
 ```json5
 {
@@ -51,10 +59,11 @@ The configuration file can be found in the client/server directory.
 }
 ```
 
-</details>
+Changes require a server or game restart to take effect.
 
-### Other
+---
 
-Only the latest stable version of Minecraft will have feature updates and bug fixes. 
+## 💬 Support & Feedback
 
-If you need help with any of my mods, join my [discord server](https://nyon.dev/discord).
+- Open an [issue](https://github.com/btwonion/magnetic/issues) for bugs or suggestions.
+- Join our [Discord](https://nyon.dev/discord) for help and community.
