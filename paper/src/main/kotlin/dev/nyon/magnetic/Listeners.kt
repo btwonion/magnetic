@@ -8,6 +8,7 @@ import io.papermc.paper.event.block.PlayerShearBlockEvent
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
 import org.bukkit.Statistic
+import org.bukkit.entity.Item
 import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
@@ -41,7 +42,13 @@ object Listeners {
 
     fun listenForBukkitEvents() {
         listen<BlockDropItemEvent> {
-            DropEvent(items as MutableList<ItemStack>, MutableInt(), player).also(Event::callEvent)
+            val itemStacks = items.map { it.itemStack }.toMutableList()
+            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+
+            // Delete items that have been added to the inventory
+            items.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item.itemStack) }
+            }
         }
 
         listen<BlockBreakEvent> {
@@ -53,16 +60,34 @@ object Listeners {
         listen<EntityDeathEvent> {
             val killer = entity.killer ?: return@listen
             val mutableInt = MutableInt(droppedExp)
-            DropEvent(drops as MutableList<ItemStack>, mutableInt, killer).also(Event::callEvent)
+            val itemStacks = drops.toMutableList()
+            DropEvent(itemStacks, mutableInt, killer).also(Event::callEvent)
             droppedExp = mutableInt.value
+
+            // Delete items that have been added to the inventory
+            drops.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item) }
+            }
         }
 
         listen<PlayerShearBlockEvent> {
-            DropEvent(drops as MutableList<ItemStack>, MutableInt(), player).also(Event::callEvent)
+            val itemStacks = drops.toMutableList()
+            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+
+            // Delete items that have been added to the inventory
+            drops.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item) }
+            }
         }
 
         listen<PlayerShearEntityEvent> {
-            DropEvent(drops as MutableList<ItemStack>, MutableInt(), player).also(Event::callEvent)
+            val itemStacks = drops.toMutableList()
+            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+
+            // Delete items that have been added to the inventory
+            drops.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item) }
+            }
         }
 
         listen<PlayerFishEvent> {
@@ -76,8 +101,14 @@ object Listeners {
         if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) {
             listen<de.miraculixx.veinminer.VeinMinerEvent.VeinminerDropEvent> {
                 val mutableInt = MutableInt(exp)
-                DropEvent(items, mutableInt, player).also(Event::callEvent)
+                val itemStacks = items.toMutableList()
+                DropEvent(itemStacks, mutableInt, player).also(Event::callEvent)
                 exp = mutableInt.value
+
+                // Delete items that have been added to the inventory
+                items.removeIf { item ->
+                    itemStacks.none { stack -> stack.isSimilar(item) }
+                }
             }
         }
     }
