@@ -8,14 +8,12 @@ import io.papermc.paper.event.block.PlayerShearBlockEvent
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
 import org.bukkit.Statistic
-import org.bukkit.entity.Item
 import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerFishEvent
 import org.bukkit.event.player.PlayerShearEntityEvent
-import org.bukkit.inventory.ItemStack
 
 object Listeners {
 
@@ -29,8 +27,9 @@ object Listeners {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
+                val copiedStack = item.clone()
                 if (player.inventory.addItem(item).isNotEmpty()) return@removeIf false
-                player.incrementStatistic(Statistic.PICKUP, item.type, item.amount)
+                player.incrementStatistic(Statistic.PICKUP, copiedStack.type, copiedStack.amount)
                 true
             }
         }

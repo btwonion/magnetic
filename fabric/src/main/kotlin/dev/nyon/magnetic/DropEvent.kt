@@ -30,8 +30,9 @@ object DropEvent {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
+                val copiedStack = item.copy()
                 if (!player.addItem(item)) return@removeIf false
-                player.awardStat(Stats.ITEM_PICKED_UP.get(item.item), item.count)
+                player.awardStat(Stats.ITEM_PICKED_UP.get(copiedStack.item), copiedStack.count)
                 true
             }
         }
