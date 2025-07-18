@@ -85,6 +85,8 @@ val changelogText = buildString {
     rootProject.file("changelog.md").readText().also(::append)
 }
 
+val supportedMcVersions: List<String> =
+    property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
 publishMods {
     displayName = "v${project.version}"
     changelog = changelogText
@@ -95,12 +97,7 @@ publishMods {
     modrinth {
         projectId = "LLfA8jAD"
         accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        minecraftVersions.addAll(
-            listOf(
-                "1.21.7",
-                "1.21.8"
-            )
-        )
+        minecraftVersions.addAll(supportedMcVersions)
     }
 
     github {

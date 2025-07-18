@@ -30,7 +30,7 @@ repositories {
 val beta: Int? = property("beta").toString().toIntOrNull() // Pattern is '1.0.0-beta1-1.20.6-pre.2'
 val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
 val supportedMcVersions: List<String> =
-    property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
+    project("fabric").property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
 
 tasks {
     register("releaseAllPlatforms") {
