@@ -1,8 +1,5 @@
-# Fabric and Paper
-- add picked-up items to vanilla statistics
-
 # Fabric
-- fix icon
+
 
 # Paper
-- improve event handling
+- resolve ClassCastException - by @Aathoss in [#41](https://github.com/btwonion/magnetic/pull/41)
