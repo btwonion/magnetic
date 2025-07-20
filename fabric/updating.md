@@ -3,5 +3,8 @@
   - dropResources
   - spawnAtLocation
   - destroyBlock
-- check if every relevant result is already handled by the mixins
-- 
+  - spawnAfterBreak
+    - the player is given via the threadLocal in this case
+    - if the method only calls one of the following, you can ignore it
+      - tryDropExperience
+  - check if every relevant result is already handled by the mixins
