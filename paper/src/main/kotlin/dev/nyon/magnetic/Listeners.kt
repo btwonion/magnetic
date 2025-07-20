@@ -14,7 +14,6 @@ import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerFishEvent
 import org.bukkit.event.player.PlayerShearEntityEvent
-import org.bukkit.inventory.ItemStack
 
 object Listeners {
 
@@ -28,8 +27,9 @@ object Listeners {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
+                val copiedStack = item.clone()
                 if (player.inventory.addItem(item).isNotEmpty()) return@removeIf false
-                player.incrementStatistic(Statistic.PICKUP, item.type, item.amount)
+                player.incrementStatistic(Statistic.PICKUP, copiedStack.type, copiedStack.amount)
                 true
             }
         }
@@ -41,7 +41,13 @@ object Listeners {
 
     fun listenForBukkitEvents() {
         listen<BlockDropItemEvent> {
-            DropEvent(items as MutableList<ItemStack>, MutableInt(), player).also(Event::callEvent)
+            val itemStacks = items.map { it.itemStack }.toMutableList()
+            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+
+            // Delete items that have been added to the inventory
+            items.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item.itemStack) }
+            }
         }
 
         listen<BlockBreakEvent> {
@@ -53,16 +59,34 @@ object Listeners {
         listen<EntityDeathEvent> {
             val killer = entity.killer ?: return@listen
             val mutableInt = MutableInt(droppedExp)
-            DropEvent(drops as MutableList<ItemStack>, mutableInt, killer).also(Event::callEvent)
+            val itemStacks = drops.toMutableList()
+            DropEvent(itemStacks, mutableInt, killer).also(Event::callEvent)
             droppedExp = mutableInt.value
+
+            // Delete items that have been added to the inventory
+            drops.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item) }
+            }
         }
 
         listen<PlayerShearBlockEvent> {
-            DropEvent(drops as MutableList<ItemStack>, MutableInt(), player).also(Event::callEvent)
+            val itemStacks = drops.toMutableList()
+            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+
+            // Delete items that have been added to the inventory
+            drops.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item) }
+            }
         }
 
         listen<PlayerShearEntityEvent> {
-            DropEvent(drops as MutableList<ItemStack>, MutableInt(), player).also(Event::callEvent)
+            val itemStacks = drops.toMutableList()
+            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+
+            // Delete items that have been added to the inventory
+            drops.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item) }
+            }
         }
 
         listen<PlayerFishEvent> {
@@ -76,8 +100,14 @@ object Listeners {
         if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) {
             listen<de.miraculixx.veinminer.VeinMinerEvent.VeinminerDropEvent> {
                 val mutableInt = MutableInt(exp)
-                DropEvent(items, mutableInt, player).also(Event::callEvent)
+                val itemStacks = items.toMutableList()
+                DropEvent(itemStacks, mutableInt, player).also(Event::callEvent)
                 exp = mutableInt.value
+
+                // Delete items that have been added to the inventory
+                items.removeIf { item ->
+                    itemStacks.none { stack -> stack.isSimilar(item) }
+                }
             }
         }
     }

@@ -25,8 +25,9 @@ public class FallingBlockEntityMixin {
         ServerLevel serverLevel,
         ItemLike itemLike
     ) {
-        ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) instance.getBlockState()
-            .getBlock()).getInitialBreaker();
+        ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) instance.getBlockState().getBlock())
+            .getInitialBreaker();
+        if (initialBreaker == null) return true;
         return MixinHelper.wrapWithConditionPlayerItemSingle(
             initialBreaker,
             itemLike.asItem().getDefaultInstance()

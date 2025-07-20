@@ -16,7 +16,7 @@ plugins {
     `maven-publish`
 }
 
-val beta: Int? = property("beta").toString().toIntOrNull() // Pattern is '1.0.0-beta1-1.20.6-pre.2'
+val beta: Int? = property("beta").toString().toIntOrNull() // The pattern is '1.0.0-beta1-1.20.6-pre.2'
 val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
 val mcVersion = property("mcVersion")!!.toString()
 val mcVersionName = property("versionName")!!.toString()
@@ -58,7 +58,7 @@ paperPluginYaml {
     foliaSupported = true
     apiVersion = "1.21"
 
-    dependencies.server("Veinminer", PaperPluginYaml.Load.BEFORE, false, true)
+    dependencies.server("Veinminer", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
 }
 
 tasks {
@@ -85,6 +85,8 @@ val changelogText = buildString {
     rootProject.file("changelog.md").readText().also(::append)
 }
 
+val supportedMcVersions: List<String> =
+    property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
 publishMods {
     displayName = "v${project.version}"
     changelog = changelogText
@@ -95,11 +97,7 @@ publishMods {
     modrinth {
         projectId = "LLfA8jAD"
         accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        minecraftVersions.addAll(
-            listOf(
-                "1.21.6"
-            )
-        )
+        minecraftVersions.addAll(supportedMcVersions)
     }
 
     github {
