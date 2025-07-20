@@ -39,7 +39,7 @@ public class TreeCutEventsMixin {
         BlockState state,
         BlockEntity blockEntity
     ) {
-        if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel)) return false;
+        if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel)) return true;
         ArrayList<ItemStack> drops = new ArrayList<>(Block.getDrops(state, serverLevel, blockPos, blockEntity));
 
         DropEvent.INSTANCE.getEvent()
@@ -47,8 +47,9 @@ public class TreeCutEventsMixin {
             .invoke(drops, new MutableInt(0), serverPlayer);
 
         drops.forEach(item -> Block.popResource(serverLevel, blockPos, item));
+        state.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, true);
         serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
 
-        return true;
+        return false;
     }
 }
