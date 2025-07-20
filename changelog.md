@@ -6,3 +6,4 @@
 
 # Paper
 - improve event handling
+- move config from `/plugins/magnetic.json` to `/plugins/magnetic/magnetic.json`
