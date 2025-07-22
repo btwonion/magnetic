@@ -1,0 +1,14 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "plugin": "dev.nyon.magnetic.mixins.compat.fallingtree.FallingTreeMixinPlugin",
+    "package": "dev.nyon.magnetic.mixins.compat.fallingtree",
+    "compatibilityLevel": "JAVA_17",
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "mixins": [
+        "BlockWrapperMixin",
+        "LeafForceBreakerMixin"
+    ]
+}

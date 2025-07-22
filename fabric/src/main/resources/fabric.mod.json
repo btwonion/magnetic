@@ -45,6 +45,7 @@
     "mixins": [
         "magnetic.mixins.json",
         "compat.treeharvester.mixins.json",
+        "compat.fallingtree.mixins.json",
         "compat.rightclickharvest.mixins.json",
         "compat.veinminer.mixins.json"
     ],

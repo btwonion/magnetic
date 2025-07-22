@@ -84,6 +84,7 @@ dependencies {
     // Compatibility mods
     modCompileOnly("maven.modrinth:rightclickharvest:9jOYB5rp")
     modCompileOnly("maven.modrinth:veinminer:n6Nt0h4H")
+    modCompileOnly("maven.modrinth:fallingtree:hB7NfdzA")
     modCompileOnly("curse.maven:tree-harvester-367178:6355493")
     modCompileOnly("curse.maven:collective-342584:6390780")
 
