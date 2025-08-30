@@ -29,6 +29,7 @@ public class SpongeBlockMixin {
         BlockPos blockPos,
         BlockEntity blockEntity
     ) {
+        if (blockEntity == null) return;
         ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) blockState.getBlock()).getInitialBreaker();
         Block.dropResources(blockState, blockEntity.getLevel(), blockPos, null, initialBreaker, Items.AIR.getDefaultInstance());
     }

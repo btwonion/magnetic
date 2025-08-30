@@ -1,2 +1,2 @@
 # Fabric
-- add compat with kleeslabs
+- fix NullPointerException when trying to place a sponge in water
