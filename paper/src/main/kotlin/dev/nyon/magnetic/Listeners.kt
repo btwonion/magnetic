@@ -2,7 +2,7 @@
 
 package dev.nyon.magnetic
 
-import dev.nyon.magnetic.extensions.hasMagnetic
+import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.extensions.listen
 import io.papermc.paper.event.block.PlayerShearBlockEvent
 import org.apache.commons.lang3.mutable.MutableInt
@@ -19,11 +19,7 @@ object Listeners {
 
     @Suppress("unused")
     private val magneticListener = listen<DropEvent> {
-        if (config.needEnchantment && listOf(
-                player.inventory.itemInMainHand, player.inventory.itemInOffHand
-            ).none { it.hasMagnetic() }
-        ) return@listen
-        if (config.needSneak && !player.isSneaking) return@listen
+        if (!player.isAllowedToUseMagnetic()) return@listen
 
         if (config.itemsAllowed) {
             items.removeIf { item ->

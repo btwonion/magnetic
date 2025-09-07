@@ -12,6 +12,7 @@ import kotlin.io.path.moveTo
 import dev.nyon.magnetic.config as internalConfig
 
 val magneticKey = NamespacedKey("magnetic", "magnetic")
+const val magneticPermission = "magnetic.ability.use"
 
 class Main : JavaPlugin() {
     companion object {
@@ -22,7 +23,7 @@ class Main : JavaPlugin() {
         INSTANCE = this
         val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
-        config(configPath, 1, Config()) { _, _, _ -> null }
+        config(configPath, 2, Config()) { _, jsonElement, version -> migrate(jsonElement, version) }
         internalConfig = loadConfig()
     }
 
