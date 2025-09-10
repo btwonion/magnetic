@@ -1,6 +1,7 @@
 package dev.nyon.magnetic
 
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
@@ -8,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.stats.Stats
 import net.minecraft.world.entity.ExperienceOrb
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.enchantment.EnchantmentHelper
 import org.apache.commons.lang3.mutable.MutableInt
 
 object DropEvent {
@@ -22,11 +22,7 @@ object DropEvent {
 
     @Suppress("unused", "KotlinConstantConditions")
     private val listener = event.register { items, exp, player ->
-        if (config.needSneak && !player.isCrouching) return@register
-        if (config.needEnchantment && !EnchantmentHelper.hasTag(
-                player.mainHandItem, magneticEffectId
-            ) && !EnchantmentHelper.hasTag(player.offhandItem, magneticEffectId)
-        ) return@register
+        if (!player.isAllowedToUseMagnetic()) return@register
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
