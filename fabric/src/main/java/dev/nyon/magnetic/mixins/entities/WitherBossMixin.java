@@ -8,12 +8,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(WitherBoss.class)
 public abstract class WitherBossMixin {
+
+    @Unique
+    private WitherBoss instance = (WitherBoss) (Object) this;
+
     @ModifyArgs(
         method = "dropCustomDeathLoot",
         at = @At(
@@ -29,7 +34,7 @@ public abstract class WitherBossMixin {
     ) {
         ItemLike original = args.get(1);
 
-        if (MixinHelper.entityCustomDeathLootSingle(damageSource, new ItemStack(original))) return;
+        if (MixinHelper.entityCustomDeathLootSingle(damageSource, new ItemStack(original), instance)) return;
         args.set(1, Items.AIR);
     }
 }

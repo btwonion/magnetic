@@ -9,10 +9,14 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ArmorStand.class)
 public class ArmorStandMixin {
+
+    @Unique
+    private ArmorStand instance = (ArmorStand) (Object) this;
 
     @WrapWithCondition(
         method = "brokenByPlayer",
@@ -28,7 +32,7 @@ public class ArmorStandMixin {
         ServerLevel serverLevel,
         DamageSource damageSource
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack);
+        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance);
     }
 
     @WrapWithCondition(
@@ -45,6 +49,6 @@ public class ArmorStandMixin {
         ServerLevel serverLevel,
         DamageSource damageSource
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack);
+        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance);
     }
 }

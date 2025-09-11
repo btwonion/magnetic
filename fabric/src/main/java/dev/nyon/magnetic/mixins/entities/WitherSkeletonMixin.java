@@ -28,6 +28,6 @@ public class WitherSkeletonMixin {
         DamageSource source,
         boolean playerKill
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(source, new ItemStack(itemLike));
+        return MixinHelper.entityCustomDeathLootSingle(source, new ItemStack(itemLike), instance);
     }
 }

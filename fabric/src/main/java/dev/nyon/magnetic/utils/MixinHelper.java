@@ -1,6 +1,7 @@
 package dev.nyon.magnetic.utils;
 
 import dev.nyon.magnetic.DropEvent;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -13,6 +14,15 @@ import java.util.List;
 
 public class MixinHelper {
     public static final ThreadLocal<ServerPlayer> threadLocal = new ThreadLocal<>();
+
+    public static boolean entityWrapWithConditionPlayerItemSingle(
+        ServerPlayer player,
+        ItemStack item,
+        Entity instance
+    ) {
+        if (MagneticCheckKt.isIgnored(instance.getType())) return true;
+        return wrapWithConditionPlayerItemSingle(player, item);
+    }
 
     public static boolean wrapWithConditionPlayerItemSingle(
         ServerPlayer player,
@@ -51,13 +61,14 @@ public class MixinHelper {
     ) {
         LivingEntity lastAttacker = entity.getLastAttacker();
         if (!(lastAttacker instanceof ServerPlayer player)) return true;
-        return wrapWithConditionPlayerItemSingle(player, item);
+        return entityWrapWithConditionPlayerItemSingle(player, item, entity);
     }
 
     public static List<ItemStack> entityDropEquipmentMultiple(
         LivingEntity entity,
         List<ItemStack> items
     ) {
+        if (MagneticCheckKt.isIgnored(entity.getType())) return items;
         LivingEntity lastAttacker = entity.getLastAttacker();
         if (!(lastAttacker instanceof ServerPlayer player)) return items;
 
@@ -71,18 +82,21 @@ public class MixinHelper {
 
     public static boolean entityCustomDeathLootSingle(
         DamageSource source,
-        ItemStack item
+        ItemStack item,
+        Entity instance
     ) {
         Entity lastAttacker = source.getEntity();
         if (!(lastAttacker instanceof ServerPlayer player)) return true;
 
-        return wrapWithConditionPlayerItemSingle(player, item);
+        return entityWrapWithConditionPlayerItemSingle(player, item, instance);
     }
 
     public static List<ItemStack> entityCustomDeathLootMultiple(
         DamageSource source,
-        List<ItemStack> items
+        List<ItemStack> items,
+        Entity instance
     ) {
+        if (MagneticCheckKt.isIgnored(instance.getType())) return items;
         Entity lastAttacker = source.getEntity();
         if (!(lastAttacker instanceof ServerPlayer player)) return items;
 

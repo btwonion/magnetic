@@ -27,6 +27,6 @@ public class ZombieMixin {
         DamageSource source,
         boolean playerKill
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(source, stack);
+        return MixinHelper.entityCustomDeathLootSingle(source, stack, instance);
     }
 }
