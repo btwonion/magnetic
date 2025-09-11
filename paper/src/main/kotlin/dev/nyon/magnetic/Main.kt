@@ -25,6 +25,7 @@ class Main : JavaPlugin() {
         moveConfigToNewPath(configPath)
         config(configPath, 2, Config()) { _, jsonElement, version -> migrate(jsonElement, version) }
         internalConfig = loadConfig()
+        reloadIgnoredEntities()
     }
 
     override fun onEnable() {

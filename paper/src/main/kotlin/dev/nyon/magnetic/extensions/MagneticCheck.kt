@@ -1,8 +1,10 @@
 package dev.nyon.magnetic.extensions
 
 import dev.nyon.magnetic.config
+import dev.nyon.magnetic.ignoredEntities
 import dev.nyon.magnetic.magneticKey
 import dev.nyon.magnetic.magneticPermission
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -19,3 +21,8 @@ fun Player.isAllowedToUseMagnetic(): Boolean {
 
     return true
 }
+
+val EntityType.isIgnored: Boolean
+    get() {
+        return ignoredEntities.contains(key)
+    }
