@@ -90,6 +90,8 @@ dependencies {
     modCompileOnly("curse.maven:tree-harvester-367178:6355493")
     modCompileOnly("curse.maven:collective-342584:6390780")
 
+    modCompileOnly("me.lucko:fabric-permissions-api:0.4.1")
+
     include(implementation("dev.nyon:konfig:3.0.0")!!)
 }
 

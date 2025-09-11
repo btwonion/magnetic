@@ -1,6 +1,7 @@
 # Magnetic (Telekinesis for Minecraft)
 
-**Magnetically move items and experience directly into your inventory! Inspired by the Hypixel Skyblock Telekinesis enchantment.**  
+**Magnetically move items and experience directly into your inventory!
+Inspired by the Hypixel Skyblock Telekinesis enchantment.**  
 No more running around to collect drops—just break, kill, or mine, and let the loot fly to you!
 
 ---
@@ -35,6 +36,10 @@ No more running around to collect drops—just break, kill, or mine, and let the
 
 - **Do I need to use the enchantment?**
   No, just toggle the `needEnchantment` option! Like this, the enchantment will be removed completely.
+
+- **Can I configure the mod/plugin to only work on people that have a certain permission?**
+  Yes, you can toggle the `needPermission` option!
+  If you disable `needEnchantment` as well, the permission will function as a drop-in replacement for the enchantment
 
 ---
 
