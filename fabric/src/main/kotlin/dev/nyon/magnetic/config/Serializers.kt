@@ -8,23 +8,22 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import net.minecraft.resources.ResourceLocation
 
-object ResourceLocationSerializer : KSerializer<Identifier> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("resource_location", PrimitiveKind.STRING)
+object IdentifierSerializer : KSerializer<Identifier> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("identifier", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Identifier {
-        val rawString = decoder.decodeString()
-        val isTag = rawString.startsWith('#')
-        val namespacedKey = ResourceLocation.parse(rawString.run { return@run if (isTag) drop(1) else this@run }) ?: error("Magnetic couldn't parse malformed identifier: '$rawString'.")
+        return decodeFromString(decoder.decodeString())
+    }
+
+    fun decodeFromString(string: String): Identifier {
+        val isTag = string.startsWith('#')
+        val namespacedKey = ResourceLocation.parse(string.run { return@run if (isTag) drop(1) else this@run }) ?: error("Magnetic couldn't parse malformed identifier: '$string'.")
         return Identifier(namespacedKey, isTag)
     }
 
     override fun serialize(
         encoder: Encoder, value: Identifier
     ) {
-        val rawIdentifier = buildString {
-            if (value.isTag) append('#')
-            append(value.original.toString())
-        }
-        encoder.encodeString(rawIdentifier)
+        encoder.encodeString(value.toString())
     }
 }

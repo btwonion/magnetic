@@ -1,11 +1,11 @@
 package dev.nyon.magnetic.config
 
-import dev.isxander.yacl3.dsl.YetAnotherConfigLib
-import dev.isxander.yacl3.dsl.controller
-import dev.isxander.yacl3.dsl.descriptionBuilder
-import dev.isxander.yacl3.dsl.tickBox
+import dev.isxander.yacl3.api.ListOption
+import dev.isxander.yacl3.api.OptionDescription
+import dev.isxander.yacl3.dsl.*
 import dev.nyon.konfig.config.saveConfig
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
 
 fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("magnetic") {
     val general by categories.registering {
@@ -40,6 +40,25 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
                 addDefaultText(1)
             }
         }
+
+        val ignoreKilledEntities = rootOptions.register(
+            "ignoreKilledEntities",
+            ListOption.createBuilder<String>()
+                .name(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities"))
+                .description(OptionDescription.createBuilder().text(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities.description")).build())
+                .controller(stringField())
+                .binding(
+                    emptyList(),
+                    { config.ignoreKilledEntities.map(Identifier::toString) },
+                    { list->
+                        config.ignoreKilledEntities = list.mapNotNull { entry ->
+                            runCatching { IdentifierSerializer.decodeFromString(entry) }.getOrNull()
+                        }
+                    }
+                )
+                .initial("")
+                .build()
+        )
     }
 
     save { saveConfig(config) }
