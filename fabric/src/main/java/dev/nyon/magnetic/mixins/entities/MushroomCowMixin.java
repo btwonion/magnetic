@@ -12,6 +12,7 @@ import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
@@ -22,6 +23,9 @@ import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(MushroomCow.class)
 public class MushroomCowMixin {
+
+    @Unique
+    private MushroomCow instance = (MushroomCow) (Object) this;
 
     @WrapOperation(
         method = "mobInteract",
@@ -56,7 +60,7 @@ public class MushroomCowMixin {
 
         args.set(
             3, (BiConsumer<ServerLevel, ItemStack>) (world, stack) -> {
-                if (MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack)) original.accept(world, stack);
+                if (MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, stack, instance)) original.accept(world, stack);
             }
         );
     }

@@ -9,5 +9,7 @@
     "yacl3.config.magnetic.category.general.root.option.expAllowed.description": "Decides whether Magnetic should also work for exp drops.",
     "yacl3.config.magnetic.category.general.root.option.itemsAllowed": "Items",
     "yacl3.config.magnetic.category.general.root.option.itemsAllowed.description": "Decides whether Magnetic should also work for item drops.",
+    "yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities": "Ignore killed entity drops",
+    "yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities.description": "The specified entities will not be affected by Magnetic. You can use both tags and entity ids (resource locations) to define which entities to ignore.",
     "enchantment.magnetic.magnetic.name": "Magnetic"
 }

@@ -7,12 +7,16 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.List;
 
 @Mixin(Piglin.class)
 public class PiglinMixin {
+
+    @Unique
+    private Piglin instance = (Piglin) (Object) this;
 
     @ModifyExpressionValue(
         method = "dropCustomDeathLoot",
@@ -27,6 +31,6 @@ public class PiglinMixin {
         DamageSource damageSource,
         boolean bl
     ) {
-        return MixinHelper.entityCustomDeathLootMultiple(damageSource, original);
+        return MixinHelper.entityCustomDeathLootMultiple(damageSource, original, instance);
     }
 }

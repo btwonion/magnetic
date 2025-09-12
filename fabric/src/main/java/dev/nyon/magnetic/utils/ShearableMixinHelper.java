@@ -2,6 +2,7 @@ package dev.nyon.magnetic.utils;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.nyon.magnetic.DropEvent;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -19,6 +20,10 @@ import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 public class ShearableMixinHelper {
 
     public static void prepare(Player player, Operation<Void> original, Entity instance, ServerLevel world, SoundSource source, ItemStack stack) {
+        if (MagneticCheckKt.isIgnored(instance.getType())) {
+            original.call(instance, world, source, stack);
+            return;
+        }
         if (!(player instanceof ServerPlayer serverPlayer)) {
             original.call(instance, world, source, stack);
             return;

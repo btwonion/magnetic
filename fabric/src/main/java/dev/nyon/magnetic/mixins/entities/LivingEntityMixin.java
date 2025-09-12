@@ -3,6 +3,7 @@ package dev.nyon.magnetic.mixins.entities;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.nyon.magnetic.DropEvent;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,6 +27,9 @@ import java.util.function.Consumer;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
+    @Unique
+    private LivingEntity instance = (LivingEntity) (Object) this;
+
     @ModifyExpressionValue(
         method = "dropExperience",
         at = @At(
@@ -38,6 +42,7 @@ public abstract class LivingEntityMixin {
         ServerLevel level,
         Entity entity
     ) {
+        if (MagneticCheckKt.isIgnored(instance.getType())) return original;
         if (!(entity instanceof ServerPlayer player)) return original;
 
         return MixinHelper.modifyExpressionValuePlayerExp(player, original);
@@ -48,6 +53,7 @@ public abstract class LivingEntityMixin {
         LootParams params,
         Consumer<ItemStack> original
     ) {
+        if (MagneticCheckKt.isIgnored(instance.getType())) return original;
         DamageSource source = params.contextMap()
             .getOptional(LootContextParams.DAMAGE_SOURCE);
         if (source == null || !(source.getEntity() instanceof ServerPlayer player)) return original;

@@ -3,6 +3,7 @@
 package dev.nyon.magnetic
 
 import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
+import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import io.papermc.paper.event.block.PlayerShearBlockEvent
 import org.apache.commons.lang3.mutable.MutableInt
@@ -53,6 +54,7 @@ object Listeners {
         }
 
         listen<EntityDeathEvent> {
+            if (entityType.isIgnored) return@listen
             val killer = entity.killer ?: return@listen
             val mutableInt = MutableInt(droppedExp)
             val itemStacks = drops.toMutableList()
