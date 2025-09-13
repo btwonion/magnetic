@@ -11,5 +11,7 @@
     "yacl3.config.magnetic.category.general.root.option.itemsAllowed.description": "Entscheidet, ob Magnetic für auch für Item Drops funktionieren soll.",
     "yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities": "Ignoriere Loot von Entities",
     "yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities.description": "Angegebene Entities werden von Magnetic ignoriert und lassen ihren Loot wie gewöhnlich fallen. Es werden sowohl Tags, wie auch Ids von den Entities akzeptiert (Resource Location).",
+    "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons": "Fernkampfwaffen ignorieren",
+    "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons.description": "Loot, der vom Töten mit Fernkampfwaffen verursacht wird, wird von Magnetic ignoriert.",
     "enchantment.magnetic.magnetic.name": "Magnetic"
 }

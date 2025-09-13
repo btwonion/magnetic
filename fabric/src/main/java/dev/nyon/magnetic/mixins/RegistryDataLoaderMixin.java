@@ -3,7 +3,7 @@ package dev.nyon.magnetic.mixins;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Decoder;
 import dev.nyon.magnetic.config.ConfigKt;
-import dev.nyon.magnetic.datagen.MagneticEnchantmentGeneratorKt;
+import dev.nyon.magnetic.datagen.DataGeneratorKt;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryDataLoader;
@@ -34,6 +34,6 @@ public class RegistryDataLoaderMixin {
     ) {
         if (!ConfigKt.getConfig()
             .getNeedEnchantment() && registryKey.location()
-            .equals(MagneticEnchantmentGeneratorKt.getMagneticEnchantmentId())) ci.cancel();
+            .equals(DataGeneratorKt.getMagneticEnchantmentId())) ci.cancel();
     }
 }

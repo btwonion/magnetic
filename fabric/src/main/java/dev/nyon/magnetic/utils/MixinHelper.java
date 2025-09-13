@@ -60,6 +60,7 @@ public class MixinHelper {
         ItemStack item
     ) {
         LivingEntity lastAttacker = entity.getLastAttacker();
+        if (MagneticCheckKt.failsLongRangeCheck(entity.getLastDamageSource())) return true;
         if (!(lastAttacker instanceof ServerPlayer player)) return true;
         return entityWrapWithConditionPlayerItemSingle(player, item, entity);
     }
@@ -69,6 +70,7 @@ public class MixinHelper {
         List<ItemStack> items
     ) {
         if (MagneticCheckKt.isIgnored(entity.getType())) return items;
+        if (MagneticCheckKt.failsLongRangeCheck(entity.getLastDamageSource())) return items;
         LivingEntity lastAttacker = entity.getLastAttacker();
         if (!(lastAttacker instanceof ServerPlayer player)) return items;
 
@@ -85,6 +87,7 @@ public class MixinHelper {
         ItemStack item,
         Entity instance
     ) {
+        if (MagneticCheckKt.failsLongRangeCheck(source)) return true;
         Entity lastAttacker = source.getEntity();
         if (!(lastAttacker instanceof ServerPlayer player)) return true;
 
@@ -96,6 +99,7 @@ public class MixinHelper {
         List<ItemStack> items,
         Entity instance
     ) {
+        if (MagneticCheckKt.failsLongRangeCheck(source)) return items;
         if (MagneticCheckKt.isIgnored(instance.getType())) return items;
         Entity lastAttacker = source.getEntity();
         if (!(lastAttacker instanceof ServerPlayer player)) return items;

@@ -2,6 +2,7 @@
 
 package dev.nyon.magnetic
 
+import dev.nyon.magnetic.extensions.failsLongRangeCheck
 import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
@@ -55,6 +56,7 @@ object Listeners {
 
         listen<EntityDeathEvent> {
             if (entityType.isIgnored) return@listen
+            if (entity.lastDamageCause.failsLongRangeCheck()) return@listen
             val killer = entity.killer ?: return@listen
             val mutableInt = MutableInt(droppedExp)
             val itemStacks = drops.toMutableList()

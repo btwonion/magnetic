@@ -31,7 +31,8 @@ data class Config(
     var expAllowed: Boolean = true,
     var itemsAllowed: Boolean = true,
     var needPermission: Boolean = false,
-    var ignoreKilledEntities: List<Identifier> = listOf()
+    var ignoreKilledEntities: List<Identifier> = listOf(),
+    var ignoreRangedWeapons: Boolean = true
 )
 
 private fun migrate(jsonElement: JsonElement, version: Int?): Config? {

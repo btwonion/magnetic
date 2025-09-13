@@ -59,6 +59,14 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
                 .initial("")
                 .build()
         )
+
+        val ignoreRangedWeapons by rootOptions.registering {
+            binding(true, { config.ignoreRangedWeapons }, { config.ignoreRangedWeapons = it })
+            controller = tickBox()
+            descriptionBuilder {
+                addDefaultText(1)
+            }
+        }
     }
 
     save { saveConfig(config) }
