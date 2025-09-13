@@ -13,12 +13,12 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper
 private const val magneticPermission = "magnetic.ability.use"
 
 fun ServerPlayer.isAllowedToUseMagnetic(): Boolean {
-    if (config.needEnchantment
+    if (config.enchantmentRequired
         && !EnchantmentHelper.hasTag(mainHandItem, magneticEffectId)
         && !EnchantmentHelper.hasTag(offhandItem, magneticEffectId)
     ) return false
-    if (config.needSneak && !isCrouching) return false
-    if (config.needPermission && !me.lucko.fabric.api.permissions.v0.Permissions.check(this, magneticPermission))
+    if (config.sneakRequired && !isCrouching) return false
+    if (config.permissionRequired && !me.lucko.fabric.api.permissions.v0.Permissions.check(this, magneticPermission))
         return false
 
     return true

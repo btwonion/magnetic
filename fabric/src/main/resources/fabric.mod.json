@@ -38,7 +38,7 @@
         "modmenu": [
             {
                 "adapter": "kotlin",
-                "value": "dev.nyon.magnetic.config.ModMenuImpl"
+                "value": "dev.nyon.magnetic.config.screen.ModMenuImpl"
             }
         ]
     },

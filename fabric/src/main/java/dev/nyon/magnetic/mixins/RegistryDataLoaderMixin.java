@@ -33,7 +33,7 @@ public class RegistryDataLoaderMixin {
         CallbackInfo ci
     ) {
         if (!ConfigKt.getConfig()
-            .getNeedEnchantment() && registryKey.location()
+            .getEnchantmentRequired() && registryKey.location()
             .equals(DataGeneratorKt.getMagneticEnchantmentId())) ci.cancel();
     }
 }

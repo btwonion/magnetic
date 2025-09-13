@@ -7,6 +7,6 @@ import net.fabricmc.loader.api.FabricLoader
 
 fun init() {
     DropEvent
-    if (config.needPermission && !FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0"))
+    if (config.permissionRequired && !FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0"))
         error("To use the 'needPermission' option of Magnetic, you have to install the fabric-permissions-api.")
 }

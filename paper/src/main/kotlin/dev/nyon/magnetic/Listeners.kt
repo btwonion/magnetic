@@ -2,6 +2,7 @@
 
 package dev.nyon.magnetic
 
+import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.failsLongRangeCheck
 import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.extensions.isIgnored

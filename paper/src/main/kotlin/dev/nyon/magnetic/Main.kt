@@ -2,6 +2,9 @@ package dev.nyon.magnetic
 
 import dev.nyon.konfig.config.config
 import dev.nyon.konfig.config.loadConfig
+import dev.nyon.magnetic.config.Config
+import dev.nyon.magnetic.config.migrate
+import dev.nyon.magnetic.config.reloadIgnoredEntities
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
@@ -9,7 +12,7 @@ import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.moveTo
-import dev.nyon.magnetic.config as internalConfig
+import dev.nyon.magnetic.config.config as internalConfig
 
 val magneticKey = NamespacedKey("magnetic", "magnetic")
 const val magneticPermission = "magnetic.ability.use"

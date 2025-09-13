@@ -1,22 +1,12 @@
 package dev.nyon.magnetic.config
 
-import dev.nyon.konfig.config.config
-import dev.nyon.konfig.config.loadConfig
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.fabricmc.loader.api.FabricLoader
 
-val config: Config by lazy {
-    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 2, Config()) { _, element, version ->
-        migrate(
-            element, version
-        )
-    }
-    loadConfig()
-}
+lateinit var config: Config
 
 @Serializable
 data class Config(
@@ -29,7 +19,7 @@ data class Config(
     var ignoreEntities: List<Identifier> = listOf()
 )
 
-private fun migrate(jsonElement: JsonElement, version: Int?): Config? {
+internal fun migrate(jsonElement: JsonElement, version: Int?): Config? {
     val jsonObject = jsonElement.jsonObject
     return when (version) {
         1 -> Config(

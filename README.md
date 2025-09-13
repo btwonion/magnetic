@@ -9,7 +9,7 @@ No more running around to collect drops—just break, kill, or mine, and let the
 ## ✨ Features
 
 - 🧲 **Automatic Pickup**: Items and experience orbs zip straight into your inventory.
-- ⚙️ **Configurable**: Fine-tune exactly how magnetism works for you.
+- ⚙️ **Configurable**: Fine-tune exactly how magnetic works for you.
 - 🚀 **Performance-Friendly**: Lightweight, designed for both servers and single-player.
 - 🔄 **Flexible**: Easy toggling and customizability.
 
@@ -49,17 +49,15 @@ Configuration is handled via the `magnetic.json` file:
 
 ```json5
 {
-    "version": 1,
-    // For migration purposes only, just ignore this.
+    "version": 2, // For migration purposes only, just ignore this.
     "config": {
-        "needEnchantment": true,
-        // Defines whether Magnetic should without or with the enchantment on the tool.
-        "needSneak": false,
-        // Defines whether the player should have to sneak to use Magnetic.
-        "expAllowed": true,
-        // Enables the use of Magnetic for exp drops.
-        "itemsAllowed": true
-        // Enables the use of Magnetic for item drops.
+        "enchantmentRequired": true, // The magnetic ability will only work if the tool in the off- or main-hand is enchanted with magnetic. If this option is set to false, the enchantment will not be available.
+        "sneakRequired": false, // Requires the player to sneak to use magnetic.
+        "permissionRequired": false, // Requires the player to have a certain permission ('magnetic.ability.use') to use magnetic.
+        "itemsAllowed": true, // Allows the player to also pickup items with magnetic.
+        "expAllowed": true, // Allows the player to also pickup exp with magnetic.
+        "ignoreRangedWeapons": true, // Ignores drops that were produced via a kill with a long-ranged weapon (e.g. bow, crossbow, etc.).
+        "ignoreEntities": [] // The specified entities will not be affected by magnetic when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
     }
 }
 ```

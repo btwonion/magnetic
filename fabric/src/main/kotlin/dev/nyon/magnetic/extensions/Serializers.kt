@@ -1,5 +1,6 @@
-package dev.nyon.magnetic.config
+package dev.nyon.magnetic.extensions
 
+import dev.nyon.magnetic.config.Identifier
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -17,7 +18,9 @@ object IdentifierSerializer : KSerializer<Identifier> {
 
     fun decodeFromString(string: String): Identifier {
         val isTag = string.startsWith('#')
-        val namespacedKey = ResourceLocation.parse(string.run { return@run if (isTag) drop(1) else this@run }) ?: error("Magnetic couldn't parse malformed identifier: '$string'.")
+        val namespacedKey = ResourceLocation.parse(string.run { return@run if (isTag) drop(1) else this@run }) ?: error(
+            "Magnetic couldn't parse malformed identifier: '$string'."
+        )
         return Identifier(namespacedKey, isTag)
     }
 

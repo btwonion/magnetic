@@ -1,4 +1,4 @@
-package dev.nyon.magnetic.config
+package dev.nyon.magnetic.config.screen
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
