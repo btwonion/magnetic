@@ -34,7 +34,9 @@ object Listeners {
             items.removeIf { item ->
                 val copiedStack = item.clone()
                 if (player.inventory.addItem(item).isNotEmpty()) return@removeIf false
-                player.incrementStatistic(Statistic.PICKUP, copiedStack.type, copiedStack.amount)
+                if (copiedStack.amount != 0) player.incrementStatistic(
+                    Statistic.PICKUP, copiedStack.type, copiedStack.amount
+                )
                 true
             }
         }
