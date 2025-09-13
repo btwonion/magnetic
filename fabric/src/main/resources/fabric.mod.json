@@ -27,7 +27,7 @@
     },
     "entrypoints": {
         "fabric-datagen": [
-            "dev.nyon.magnetic.datagen.MagneticEnchantmentGenerator"
+            "dev.nyon.magnetic.datagen.DataGenerator"
         ],
         "main": [
             {

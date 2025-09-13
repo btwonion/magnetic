@@ -11,5 +11,7 @@
     "yacl3.config.magnetic.category.general.root.option.itemsAllowed.description": "Decides whether Magnetic should also work for item drops.",
     "yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities": "Ignore killed entity drops",
     "yacl3.config.magnetic.category.general.root.option.ignoreKilledEntities.description": "The specified entities will not be affected by Magnetic. You can use both tags and entity ids (resource locations) to define which entities to ignore.",
+    "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons": "Ignore ranged weapons",
+    "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons.description": "Ignores drops that were produced via a kill with a long-ranged weapon (e.g. bow, crossbow, etc.).",
     "enchantment.magnetic.magnetic.name": "Magnetic"
 }
