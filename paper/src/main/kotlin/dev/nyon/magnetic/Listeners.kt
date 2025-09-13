@@ -49,10 +49,18 @@ object Listeners {
     private val breakChainedBlocks = listOf(
         Material.BAMBOO,
         Material.CACTUS,
+        Material.CAVE_VINES,
+        Material.CAVE_VINES_PLANT,
         Material.CHORUS_FLOWER,
         Material.CHORUS_PLANT,
+        Material.KELP,
+        Material.KELP_PLANT,
         Material.SUGAR_CANE,
-        Material.SCAFFOLDING
+        Material.SCAFFOLDING,
+        Material.TWISTING_VINES,
+        Material.TWISTING_VINES_PLANT,
+        Material.WEEPING_VINES,
+        Material.WEEPING_VINES_PLANT
     )
     private val neededBlockFaces = BlockFace.entries.filter(BlockFace::isCartesian)
     fun listenForBukkitEvents() {
