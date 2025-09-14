@@ -2,6 +2,7 @@ package dev.nyon.magnetic.config.screen
 
 import dev.isxander.yacl3.api.ListOption
 import dev.isxander.yacl3.api.OptionDescription
+import dev.isxander.yacl3.api.OptionGroup
 import dev.isxander.yacl3.dsl.*
 import dev.nyon.konfig.config.saveConfig
 import dev.nyon.magnetic.config.Identifier
@@ -68,6 +69,40 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             controller = tickBox()
             descriptionBuilder {
                 addDefaultText(1)
+            }
+        }
+
+        val fullInventoryAlert by groups.registering {
+            val soundAlertEnabled by options.registering {
+                binding(true, { config.fullInventoryAlert.soundAlert.enabled }, { config.fullInventoryAlert.soundAlert.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val soundAlertCooldownInSeconds by options.registering {
+                binding(10, { config.fullInventoryAlert.soundAlert.cooldownInSeconds }, { config.fullInventoryAlert.soundAlert.cooldownInSeconds = it })
+                controller = numberField(0, Int.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val textAlertEnabled by options.registering {
+                binding(true, { config.fullInventoryAlert.textAlert.enabled }, { config.fullInventoryAlert.textAlert.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val textAlertCooldownInSeconds by options.registering {
+                binding(10, { config.fullInventoryAlert.textAlert.cooldownInSeconds }, { config.fullInventoryAlert.textAlert.cooldownInSeconds = it })
+                controller = numberField(0, Int.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
             }
         }
     }

@@ -13,6 +13,15 @@
     "yacl3.config.magnetic.category.general.root.option.ignoreEntities.description": "The specified entities will not be affected by magnetic when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.",
     "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons": "Ignore ranged weapons",
     "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons.description": "Ignores drops that were produced via a kill with a long-ranged weapon (e.g. bow, crossbow, etc.).",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert": "Full inventory alert",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertEnabled": "Sound alert enabled",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertEnabled.description": "Enables sound alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertCooldownInSeconds": "Sound alert cooldown",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertCooldownInSeconds.description": "The time that has to pass to play the sound alert again.",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertEnabled": "Message alert enabled",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertEnabled.description": "Enables text message alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds": "Message alert cooldown",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds.description": "The time that has to pass to show the text message alert again.",
     "enchantment.magnetic.magnetic.name": "magnetic",
     "chat.message.fullinventoryalert.text": "[magnetic] Your inventory is full!"
 }

@@ -13,6 +13,15 @@
     "yacl3.config.magnetic.category.general.root.option.ignoreEntities.description": "Angegebene Wesen werden von Magnetic ignoriert und lassen ihre Beute wie gewöhnlich fallen. Es werden sowohl Tags, wie auch IDs von den Entities akzeptiert (Resource Locations).",
     "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons": "Fernkampfwaffen ignorieren",
     "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons.description": "Beute, die vom Töten mit Fernkampfwaffen verursacht wird, wird von der Magnetic-Fähigkeit ignoriert.",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert": "Hinweis: Inventar voll",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertEnabled": "Ton-Hinweis aktiviert",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertEnabled.description": "Aktiviert einen Hinweis in Form eines Tons, wenn die Magnetic-Fähigkeit versucht, einen Gegenstand in das Inventar hinzuzufügen, dieses aber voll ist.",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertCooldownInSeconds": "Ton-Hinweis Abklingzeit",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.soundAlertCooldownInSeconds.description": "Die Abklingzeit, die der Hinweis braucht, um nochmal abgespielt zu werden.",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertEnabled": "Nachrichten-Hinweis aktiviert",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertEnabled.description": "Aktiviert einen Hinweis in Form einer Nachricht, wenn die Magnetic-Fähigkeit versucht, einen Gegenstand in das Inventar hinzuzufügen, dieses aber voll ist.",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds": "Nachrichten-Hinweis Abklingzeit",
+    "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds.description": "Die Abklingzeit, die der Hinweis braucht, um nochmal abgespielt zu werden.",
     "enchantment.magnetic.magnetic.name": "Magnetic",
     "chat.message.fullinventoryalert.text": "[magnetic] Dein Inventar ist voll!"
 }
