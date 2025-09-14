@@ -45,7 +45,7 @@ No more running around to collect drops—just break, kill, or mine, and let the
 
 ## ⚙️ Configuration
 
-Configuration is handled via the `magnetic.json` file:
+Configuration is handled via the `magnetic.json` file and can be edited as well in the config screen on the client:
 
 ```json5
 {
@@ -57,7 +57,17 @@ Configuration is handled via the `magnetic.json` file:
         "itemsAllowed": true, // Allows the player to also pickup items with magnetic.
         "expAllowed": true, // Allows the player to also pickup exp with magnetic.
         "ignoreRangedWeapons": true, // Ignores drops that were produced via a kill with a long-ranged weapon (e.g. bow, crossbow, etc.).
-        "ignoreEntities": [] // The specified entities will not be affected by magnetic when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
+        "ignoreEntities": [], // The specified entities will not be affected by magnetic when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
+        "fullInventoryAlert": {
+            "soundAlert": {
+                "enabled": true, // Enables sound alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
+                "cooldownInSeconds": 5 // The time that has to pass to play the sound alert again.
+            },
+            "textAlert": {
+                "enabled": true, // Enables text message alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
+                "cooldownInSeconds": 60 // The time that has to pass to show the message alert again.
+            }
+        }
     }
 }
 ```
