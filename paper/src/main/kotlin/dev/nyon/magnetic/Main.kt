@@ -1,9 +1,5 @@
 package dev.nyon.magnetic
 
-import dev.nyon.konfig.config.config
-import dev.nyon.konfig.config.loadConfig
-import dev.nyon.magnetic.config.Config
-import dev.nyon.magnetic.config.migrate
 import dev.nyon.magnetic.config.reloadIgnoredEntities
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
@@ -12,10 +8,10 @@ import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.moveTo
-import dev.nyon.magnetic.config.config as internalConfig
 
 val magneticKey = NamespacedKey("magnetic", "magnetic")
 const val magneticPermission = "magnetic.ability.use"
+val configPath: Path = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
 
 class Main : JavaPlugin() {
     companion object {
@@ -24,10 +20,7 @@ class Main : JavaPlugin() {
 
     override fun onLoad() {
         INSTANCE = this
-        val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
-        config(configPath, 2, Config()) { _, jsonElement, version -> migrate(jsonElement, version) }
-        internalConfig = loadConfig()
         reloadIgnoredEntities()
     }
 

@@ -92,7 +92,7 @@ dependencies {
 
     modCompileOnly("me.lucko:fabric-permissions-api:0.4.1")
 
-    include(implementation("dev.nyon:konfig:3.0.0")!!)
+    include(implementation("dev.nyon:konfig:3.0.1")!!)
 }
 
 val supportedMcVersions: List<String> =
