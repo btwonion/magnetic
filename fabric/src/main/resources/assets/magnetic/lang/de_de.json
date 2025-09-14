@@ -13,5 +13,6 @@
     "yacl3.config.magnetic.category.general.root.option.ignoreEntities.description": "Angegebene Wesen werden von Magnetic ignoriert und lassen ihre Beute wie gewöhnlich fallen. Es werden sowohl Tags, wie auch IDs von den Entities akzeptiert (Resource Locations).",
     "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons": "Fernkampfwaffen ignorieren",
     "yacl3.config.magnetic.category.general.root.option.ignoreRangedWeapons.description": "Beute, die vom Töten mit Fernkampfwaffen verursacht wird, wird von der Magnetic-Fähigkeit ignoriert.",
-    "enchantment.magnetic.magnetic.name": "Magnetic"
+    "enchantment.magnetic.magnetic.name": "Magnetic",
+    "chat.message.fullinventoryalert.text": "[magnetic] Dein Inventar ist voll!"
 }
