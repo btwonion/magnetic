@@ -17,3 +17,4 @@
 
 # Paper
 - fixed an issue, where the enchantment was created, even though the corresponding option was set to `false`
+- now also handle break-chained blocks like Sugar Cane, Bamboo, etc.
