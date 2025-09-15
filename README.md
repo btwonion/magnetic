@@ -66,6 +66,10 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
             "textAlert": {
                 "enabled": true, // Enables text message alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
                 "cooldownInSeconds": 60 // The time that has to pass to show the message alert again.
+            },
+            "titleAlert": {
+                "enabled": true, // Enables title alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
+                "cooldownInSeconds": 5 // The time that has to pass to show the title alert again.
             }
         }
     }
