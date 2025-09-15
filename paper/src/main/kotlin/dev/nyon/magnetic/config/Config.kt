@@ -54,11 +54,11 @@ data class Config(
         ) : Alert {
             override fun invoke(player: Player) {
                 player.sendMessage(
-                    Component.text("[magnetic] Your inventory is full!")
-                        .color(NamedTextColor.GOLD)
+                    Component.translatable("chat.message.fullinventoryalert.text")
                 )
             }
         }
+
     }
 }
 

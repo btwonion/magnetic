@@ -12,6 +12,7 @@
     - `fullInventoryAlert`, by default: both enabled, cooldowns: sound - 5s; messages - 60s
     - the alerts will show when magnetic tries to add an item to the player's inventory, but the inventory is already
       full
+    - add a new `plugins/magnetic/translations` folder on Paper, where the localization messages can be configured
 - bump config version to 2:
     - `needEnchantment` -> `enchantmentRequired`
     - `needSneak` -> `sneakRequired`

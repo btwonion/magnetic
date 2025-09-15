@@ -3,8 +3,10 @@ package dev.nyon.magnetic
 import dev.nyon.konfig.config.config
 import dev.nyon.konfig.config.loadConfig
 import dev.nyon.magnetic.config.Config
+import dev.nyon.magnetic.config.MiniMessageTranslator
 import dev.nyon.magnetic.config.migrate
 import dev.nyon.magnetic.config.reloadIgnoredEntities
+import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
@@ -29,6 +31,8 @@ class Main : JavaPlugin() {
         config(configPath, 2, Config()) { _, jsonElement, version -> migrate(jsonElement, version) }
         internalConfig = loadConfig()
         reloadIgnoredEntities()
+        MiniMessageTranslator.loadTranslations()
+        GlobalTranslator.translator().addSource(MiniMessageTranslator)
     }
 
     override fun onEnable() {
