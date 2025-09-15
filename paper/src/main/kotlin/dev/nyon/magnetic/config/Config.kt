@@ -10,6 +10,7 @@ import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.title.Title
 import org.bukkit.entity.Player
 
 lateinit var config: Config
@@ -27,7 +28,9 @@ data class Config(
 ) {
     @Serializable
     data class FullInventoryAlert(
-        var soundAlert: SoundAlert = SoundAlert(), var textAlert: TextAlert = TextAlert()
+        var soundAlert: SoundAlert = SoundAlert(),
+        var textAlert: TextAlert = TextAlert(),
+        var titleAlert: TitleAlert = TitleAlert()
     ) {
         interface Alert {
             var enabled: Boolean
@@ -59,6 +62,19 @@ data class Config(
             }
         }
 
+        @Serializable
+        data class TitleAlert(
+            override var enabled: Boolean = true, override var cooldownInSeconds: Int = 5
+        ) : Alert {
+            override fun invoke(player: Player) {
+                player.showTitle(
+                    Title.title(
+                        Component.translatable("chat.message.fullinventoryalert.title.main"),
+                        Component.translatable("chat.message.fullinventoryalert.title.subtitle")
+                    )
+                )
+            }
+        }
     }
 }
 

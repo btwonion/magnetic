@@ -8,8 +8,8 @@
     - the option takes identifiers and tags as an input
 - add an option to ignore drops produced by ranged weapons ([**#49**](https://github.com/btwonion/magnetic/pull/49))
     - `ignoreRangedWeapons`, by default: true
-- add an option to play/show sound and text message alerts when the inventory is full ([**#51**](https://github.com/btwonion/magnetic/pull/51))
-    - `fullInventoryAlert`, by default: both enabled, cooldowns: sound - 5s; messages - 60s
+- add an option to play/show sound, text message and title alerts when the inventory is full ([**#51**](https://github.com/btwonion/magnetic/pull/51))
+    - `fullInventoryAlert`, by default: all enabled, cooldowns: sound and title - 5s; messages - 60s
     - the alerts will show when magnetic tries to add an item to the player's inventory, but the inventory is already
       full
     - add a new `plugins/magnetic/translations` folder on Paper, where the localization messages can be configured
