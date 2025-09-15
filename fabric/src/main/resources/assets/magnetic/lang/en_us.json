@@ -23,5 +23,7 @@
     "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds": "Message alert cooldown",
     "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds.description": "The time that has to pass to show the text message alert again.",
     "enchantment.magnetic.magnetic.name": "magnetic",
-    "chat.message.fullinventoryalert.text": "[magnetic] Your inventory is full!"
+    "chat.message.fullinventoryalert.text": "[magnetic] Your inventory is full!",
+    "chat.message.fullinventoryalert.title.main": "!!!",
+    "chat.message.fullinventoryalert.title.subtitle": "Your inventory is full!"
 }

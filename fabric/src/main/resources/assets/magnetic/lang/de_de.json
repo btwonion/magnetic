@@ -23,5 +23,7 @@
     "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds": "Nachrichten-Hinweis Abklingzeit",
     "yacl3.config.magnetic.category.general.group.fullInventoryAlert.option.textAlertCooldownInSeconds.description": "Die Abklingzeit, die der Hinweis braucht, um nochmal abgespielt zu werden.",
     "enchantment.magnetic.magnetic.name": "Magnetic",
-    "chat.message.fullinventoryalert.text": "[magnetic] Dein Inventar ist voll!"
+    "chat.message.fullinventoryalert.text": "[magnetic] Dein Inventar ist voll!",
+    "chat.message.fullinventoryalert.title.main": "!!!",
+    "chat.message.fullinventoryalert.title.subtitle": "Dein Inventar ist voll!"
 }
