@@ -29,5 +29,6 @@
     "enchantment.magnetic.magnetic.name": "magnetic",
     "chat.message.fullinventoryalert.text": "[magnetic] Your inventory is full!",
     "chat.message.fullinventoryalert.title.main": "!!!",
-    "chat.message.fullinventoryalert.title.subtitle": "Your inventory is full!"
+    "chat.message.fullinventoryalert.title.subtitle": "Your inventory is full!",
+    "tag.item.magnetic.ranged_weapons": "Ranged Weapons"
 }
