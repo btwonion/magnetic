@@ -2,6 +2,7 @@
 
 package dev.nyon.magnetic
 
+import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.failsLongRangeCheck
 import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
@@ -23,7 +24,17 @@ import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerFishEvent
 import org.bukkit.event.player.PlayerShearEntityEvent
 import org.bukkit.inventory.ItemStack
+import java.util.UUID
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.forEach
+import kotlin.collections.set
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 object Listeners {
 
     @Suppress("unused")
@@ -33,7 +44,10 @@ object Listeners {
         if (config.itemsAllowed) {
             items.removeIf { item ->
                 val copiedStack = item.clone()
-                if (player.inventory.addItem(item).isNotEmpty()) return@removeIf false
+                if (player.inventory.addItem(item).isNotEmpty()) {
+                    tickInventoryAlert(player)
+                    return@removeIf false
+                }
                 if (copiedStack.amount != 0) player.incrementStatistic(
                     Statistic.PICKUP, copiedStack.type, copiedStack.amount
                 )
@@ -166,6 +180,24 @@ object Listeners {
         affectedBlocks.forEach { affectedBlock ->
             itemStacks.addAll(affectedBlock.getDrops(player.inventory.itemInMainHand, player))
             affectedBlock.type = Material.AIR
+        }
+    }
+
+    private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(
+        config.fullInventoryAlert.soundAlert to mutableMapOf(),
+        config.fullInventoryAlert.textAlert to mutableMapOf(),
+        config.fullInventoryAlert.titleAlert to mutableMapOf()
+    )
+    private fun tickInventoryAlert(player: Player) {
+        val currentTime = Clock.System.now()
+        val uuid = player.playerProfile.id ?: return
+        cooldowns.forEach { (alert, playerCooldowns) ->
+            if (!alert.enabled) return@forEach
+            val lastAlert = playerCooldowns[uuid]
+            if (lastAlert == null || currentTime > lastAlert + alert.cooldownInSeconds.seconds) {
+                playerCooldowns[uuid] = currentTime
+                alert.invoke(player)
+            }
         }
     }
 }

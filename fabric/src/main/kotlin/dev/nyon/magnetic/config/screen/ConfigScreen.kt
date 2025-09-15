@@ -5,8 +5,8 @@ import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.dsl.*
 import dev.nyon.konfig.config.saveConfig
 import dev.nyon.magnetic.config.Identifier
-import dev.nyon.magnetic.extensions.IdentifierSerializer
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.IdentifierSerializer
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 
@@ -68,6 +68,56 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             controller = tickBox()
             descriptionBuilder {
                 addDefaultText(1)
+            }
+        }
+
+        val fullInventoryAlert by groups.registering {
+            val soundAlertEnabled by options.registering {
+                binding(true, { config.fullInventoryAlert.soundAlert.enabled }, { config.fullInventoryAlert.soundAlert.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val soundAlertCooldownInSeconds by options.registering {
+                binding(5, { config.fullInventoryAlert.soundAlert.cooldownInSeconds }, { config.fullInventoryAlert.soundAlert.cooldownInSeconds = it })
+                controller = numberField(0, Int.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val textAlertEnabled by options.registering {
+                binding(true, { config.fullInventoryAlert.textAlert.enabled }, { config.fullInventoryAlert.textAlert.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val textAlertCooldownInSeconds by options.registering {
+                binding(60, { config.fullInventoryAlert.textAlert.cooldownInSeconds }, { config.fullInventoryAlert.textAlert.cooldownInSeconds = it })
+                controller = numberField(0, Int.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val titleAlertEnabled by options.registering {
+                binding(true, { config.fullInventoryAlert.titleAlert.enabled }, { config.fullInventoryAlert.titleAlert.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val titleAlertCooldownInSeconds by options.registering {
+                binding(5, { config.fullInventoryAlert.titleAlert.cooldownInSeconds }, { config.fullInventoryAlert.titleAlert.cooldownInSeconds = it })
+                controller = numberField(0, Int.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
             }
         }
     }

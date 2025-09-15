@@ -8,7 +8,9 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("UnstableApiUsage")
+import java.util.Arrays;
+
+@SuppressWarnings({ "UnstableApiUsage", "unused" })
 public class MagneticLoader implements PluginLoader {
     @Override
     public void classloader(@NotNull PluginClasspathBuilder builder) {
@@ -25,12 +27,17 @@ public class MagneticLoader implements PluginLoader {
             MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR
         ).build());
 
-        resolver.addDependency(new Dependency(new DefaultArtifact("dev.nyon:konfig:3.0.0"), null));
-        resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.1.21"), null));
-        resolver.addDependency(new Dependency(
-            new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0"), null));
-        resolver.addDependency(new Dependency(
-            new DefaultArtifact("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"), null));
+        var dependencies = Arrays.asList(
+            "dev.nyon:konfig:3.0.0",
+            "org.jetbrains.kotlin:kotlin-stdlib:2.1.21",
+            "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0",
+            "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0",
+            "org.jetbrains.kotlinx:kotlinx-datetime:0.7.1"
+        );
+        dependencies.forEach(dependency -> resolver.addDependency(new Dependency(
+            new DefaultArtifact(dependency),
+            null
+        )));
 
         builder.addLibrary(resolver);
     }

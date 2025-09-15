@@ -1,6 +1,8 @@
 package dev.nyon.magnetic
 
+import dev.nyon.magnetic.config.MiniMessageTranslator
 import dev.nyon.magnetic.config.reloadIgnoredEntities
+import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
@@ -20,8 +22,11 @@ class Main : JavaPlugin() {
 
     override fun onLoad() {
         INSTANCE = this
+        val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
         reloadIgnoredEntities()
+        MiniMessageTranslator.loadTranslations()
+        GlobalTranslator.translator().addSource(MiniMessageTranslator)
     }
 
     override fun onEnable() {
