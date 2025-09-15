@@ -18,9 +18,7 @@ import net.minecraft.sounds.SoundSource
 
 val config: Config by lazy {
     config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 2, Config()) { _, element, version ->
-        migrate(
-            element, version
-        )
+        migrate(element, version)
     }
     loadConfig()
 }

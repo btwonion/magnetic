@@ -1,5 +1,8 @@
 package dev.nyon.magnetic.config
 
+import dev.nyon.konfig.config.config
+import dev.nyon.konfig.config.loadConfig
+import dev.nyon.magnetic.configPath
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.JsonElement
@@ -13,7 +16,12 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.title.Title
 import org.bukkit.entity.Player
 
-lateinit var config: Config
+val config: Config by lazy {
+    config(configPath, 2, Config()) { _, element, version ->
+        migrate(element, version)
+    }
+    loadConfig()
+}
 
 @Serializable
 data class Config(
@@ -78,7 +86,7 @@ data class Config(
     }
 }
 
-internal fun migrate(jsonElement: JsonElement, version: Int?): Config? {
+private fun migrate(jsonElement: JsonElement, version: Int?): Config? {
     val jsonObject = jsonElement.jsonObject
     return when (version) {
         1 -> Config(

@@ -14,10 +14,10 @@ import java.nio.file.Path
 import kotlin.io.path.createParentDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.moveTo
-import dev.nyon.magnetic.config.config as internalConfig
 
 val magneticKey = NamespacedKey("magnetic", "magnetic")
 const val magneticPermission = "magnetic.ability.use"
+val configPath: Path = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
 
 class Main : JavaPlugin() {
     companion object {
@@ -26,10 +26,7 @@ class Main : JavaPlugin() {
 
     override fun onLoad() {
         INSTANCE = this
-        val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
-        config(configPath, 2, Config()) { _, jsonElement, version -> migrate(jsonElement, version) }
-        internalConfig = loadConfig()
         reloadIgnoredEntities()
         MiniMessageTranslator.loadTranslations()
         GlobalTranslator.translator().addSource(MiniMessageTranslator)

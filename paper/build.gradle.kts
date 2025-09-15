@@ -40,7 +40,7 @@ paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArt
 dependencies {
     paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
 
-    implementation("dev.nyon:konfig:3.0.0")
+    implementation("dev.nyon:konfig:3.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
 
