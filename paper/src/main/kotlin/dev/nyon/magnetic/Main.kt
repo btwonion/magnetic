@@ -1,10 +1,6 @@
 package dev.nyon.magnetic
 
-import dev.nyon.konfig.config.config
-import dev.nyon.konfig.config.loadConfig
-import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.MiniMessageTranslator
-import dev.nyon.magnetic.config.migrate
 import dev.nyon.magnetic.config.reloadIgnoredEntities
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
@@ -26,6 +22,7 @@ class Main : JavaPlugin() {
 
     override fun onLoad() {
         INSTANCE = this
+        val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
         reloadIgnoredEntities()
         MiniMessageTranslator.loadTranslations()
