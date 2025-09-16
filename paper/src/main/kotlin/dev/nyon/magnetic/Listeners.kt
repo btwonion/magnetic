@@ -76,14 +76,15 @@ object Listeners {
         Material.WEEPING_VINES,
         Material.WEEPING_VINES_PLANT
     )
-    private val neededBlockFaces = BlockFace.entries.filter(BlockFace::isCartesian)
+
     fun listenForBukkitEvents() {
         listen<BlockDropItemEvent> {
             val itemStacks = items.map { it.itemStack }.toMutableList()
 
             // Find and break all surrounding break-chained blocks that are not handled by the event
-            if (breakChainedBlocks.contains(blockState.type))
-                handleBreakChainedBlocks(block, blockState, player, itemStacks)
+            if (breakChainedBlocks.contains(blockState.type)) handleBreakChainedBlocks(
+                block, blockState, player, itemStacks
+            )
 
             DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
 
@@ -158,14 +159,23 @@ object Listeners {
     }
 
     private fun handleBreakChainedBlocks(
-        block: Block,
-        blockState: BlockState,
-        player: Player,
-        itemStacks: MutableList<ItemStack>
+        block: Block, blockState: BlockState, player: Player, itemStacks: MutableList<ItemStack>
     ) {
+        val blockFaces = when (blockState.type) {
+            Material.BAMBOO, Material.CACTUS, Material.SUGAR_CANE, Material.KELP, Material.KELP_PLANT, Material.TWISTING_VINES, Material.TWISTING_VINES_PLANT -> listOf(
+                BlockFace.UP
+            )
+            Material.CAVE_VINES, Material.CAVE_VINES_PLANT, Material.WEEPING_VINES, Material.WEEPING_VINES_PLANT -> listOf(
+                BlockFace.DOWN
+            )
+            Material.CHORUS_PLANT, Material.CHORUS_FLOWER -> BlockFace.entries.filter(BlockFace::isCartesian)
+            Material.SCAFFOLDING -> BlockFace.entries.filter { it.isCartesian && it != BlockFace.DOWN }
+            else -> return
+        }
+
         val affectedBlocks: MutableSet<Block> = mutableSetOf()
         fun scanSurroundingBlocks(block: Block) {
-            neededBlockFaces.forEach { face ->
+            blockFaces.forEach { face ->
                 val otherBlock = block.getRelative(face)
                 if (otherBlock == block) return@forEach
                 if (otherBlock.state.type != blockState.type) return@forEach
@@ -188,6 +198,7 @@ object Listeners {
         config.fullInventoryAlert.textAlert to mutableMapOf(),
         config.fullInventoryAlert.titleAlert to mutableMapOf()
     )
+
     private fun tickInventoryAlert(player: Player) {
         val currentTime = Clock.System.now()
         val uuid = player.playerProfile.id ?: return
