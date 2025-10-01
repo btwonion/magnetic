@@ -33,6 +33,7 @@ object DropEvent {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
+                if (item.isEmpty) return@removeIf true
                 val copiedStack = item.copy()
                 if (!player.addItem(item)) {
                     tickInventoryAlert(player)

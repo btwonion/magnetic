@@ -6,3 +6,7 @@
 - now also drop byproducts of break-chained blocks like Cactus - Cactus Plant, Kelp - Kelp Plant
 - also handle `PlayerHarvestEvent`, which catches sweet berries and cave vines
 - fix bug when glow berries were dropped to the ground when the holding cave vines were broken
+
+## Fabric
+
+- fix wrongly sent full inventory warning when an empty item was added to the inventory
