@@ -201,19 +201,26 @@ object Listeners {
 
         // Add all the scanned blocks to the list of unhandled blocks and break them
         affectedBlocks.forEach { affectedBlock ->
+            affectedBlock.getGlowBerriesIfPossible()?.let { itemStacks.add(it) }
             itemStacks.addAll(affectedBlock.getDrops(player.inventory.itemInMainHand, player))
             affectedBlock.type = Material.AIR
         }
     }
 
-    private val byProducts = mapOf(
+    private val trailingBlocks = mapOf(
         Material.CACTUS to Material.CACTUS_FLOWER,
         Material.KELP to Material.KELP_PLANT,
         Material.KELP_PLANT to Material.KELP
     )
     private fun Material.alsoBreakType(other: Material): Boolean {
-        val byProduct = byProducts[this] ?: return this == other
+        val byProduct = trailingBlocks[this] ?: return this == other
         return this == byProduct
+    }
+    private fun Block.getGlowBerriesIfPossible(): ItemStack? {
+        if (this.type != Material.CAVE_VINES && this.type != Material.CAVE_VINES_PLANT) return null
+        val data = this.blockData as? CaveVinesPlant ?: return null
+        return if (data.hasBerries()) null
+        else ItemStack(Material.GLOW_BERRIES)
     }
 
     private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(
