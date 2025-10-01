@@ -16,12 +16,14 @@ import org.bukkit.Statistic
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
+import org.bukkit.block.data.type.CaveVinesPlant
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerFishEvent
+import org.bukkit.event.player.PlayerHarvestBlockEvent
 import org.bukkit.event.player.PlayerShearEntityEvent
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
@@ -140,6 +142,16 @@ object Listeners {
             val mutableInt = MutableInt(expToDrop)
             DropEvent(mutableListOf(), mutableInt, player).also(Event::callEvent)
             expToDrop = mutableInt.value
+        }
+
+        listen<PlayerHarvestBlockEvent> {
+            val itemStacks = itemsHarvested.toMutableList()
+            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+
+            // Delete items that have been added to the inventory
+            itemsHarvested.removeIf { item ->
+                itemStacks.none { stack -> stack.isSimilar(item) }
+            }
         }
     }
 
