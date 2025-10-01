@@ -179,7 +179,7 @@ object Listeners {
             blockFaces.forEach { face ->
                 val otherBlock = block.getRelative(face)
                 if (otherBlock == block) return@forEach
-                if (otherBlock.state.type != blockState.type) return@forEach
+                if (!blockState.type.alsoBreakType(otherBlock.state.type)) return@forEach
                 if (affectedBlocks.add(otherBlock)) scanSurroundingBlocks(otherBlock)
             }
         }
@@ -192,6 +192,16 @@ object Listeners {
             itemStacks.addAll(affectedBlock.getDrops(player.inventory.itemInMainHand, player))
             affectedBlock.type = Material.AIR
         }
+    }
+
+    private val byProducts = mapOf(
+        Material.CACTUS to Material.CACTUS_FLOWER,
+        Material.KELP to Material.KELP_PLANT,
+        Material.KELP_PLANT to Material.KELP
+    )
+    private fun Material.alsoBreakType(other: Material): Boolean {
+        val byProduct = byProducts[this] ?: return this == other
+        return this == byProduct
     }
 
     private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(
