@@ -82,15 +82,16 @@ object Listeners {
             val itemStacks = items.map { it.itemStack }.toMutableList()
 
             // Find and break all surrounding break-chained blocks that are not handled by the event
-            if (breakChainedBlocks.contains(blockState.type)) handleBreakChainedBlocks(
+            if (breakChainedBlocks.contains(blockState.type) && player.isAllowedToUseMagnetic()) handleBreakChainedBlocks(
                 block, blockState, player, itemStacks
             )
 
             DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
 
             // Delete items that have been added to the inventory
-            items.removeIf { item ->
-                itemStacks.none { stack -> stack.isSimilar(item.itemStack) }
+            items.clear()
+            itemStacks.forEach { stack ->
+                player.world.dropItemNaturally(block.location, stack)
             }
         }
 
