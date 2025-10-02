@@ -54,8 +54,6 @@
         "entities.SnowGolemMixin",
         "entities.VehicleEntityMixin",
         "entities.WitherBossMixin",
-        "entities.WitherSkeletonMixin",
-        "entities.ZombieMixin",
         "items.FishingHookMixin",
         "items.HoeItemMixin",
         "items.ItemFrameMixin",

@@ -16,7 +16,7 @@ plugins {
     kotlin("plugin.serialization") version "2.1.21"
     id("me.modmuss50.mod-publish-plugin") version "0.8.+"
 
-    id("fabric-loom") version "1.10-SNAPSHOT" apply false
+    id("fabric-loom") version "1.11-SNAPSHOT" apply false
 
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.17" apply false
     id("xyz.jpenilla.run-paper") version "2.3.1" apply false

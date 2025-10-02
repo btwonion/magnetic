@@ -1,10 +1,7 @@
 package dev.nyon.magnetic.mixins.entities;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.sugar.Local;
-import dev.nyon.magnetic.DropEvent;
-import dev.nyon.magnetic.config.ConfigKt;
-import dev.nyon.magnetic.datagen.TagProviderKt;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -13,18 +10,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -51,55 +39,20 @@ public abstract class LivingEntityMixin {
         return MixinHelper.modifyExpressionValuePlayerExp(player, original);
     }
 
-    @Unique
-    private Consumer<ItemStack> replaceConsumer(
-        LootParams params,
-        Consumer<ItemStack> original
-    ) {
-        if (MagneticCheckKt.isIgnored(instance.getType())) return original;
-        DamageSource source = params.contextMap()
-            .getOptional(LootContextParams.DAMAGE_SOURCE);
-        if (MagneticCheckKt.failsLongRangeCheck(source)) return original;
-        if (source == null || !(source.getEntity() instanceof ServerPlayer player)) return original;
-
-        return item -> {
-            ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
-            DropEvent.INSTANCE.getEvent()
-                .invoker()
-                .invoke(mutableList, new MutableInt(0), player);
-
-            if (!mutableList.isEmpty()) original.accept(item);
-        };
-    }
-
-    @ModifyArg(
-        method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;Z)V",
+    // Consumer of Lnet/minecraft/world/entity/LivingEntity;dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;ZLnet/minecraft/resources/ResourceKey;)V
+    @WrapWithCondition(
+        method = "method_64449",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;JLjava/util/function/Consumer;)V"
-        ),
-        index = 2
-    )
-    public Consumer<ItemStack> redirectCommonDrops(
-        LootParams params,
-        long seed,
-        Consumer<ItemStack> original
-    ) {
-        return replaceConsumer(params, original);
-    }
-
-    @ModifyArg(
-        method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/resources/ResourceKey;Ljava/util/function/Function;Ljava/util/function/BiConsumer;)Z",
-        at = @At(
-            value = "INVOKE",
-            target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V"
+            target = "Lnet/minecraft/world/entity/LivingEntity;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
-    public Consumer<ItemStack> redirectDropConsumer(
-        Consumer<ItemStack> original,
-        @Local(ordinal = 0)
-        LootParams params
+    public boolean redirectCommonDrops(
+        LivingEntity instance,
+        ServerLevel serverLevel,
+        ItemStack itemStack
     ) {
-        return replaceConsumer(params, original);
+        DamageSource damageSource = instance.getLastDamageSource();
+        return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack, instance);
     }
 }
