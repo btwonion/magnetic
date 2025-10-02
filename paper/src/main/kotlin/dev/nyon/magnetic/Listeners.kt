@@ -4,6 +4,8 @@ package dev.nyon.magnetic
 
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.BreakChainedBlocks.breakChainedBlocks
+import dev.nyon.magnetic.extensions.BreakChainedBlocks.trailingBlocks
 import dev.nyon.magnetic.extensions.failsLongRangeCheck
 import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.extensions.isIgnored
@@ -16,7 +18,6 @@ import org.bukkit.Statistic
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
-import org.bukkit.block.data.type.CaveVinesPlant
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
@@ -26,7 +27,7 @@ import org.bukkit.event.player.PlayerFishEvent
 import org.bukkit.event.player.PlayerHarvestBlockEvent
 import org.bukkit.event.player.PlayerShearEntityEvent
 import org.bukkit.inventory.ItemStack
-import java.util.UUID
+import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
@@ -58,31 +59,26 @@ object Listeners {
         }
     }
 
-    private val breakChainedBlocks = listOf(
-        Material.BAMBOO,
-        Material.CACTUS,
-        Material.CAVE_VINES,
-        Material.CAVE_VINES_PLANT,
-        Material.CHORUS_FLOWER,
-        Material.CHORUS_PLANT,
-        Material.KELP,
-        Material.KELP_PLANT,
-        Material.SUGAR_CANE,
-        Material.SCAFFOLDING,
-        Material.TWISTING_VINES,
-        Material.TWISTING_VINES_PLANT,
-        Material.WEEPING_VINES,
-        Material.WEEPING_VINES_PLANT
-    )
-
     fun listenForBukkitEvents() {
         listen<BlockDropItemEvent> {
+            // Return before calling the DropEvent to prevent executing expensive logic
+            if (!player.isAllowedToUseMagnetic()) return@listen
+            if (items.isEmpty()) return@listen
+
             val itemStacks = items.map { it.itemStack }.toMutableList()
 
-            // Find and break all surrounding break-chained blocks that are not handled by the event
-            if (breakChainedBlocks.contains(blockState.type) && player.isAllowedToUseMagnetic()) handleBreakChainedBlocks(
+            // Check for break-chained block upward and downward
+            if (breakChainedBlocks.contains(blockState.type)) handleBreakChainedBlocks(
                 block, blockState, player, itemStacks
             )
+            else listOf(BlockFace.UP, BlockFace.DOWN).forEach { direction ->
+                val other = block.getRelative(direction)
+                if (breakChainedBlocks.contains(other.state.type) && other.state.type.breakDirections()
+                        .contains(direction)
+                ) handleBreakChainedBlocks(
+                    other, other.state, player, itemStacks, dontIgnoreRoot = true
+                )
+            }
 
             DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
 
@@ -168,9 +164,43 @@ object Listeners {
     }
 
     private fun handleBreakChainedBlocks(
-        block: Block, blockState: BlockState, player: Player, itemStacks: MutableList<ItemStack>
+        block: Block,
+        blockState: BlockState,
+        player: Player,
+        itemStacks: MutableList<ItemStack>,
+        dontIgnoreRoot: Boolean = false
     ) {
-        val blockFaces = when (blockState.type) {
+        val blockFaces = blockState.type.breakDirections()
+
+        val affectedBlocks: MutableSet<Block> = mutableSetOf()
+        if (dontIgnoreRoot) affectedBlocks.add(block)
+        fun scanSurroundingBlocks(block: Block) {
+            blockFaces.forEach { face ->
+                val otherBlock = block.getRelative(face)
+                if (otherBlock == block) return@forEach
+                if (!blockState.type.alsoBreakType(otherBlock.state.type)) return@forEach
+                if (affectedBlocks.add(otherBlock) && otherBlock.state.type == blockState.type) scanSurroundingBlocks(
+                    otherBlock
+                )
+            }
+        }
+
+        // Recursively scan for all matching blocks that are directly connected to the broken block
+        scanSurroundingBlocks(block)
+
+        // Save the drops of the blocks
+        affectedBlocks.forEach { affectedBlock ->
+            itemStacks.addAll(affectedBlock.getDrops(player.inventory.itemInMainHand, player))
+        }
+
+        // Destroy the blocks in reversed order - prevent blocks like Cactus Flowers to break through ticking before us
+        affectedBlocks.reversed().forEach { affectedBlock ->
+            affectedBlock.type = Material.AIR
+        }
+    }
+
+    private fun Material.breakDirections(): List<BlockFace> {
+        return when (this) {
             Material.BAMBOO, Material.CACTUS, Material.SUGAR_CANE, Material.KELP, Material.KELP_PLANT, Material.TWISTING_VINES, Material.TWISTING_VINES_PLANT -> listOf(
                 BlockFace.UP
             )
@@ -179,44 +209,14 @@ object Listeners {
             )
             Material.CHORUS_PLANT, Material.CHORUS_FLOWER -> BlockFace.entries.filter(BlockFace::isCartesian)
             Material.SCAFFOLDING -> BlockFace.entries.filter { it.isCartesian && it != BlockFace.DOWN }
-            else -> return
-        }
-
-        val affectedBlocks: MutableSet<Block> = mutableSetOf()
-        fun scanSurroundingBlocks(block: Block) {
-            blockFaces.forEach { face ->
-                val otherBlock = block.getRelative(face)
-                if (otherBlock == block) return@forEach
-                if (!blockState.type.alsoBreakType(otherBlock.state.type)) return@forEach
-                if (affectedBlocks.add(otherBlock)) scanSurroundingBlocks(otherBlock)
-            }
-        }
-
-        // Recursively scan for all matching blocks that are directly connected to the broken block
-        scanSurroundingBlocks(block)
-
-        // Add all the scanned blocks to the list of unhandled blocks and break them
-        affectedBlocks.forEach { affectedBlock ->
-            affectedBlock.getGlowBerriesIfPossible()?.let { itemStacks.add(it) }
-            itemStacks.addAll(affectedBlock.getDrops(player.inventory.itemInMainHand, player))
-            affectedBlock.type = Material.AIR
+            else -> listOf()
         }
     }
 
-    private val trailingBlocks = mapOf(
-        Material.CACTUS to Material.CACTUS_FLOWER,
-        Material.KELP to Material.KELP_PLANT,
-        Material.KELP_PLANT to Material.KELP
-    )
     private fun Material.alsoBreakType(other: Material): Boolean {
-        val byProduct = trailingBlocks[this] ?: return this == other
-        return this == byProduct
-    }
-    private fun Block.getGlowBerriesIfPossible(): ItemStack? {
-        if (this.type != Material.CAVE_VINES && this.type != Material.CAVE_VINES_PLANT) return null
-        val data = this.blockData as? CaveVinesPlant ?: return null
-        return if (data.hasBerries()) null
-        else ItemStack(Material.GLOW_BERRIES)
+        if (this == other) return true
+        val byProduct = trailingBlocks[this] ?: return false
+        return other == byProduct
     }
 
     private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(
