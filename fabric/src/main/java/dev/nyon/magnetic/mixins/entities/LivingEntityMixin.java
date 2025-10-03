@@ -3,8 +3,6 @@ package dev.nyon.magnetic.mixins.entities;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.nyon.magnetic.DropEvent;
-import dev.nyon.magnetic.config.ConfigKt;
-import dev.nyon.magnetic.datagen.TagProviderKt;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -12,14 +10,19 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +32,26 @@ import java.util.function.Consumer;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
+    @Shadow
+    private @Nullable DamageSource lastDamageSource;
     @Unique
     private LivingEntity instance = (LivingEntity) (Object) this;
+
+    // In case the Entity is an Animal manually set the lastDamageSource.
+    // Otherwise, the exp will not be handled by the dropExperience function as the damageSource cannot be found somehow
+    @Inject(
+        method = "actuallyHurt",
+        at = @At("HEAD")
+    )
+    private void setLastDamageSource(
+        ServerLevel world,
+        DamageSource source,
+        float amount,
+        CallbackInfo ci
+    ) {
+        if (!(instance instanceof Animal)) return;
+        lastDamageSource = source;
+    }
 
     @ModifyExpressionValue(
         method = "dropExperience",
@@ -45,7 +66,7 @@ public abstract class LivingEntityMixin {
         Entity entity
     ) {
         if (MagneticCheckKt.isIgnored(instance.getType())) return original;
-        if (MagneticCheckKt.failsLongRangeCheck(instance.getLastDamageSource())) return original;
+        if (MagneticCheckKt.failsLongRangeCheck(lastDamageSource)) return original;
         if (!(entity instanceof ServerPlayer player)) return original;
 
         return MixinHelper.modifyExpressionValuePlayerExp(player, original);
