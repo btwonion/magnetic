@@ -1,6 +1,6 @@
 package dev.nyon.magnetic.mixins.blocks.breakchained;
 
-import dev.nyon.magnetic.BreakChainedPlayerHolder;
+import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Items;
@@ -30,7 +30,7 @@ public class SpongeBlockMixin {
         BlockEntity blockEntity
     ) {
         if (blockEntity == null) return;
-        ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) blockState.getBlock()).getInitialBreaker();
+        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer(blockState.getBlock());
         Block.dropResources(blockState, blockEntity.getLevel(), blockPos, null, initialBreaker, Items.AIR.getDefaultInstance());
     }
 }

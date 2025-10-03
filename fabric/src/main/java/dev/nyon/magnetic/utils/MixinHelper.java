@@ -1,13 +1,20 @@
 package dev.nyon.magnetic.utils;
 
+import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,5 +121,28 @@ public class MixinHelper {
             );
 
         return mutableList;
+    }
+
+    public static @Nullable ServerPlayer holdsValidPlayer(Block block) {
+        BreakChainedPlayerHolder holder = (BreakChainedPlayerHolder) block;
+        Long rootBroken = holder.getRootBroken();
+        if (rootBroken == null || System.currentTimeMillis() - rootBroken > 5000) {
+            holder.setInitialBreaker(null);
+            holder.setRootBroken(null);
+            return null;
+        }
+        return holder.getInitialBreaker();
+    }
+
+    public static void tagSurroundingBlocksWithPlayer(ServerPlayer serverPlayer, BlockPos rootPos, ServerLevel level) {
+        for (Direction direction : Direction.values()) {
+            BlockPos checkBlockPos = rootPos.relative(direction);
+            BlockState checkBlockState = level.getBlockState(checkBlockPos);
+            if (checkBlockState.isAir()) continue;
+            Block checkBlock = checkBlockState.getBlock();
+            BreakChainedPlayerHolder holder = (BreakChainedPlayerHolder) checkBlock;
+            holder.setInitialBreaker(serverPlayer);
+            holder.setRootBroken(System.currentTimeMillis());
+        }
     }
 }

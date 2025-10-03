@@ -1,7 +1,6 @@
 package dev.nyon.magnetic.mixins.blocks.breakchained;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import dev.nyon.magnetic.BreakChainedPlayerHolder;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,8 +24,7 @@ public class FallingBlockEntityMixin {
         ServerLevel serverLevel,
         ItemLike itemLike
     ) {
-        ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) instance.getBlockState().getBlock())
-            .getInitialBreaker();
+        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer(instance.getBlockState().getBlock());
         if (initialBreaker == null) return true;
         return MixinHelper.wrapWithConditionPlayerItemSingle(
             initialBreaker,

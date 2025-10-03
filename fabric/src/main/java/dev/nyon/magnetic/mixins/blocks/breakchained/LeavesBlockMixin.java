@@ -1,6 +1,6 @@
 package dev.nyon.magnetic.mixins.blocks.breakchained;
 
-import dev.nyon.magnetic.BreakChainedPlayerHolder;
+import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Items;
@@ -27,7 +27,7 @@ public class LeavesBlockMixin {
         Level level,
         BlockPos blockPos
     ) {
-        ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) this).getInitialBreaker();
+        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer((Block) (Object) this);
         Block.dropResources(blockState, level, blockPos, null, initialBreaker, Items.AIR.getDefaultInstance());
     }
 }

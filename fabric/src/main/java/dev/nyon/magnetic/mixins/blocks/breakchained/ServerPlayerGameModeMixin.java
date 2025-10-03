@@ -1,13 +1,10 @@
 package dev.nyon.magnetic.mixins.blocks.breakchained;
 
-import dev.nyon.magnetic.BreakChainedPlayerHolder;
+import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,12 +30,6 @@ public class ServerPlayerGameModeMixin {
         BlockPos pos,
         CallbackInfoReturnable<Boolean> cir
     ) {
-        for (Direction direction : Direction.values()) {
-            BlockPos checkBlockPos = pos.relative(direction);
-            BlockState checkBlockState = level.getBlockState(checkBlockPos);
-            if (checkBlockState.isAir()) continue;
-            Block checkBlock = checkBlockState.getBlock();
-            ((BreakChainedPlayerHolder) checkBlock).setInitialBreaker(player);
-        }
+        MixinHelper.tagSurroundingBlocksWithPlayer(player, pos, level);
     }
 }

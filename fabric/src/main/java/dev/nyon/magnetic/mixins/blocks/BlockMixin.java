@@ -127,7 +127,7 @@ public abstract class BlockMixin implements BreakChainedPlayerHolder {
         int maxUpdateDepth
     ) {
         Block toDestroy = instance.getBlockState(blockPos).getBlock();
-        ServerPlayer initialBreaker = ((BreakChainedPlayerHolder) toDestroy).getInitialBreaker();
+        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer(toDestroy);
         return instance.destroyBlock(blockPos, b, initialBreaker, maxUpdateDepth);
     }
 
@@ -143,4 +143,13 @@ public abstract class BlockMixin implements BreakChainedPlayerHolder {
     public void setInitialBreaker(@Nullable ServerPlayer player) {
         initialBreaker = player;
     }
+
+    @Unique
+    @Nullable Long rootBroken = null;
+
+    @Override
+    public @Nullable Long getRootBroken() { return rootBroken; }
+
+    @Override
+    public void setRootBroken(@Nullable Long rootBroken) { this.rootBroken = rootBroken; }
 }
