@@ -30,4 +30,8 @@ object BreakChainedBlocks {
         Material.WEEPING_VINES_PLANT to Material.WEEPING_VINES,
         Material.CAVE_VINES_PLANT to Material.CAVE_VINES
     )
+
+    val ignoredIndirectChainedBlocks = setOf(
+        Material.TWISTING_VINES, Material.TWISTING_VINES_PLANT, Material.WEEPING_VINES, Material.WEEPING_VINES_PLANT
+    )
 }

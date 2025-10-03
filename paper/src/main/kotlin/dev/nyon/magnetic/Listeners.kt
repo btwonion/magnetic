@@ -5,6 +5,7 @@ package dev.nyon.magnetic
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.BreakChainedBlocks.breakChainedBlocks
+import dev.nyon.magnetic.extensions.BreakChainedBlocks.ignoredIndirectChainedBlocks
 import dev.nyon.magnetic.extensions.BreakChainedBlocks.trailingBlocks
 import dev.nyon.magnetic.extensions.failsLongRangeCheck
 import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
@@ -73,8 +74,9 @@ object Listeners {
             )
             else listOf(BlockFace.UP, BlockFace.DOWN).forEach { direction ->
                 val other = block.getRelative(direction)
-                if (breakChainedBlocks.contains(other.state.type) && other.state.type.breakDirections()
-                        .contains(direction)
+                val otherType = other.state.type
+                if (breakChainedBlocks.contains(otherType) && otherType.breakDirections()
+                        .contains(direction) && ignoredIndirectChainedBlocks.contains(otherType)
                 ) handleBreakChainedBlocks(
                     other, other.state, player, itemStacks, dontIgnoreRoot = true
                 )
