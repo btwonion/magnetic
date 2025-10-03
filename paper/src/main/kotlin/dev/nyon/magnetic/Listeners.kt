@@ -12,6 +12,7 @@ import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import io.papermc.paper.event.block.PlayerShearBlockEvent
+import net.minecraft.world.level.material.WaterFluid
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -19,6 +20,7 @@ import org.bukkit.Statistic
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
+import org.bukkit.craftbukkit.block.CraftBlock
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
@@ -64,7 +66,6 @@ object Listeners {
         listen<BlockDropItemEvent> {
             // Return before calling the DropEvent to prevent executing expensive logic
             if (!player.isAllowedToUseMagnetic()) return@listen
-            if (items.isEmpty()) return@listen
 
             val itemStacks = items.map { it.itemStack }.toMutableList()
 
@@ -76,7 +77,7 @@ object Listeners {
                 val other = block.getRelative(direction)
                 val otherType = other.state.type
                 if (breakChainedBlocks.contains(otherType) && otherType.breakDirections()
-                        .contains(direction) && ignoredIndirectChainedBlocks.contains(otherType)
+                        .contains(direction) && !ignoredIndirectChainedBlocks.contains(otherType)
                 ) handleBreakChainedBlocks(
                     other, other.state, player, itemStacks, dontIgnoreRoot = true
                 )
@@ -197,7 +198,7 @@ object Listeners {
 
         // Destroy the blocks in reversed order - prevent blocks like Cactus Flowers to break through ticking before us
         affectedBlocks.reversed().forEach { affectedBlock ->
-            affectedBlock.type = Material.AIR
+            affectedBlock.type = if ((affectedBlock as CraftBlock).nmsFluid.type is WaterFluid) Material.WATER else Material.AIR
         }
     }
 
