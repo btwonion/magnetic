@@ -97,7 +97,7 @@ data class Config(
     @Serializable
     data class Animation(
         var enabled: Boolean = true,
-        var blocksPerSecond: Double = 1.5,
+        var blocksPerSecond: Double = 1.0,
         var canOtherPlayersPickup: Boolean = false
     )
 }
