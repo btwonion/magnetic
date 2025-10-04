@@ -6,6 +6,9 @@
       if they "tagged" the block with their profile before
     - this behaviour is now mitigated by only allowing a player to receive items from break-chains that were executed in
       less than 5 seconds
+- fix bug with RightClickHarvest:
+    - when right-clicking a sugar cane or cactus block before breaking it (left-click) before, the drops were dropped to
+      the ground instead of using magnetic
 
 ## Paper
 
