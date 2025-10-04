@@ -32,6 +32,7 @@ public class MagneticLoader implements PluginLoader {
             "org.jetbrains.kotlin:kotlin-stdlib:2.1.21",
             "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0",
             "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0",
+            "org.jetbrains.kotlinx:kotlinx-datetime:0.7.1",
             "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
         );
         dependencies.forEach(dependency -> resolver.addDependency(new Dependency(
