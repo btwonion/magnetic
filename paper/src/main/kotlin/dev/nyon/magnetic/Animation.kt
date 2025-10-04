@@ -19,10 +19,10 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 
 object Animation {
-    val animationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    val blocksPerTick = config.animation.blocksPerSecond / 20
-    val trackedItemEntities = mutableMapOf<Item, Player>()
-    val trackedItemEntitiesMutex = Mutex()
+    private val animationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val blocksPerTick = config.animation.blocksPerSecond / 20
+    private val trackedItemEntities = mutableMapOf<Item, Player>()
+    private val trackedItemEntitiesMutex = Mutex()
 
     fun pullItemToPlayer(item: ItemStack, pos: Location, player: Player) {
         player.world.dropItem(pos, item) { itemEntity ->
