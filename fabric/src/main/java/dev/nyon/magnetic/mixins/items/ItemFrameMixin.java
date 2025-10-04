@@ -31,6 +31,6 @@ public class ItemFrameMixin {
         boolean dropSelf
     ) {
         if (!(entity instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack);
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack, instance.blockPosition());
     }
 }

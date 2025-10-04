@@ -27,7 +27,7 @@ public class MobMixin {
         DamageSource damageSource,
         boolean playerKill
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack, instance);
+        return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack, instance, instance.blockPosition());
     }
 
     @WrapWithCondition(
@@ -42,6 +42,6 @@ public class MobMixin {
         ServerLevel serverLevel,
         ItemStack itemStack
     ) {
-        return MixinHelper.entityDropEquipmentSingle(instance, itemStack);
+        return MixinHelper.entityDropEquipmentSingle(instance, itemStack, instance.blockPosition());
     }
 }

@@ -77,7 +77,7 @@ public class RightClickHarvestMixin {
         ServerPlayer serverPlayer = threadLocal.get();
         if (serverPlayer == null) return true;
 
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack);
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack, pos);
     }
 
     @Inject(
@@ -122,6 +122,6 @@ public class RightClickHarvestMixin {
         Runnable setBlockAction
     ) {
         if (!(instance instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerExp(serverPlayer, experience);
+        return MixinHelper.wrapWithConditionPlayerExp(serverPlayer, experience, pos);
     }
 }

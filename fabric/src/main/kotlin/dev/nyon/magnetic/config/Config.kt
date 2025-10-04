@@ -17,7 +17,7 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 
 val config: Config by lazy {
-    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 2, Config()) { _, element, version ->
+    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 3, Config()) { _, element, version ->
         migrate(element, version)
     }
     loadConfig()
@@ -32,7 +32,8 @@ data class Config(
     var expAllowed: Boolean = true,
     var ignoreRangedWeapons: Boolean = true,
     var ignoreEntities: List<Identifier> = listOf(),
-    var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert()
+    var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert(),
+    var animation: Animation = Animation()
 ) {
     @Serializable
     data class FullInventoryAlert(
@@ -92,6 +93,13 @@ data class Config(
             }
         }
     }
+
+    @Serializable
+    data class Animation(
+        var enabled: Boolean = true,
+        var blocksPerSecond: Double = 1.0,
+        var canOtherPlayersPickup: Boolean = false
+    )
 }
 
 private fun migrate(jsonElement: JsonElement, version: Int?): Config? {

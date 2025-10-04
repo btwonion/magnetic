@@ -28,7 +28,8 @@ public class FallingBlockEntityMixin {
         if (initialBreaker == null) return true;
         return MixinHelper.wrapWithConditionPlayerItemSingle(
             initialBreaker,
-            itemLike.asItem().getDefaultInstance()
+            itemLike.asItem().getDefaultInstance(),
+            instance.blockPosition()
         );
     }
 }

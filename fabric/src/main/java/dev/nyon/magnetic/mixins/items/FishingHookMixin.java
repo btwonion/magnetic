@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import dev.nyon.magnetic.DropEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +21,8 @@ import java.util.List;
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin {
 
+    @Shadow
+    private @Nullable Entity hookedIn;
     @Shadow
     @Final
     private RandomSource syncronizedRandom;
@@ -42,7 +45,7 @@ public abstract class FishingHookMixin {
             ArrayList<ItemStack> singleList = new ArrayList<>(List.of(item));
             DropEvent.INSTANCE.getEvent()
                 .invoker()
-                .invoke(singleList, new MutableInt(syncronizedRandom.nextInt(6) + 1), player);
+                .invoke(singleList, new MutableInt(syncronizedRandom.nextInt(6) + 1), player, hookedIn.blockPosition());
             return singleList.isEmpty();
         });
 

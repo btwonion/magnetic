@@ -10,7 +10,7 @@ abstract class SingleListener<T : Event> : Listener {
     abstract fun onEvent(event: T)
 }
 
-inline fun <reified T : Event> listen(crossinline eventCallback: T.() -> Unit) {
+inline fun <reified T : Event> listen(priority: EventPriority = EventPriority.NORMAL, crossinline eventCallback: T.() -> Unit) {
     val listener = object : SingleListener<T>() {
         override fun onEvent(event: T) = eventCallback(event)
     }
@@ -18,7 +18,7 @@ inline fun <reified T : Event> listen(crossinline eventCallback: T.() -> Unit) {
     Bukkit.getPluginManager().registerEvent(
         T::class.java,
         listener,
-        EventPriority.NORMAL,
+        priority,
         { _, event -> (event as? T)?.let { listener.onEvent(it) } },
         Plugin
     )

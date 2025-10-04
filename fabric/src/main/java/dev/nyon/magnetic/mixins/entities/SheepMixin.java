@@ -46,6 +46,6 @@ public abstract class SheepMixin {
         index = 3
     )
     private BiConsumer<ServerLevel, ItemStack> changeOriginalDropConsumer(BiConsumer<ServerLevel, ItemStack> original) {
-        return ShearableMixinHelper.changeConsumer(original);
+        return ShearableMixinHelper.changeConsumer(original, ((Sheep) (Object) this).blockPosition());
     }
 }

@@ -25,56 +25,62 @@ public class MixinHelper {
     public static boolean entityWrapWithConditionPlayerItemSingle(
         ServerPlayer player,
         ItemStack item,
-        Entity instance
+        Entity instance,
+        BlockPos pos
     ) {
         if (MagneticCheckKt.isIgnored(instance.getType())) return true;
-        return wrapWithConditionPlayerItemSingle(player, item);
+        return wrapWithConditionPlayerItemSingle(player, item, pos);
     }
 
     public static boolean wrapWithConditionPlayerItemSingle(
         ServerPlayer player,
-        ItemStack item
+        ItemStack item,
+        BlockPos pos
     ) {
         ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList, new MutableInt(0), player);
+            .invoke(mutableList, new MutableInt(0), player, pos);
 
         return !mutableList.isEmpty();
     }
 
     public static boolean wrapWithConditionPlayerExp(
         ServerPlayer player,
-        int exp
+        int exp,
+        BlockPos pos
     ) {
-        return modifyExpressionValuePlayerExp(player, exp) != 0;
+        return modifyExpressionValuePlayerExp(player, exp, pos) != 0;
     }
 
     public static int modifyExpressionValuePlayerExp(
         ServerPlayer player,
-        int exp
+        int exp,
+        BlockPos pos
     ) {
         MutableInt mutableInt = new MutableInt(exp);
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(new ArrayList<>(), mutableInt, player);
+            .invoke(new ArrayList<>(), mutableInt, player, pos);
 
         return mutableInt.getValue();
     }
 
     public static boolean entityDropEquipmentSingle(
         LivingEntity entity,
-        ItemStack item
+        ItemStack item,
+        BlockPos pos
     ) {
         LivingEntity lastAttacker = entity.getLastAttacker();
         if (MagneticCheckKt.failsLongRangeCheck(entity.getLastDamageSource())) return true;
         if (!(lastAttacker instanceof ServerPlayer player)) return true;
-        return entityWrapWithConditionPlayerItemSingle(player, item, entity);
+        return entityWrapWithConditionPlayerItemSingle(player, item, entity, pos);
     }
 
     public static List<ItemStack> entityDropEquipmentMultiple(
         LivingEntity entity,
-        List<ItemStack> items
+        List<ItemStack> items,
+        BlockPos pos
     ) {
         if (MagneticCheckKt.isIgnored(entity.getType())) return items;
         if (MagneticCheckKt.failsLongRangeCheck(entity.getLastDamageSource())) return items;
@@ -84,7 +90,7 @@ public class MixinHelper {
         ArrayList<ItemStack> mutableList = new ArrayList<>(items);
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(mutableList, new MutableInt(0), player);
+            .invoke(mutableList, new MutableInt(0), player, pos);
 
         return mutableList;
     }
@@ -92,19 +98,21 @@ public class MixinHelper {
     public static boolean entityCustomDeathLootSingle(
         DamageSource source,
         ItemStack item,
-        Entity instance
+        Entity instance,
+        BlockPos pos
     ) {
         if (MagneticCheckKt.failsLongRangeCheck(source)) return true;
         Entity lastAttacker = source.getEntity();
         if (!(lastAttacker instanceof ServerPlayer player)) return true;
 
-        return entityWrapWithConditionPlayerItemSingle(player, item, instance);
+        return entityWrapWithConditionPlayerItemSingle(player, item, instance, pos);
     }
 
     public static List<ItemStack> entityCustomDeathLootMultiple(
         DamageSource source,
         List<ItemStack> items,
-        Entity instance
+        Entity instance,
+        BlockPos pos
     ) {
         if (MagneticCheckKt.failsLongRangeCheck(source)) return items;
         if (MagneticCheckKt.isIgnored(instance.getType())) return items;
@@ -117,7 +125,8 @@ public class MixinHelper {
             .invoke(
                 mutableList,
                 new MutableInt(0),
-                player
+                player,
+                pos
             );
 
         return mutableList;

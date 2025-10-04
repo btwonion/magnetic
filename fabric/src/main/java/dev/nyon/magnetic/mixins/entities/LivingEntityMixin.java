@@ -69,7 +69,7 @@ public abstract class LivingEntityMixin {
         if (MagneticCheckKt.failsLongRangeCheck(lastDamageSource)) return original;
         if (!(entity instanceof ServerPlayer player)) return original;
 
-        return MixinHelper.modifyExpressionValuePlayerExp(player, original);
+        return MixinHelper.modifyExpressionValuePlayerExp(player, original, instance.blockPosition());
     }
 
     @Unique
@@ -87,7 +87,7 @@ public abstract class LivingEntityMixin {
             ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
             DropEvent.INSTANCE.getEvent()
                 .invoker()
-                .invoke(mutableList, new MutableInt(0), player);
+                .invoke(mutableList, new MutableInt(0), player, instance.blockPosition());
 
             if (!mutableList.isEmpty()) original.accept(item);
         };

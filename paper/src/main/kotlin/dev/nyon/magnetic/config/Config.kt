@@ -16,7 +16,7 @@ import net.kyori.adventure.title.Title
 import org.bukkit.entity.Player
 
 val config: Config by lazy {
-    config(configPath, 2, Config()) { _, element, version ->
+    config(configPath, 3, Config()) { _, element, version ->
         migrate(element, version)
     }
     loadConfig()
@@ -31,7 +31,8 @@ data class Config(
     var expAllowed: Boolean = true,
     var ignoreRangedWeapons: Boolean = true,
     var ignoreEntities: List<Identifier> = listOf(),
-    var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert()
+    var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert(),
+    var animation: Animation = Animation()
 ) {
     @Serializable
     data class FullInventoryAlert(
@@ -83,6 +84,13 @@ data class Config(
             }
         }
     }
+
+    @Serializable
+    data class Animation(
+        var enabled: Boolean = true,
+        var blocksPerSecond: Double = 1.0,
+        var canOtherPlayersPickup: Boolean = false
+    )
 }
 
 private fun migrate(jsonElement: JsonElement, version: Int?): Config? {

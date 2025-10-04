@@ -30,7 +30,7 @@ public class AllayMixin {
         ServerLevel serverLevel,
         ItemStack stack
     ) {
-        return MixinHelper.entityDropEquipmentSingle(instance, stack);
+        return MixinHelper.entityDropEquipmentSingle(instance, stack, instance.blockPosition());
     }
 
     @ModifyExpressionValue(
@@ -43,6 +43,6 @@ public class AllayMixin {
     public List<ItemStack> modifyEquipmentDrops(
         List<ItemStack> original
     ) {
-        return MixinHelper.entityDropEquipmentMultiple(instance, original);
+        return MixinHelper.entityDropEquipmentMultiple(instance, original, instance.blockPosition());
     }
 }

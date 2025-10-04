@@ -60,7 +60,7 @@ public class MushroomCowMixin {
 
         args.set(
             3, (BiConsumer<ServerLevel, ItemStack>) (world, stack) -> {
-                if (MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, stack, instance)) original.accept(world, stack);
+                if (MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, stack, instance, instance.blockPosition())) original.accept(world, stack);
             }
         );
     }

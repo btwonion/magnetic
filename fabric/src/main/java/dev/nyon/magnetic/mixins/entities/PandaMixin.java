@@ -29,6 +29,6 @@ public class PandaMixin {
         InteractionHand hand
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, stack, instance);
+        return MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, stack, instance, instance.blockPosition());
     }
 }

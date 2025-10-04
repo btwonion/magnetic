@@ -33,6 +33,6 @@ public interface CaveVinesMixin {
         BlockPos _pos
     ) {
         if (!(picker instanceof ServerPlayer player)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(player, stack);
+        return MixinHelper.wrapWithConditionPlayerItemSingle(player, stack, pos);
     }
 }

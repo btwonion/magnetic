@@ -26,7 +26,7 @@ public class CollectiveHelper {
 
         DropEvent.INSTANCE.getEvent()
             .invoker()
-            .invoke(drops, new MutableInt(0), serverPlayer);
+            .invoke(drops, new MutableInt(0), serverPlayer, blockPos);
 
         drops.forEach(item -> Block.popResource(serverLevel, blockPos, item));
         state.spawnAfterBreak(serverLevel, blockPos, ItemStack.EMPTY, true);
