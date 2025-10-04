@@ -43,6 +43,7 @@ dependencies {
     implementation("dev.nyon:konfig:3.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     compileOnly("de.miraculixx:veinminer:2.4.7")
 }

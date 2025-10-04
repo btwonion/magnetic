@@ -45,12 +45,17 @@ object Listeners {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
+                if (config.animation.enabled) {
+                    Animation.pullItemToPlayer(item, pos.toCenterLocation(), player)
+                    return@removeIf true
+                }
+
                 val copiedStack = item.clone()
                 if (player.inventory.addItem(item).isNotEmpty()) {
                     tickInventoryAlert(player)
                     return@removeIf false
                 }
-                if (copiedStack.amount != 0) player.incrementStatistic(
+                if (copiedStack.amount > 0) player.incrementStatistic(
                     Statistic.PICKUP, copiedStack.type, copiedStack.amount
                 )
                 true
@@ -83,7 +88,7 @@ object Listeners {
                 )
             }
 
-            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+            DropEvent(itemStacks, MutableInt(), player, block.location).also(Event::callEvent)
 
             // Delete items that have been added to the inventory
             items.clear()
@@ -94,7 +99,7 @@ object Listeners {
 
         listen<BlockBreakEvent> {
             val mutableInt = MutableInt(expToDrop)
-            DropEvent(mutableListOf(), mutableInt, player).also(Event::callEvent)
+            DropEvent(mutableListOf(), mutableInt, player, block.location).also(Event::callEvent)
             expToDrop = mutableInt.value
         }
 
@@ -104,7 +109,7 @@ object Listeners {
             val killer = entity.killer ?: return@listen
             val mutableInt = MutableInt(droppedExp)
             val itemStacks = drops.toMutableList()
-            DropEvent(itemStacks, mutableInt, killer).also(Event::callEvent)
+            DropEvent(itemStacks, mutableInt, killer, entity.location).also(Event::callEvent)
             droppedExp = mutableInt.value
 
             // Delete items that have been added to the inventory
@@ -115,7 +120,7 @@ object Listeners {
 
         listen<PlayerShearBlockEvent> {
             val itemStacks = drops.toMutableList()
-            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+            DropEvent(itemStacks, MutableInt(), player, block.location).also(Event::callEvent)
 
             // Delete items that have been added to the inventory
             drops.removeIf { item ->
@@ -125,7 +130,7 @@ object Listeners {
 
         listen<PlayerShearEntityEvent> {
             val itemStacks = drops.toMutableList()
-            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+            DropEvent(itemStacks, MutableInt(), player, entity.location).also(Event::callEvent)
 
             // Delete items that have been added to the inventory
             drops.removeIf { item ->
@@ -134,14 +139,15 @@ object Listeners {
         }
 
         listen<PlayerFishEvent> {
+            if (caught == null) return@listen
             val mutableInt = MutableInt(expToDrop)
-            DropEvent(mutableListOf(), mutableInt, player).also(Event::callEvent)
+            DropEvent(mutableListOf(), mutableInt, player, caught!!.location).also(Event::callEvent)
             expToDrop = mutableInt.value
         }
 
         listen<PlayerHarvestBlockEvent> {
             val itemStacks = itemsHarvested.toMutableList()
-            DropEvent(itemStacks, MutableInt(), player).also(Event::callEvent)
+            DropEvent(itemStacks, MutableInt(), player, harvestedBlock.location).also(Event::callEvent)
 
             // Delete items that have been added to the inventory
             itemsHarvested.removeIf { item ->
@@ -155,7 +161,7 @@ object Listeners {
             listen<de.miraculixx.veinminer.VeinMinerEvent.VeinminerDropEvent> {
                 val mutableInt = MutableInt(exp)
                 val itemStacks = items.toMutableList()
-                DropEvent(itemStacks, mutableInt, player).also(Event::callEvent)
+                DropEvent(itemStacks, mutableInt, player, block.location).also(Event::callEvent)
                 exp = mutableInt.value
 
                 // Delete items that have been added to the inventory
@@ -198,7 +204,8 @@ object Listeners {
 
         // Destroy the blocks in reversed order - prevent blocks like Cactus Flowers to break through ticking before us
         affectedBlocks.reversed().forEach { affectedBlock ->
-            affectedBlock.type = if ((affectedBlock as CraftBlock).nmsFluid.type is WaterFluid) Material.WATER else Material.AIR
+            affectedBlock.type =
+                if ((affectedBlock as CraftBlock).nmsFluid.type is WaterFluid) Material.WATER else Material.AIR
         }
     }
 
