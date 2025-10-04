@@ -71,6 +71,11 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
                 "enabled": true, // Enables title alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
                 "cooldownInSeconds": 5 // The time that has to pass to show the title alert again.
             }
+        },
+        "animation": {
+            "enabled": true, // When enabled, all of the items that are handled by magnetic will be pulled towards you instead of directly being put in your inventory.
+            "blocksPerSecond": 1.0, // Defines how fast the items should be pulled towards a player.
+            "canOtherPlayersPickup": false // Toggles whether other players can intercept the floating items and pick them up.
         }
     }
 }
