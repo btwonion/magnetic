@@ -16,3 +16,9 @@
     - now also includes drops that were triggered by another block that supported a structure, e.g. Cactus on top of
       Sand
     - replace broken kelp with water instead of air
+
+## Both
+
+- add item pulling animation
+  - now every time an item is put into your inventory, there is an option to make it look like the item is pulled towards you (like you are the magnet :))
+  - default: (enabled: true, blocksPerSecond: 1.0)
