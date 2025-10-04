@@ -89,7 +89,6 @@ data class Config(
     data class Animation(
         var enabled: Boolean = true,
         var blocksPerSecond: Double = 1.5,
-        var particles: Boolean = true,
         var canOtherPlayersPickup: Boolean = false
     )
 }
