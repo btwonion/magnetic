@@ -34,7 +34,7 @@ public class PlayerMixin {
             ItemStack itemStack = inventory.items.get(i);
             if (!itemStack.isEmpty()) {
                 ArrayList<ItemStack> singleItem = new ArrayList<>(List.of(itemStack));
-                List<ItemStack> processedItems = MixinHelper.entityDropEquipmentMultiple(instance, singleItem);
+                List<ItemStack> processedItems = MixinHelper.entityDropEquipmentMultiple(instance, singleItem, instance.blockPosition());
                 if (processedItems.isEmpty()) inventory.setItem(i, ItemStack.EMPTY);
             }
         }

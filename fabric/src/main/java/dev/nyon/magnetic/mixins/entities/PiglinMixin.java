@@ -31,6 +31,6 @@ public class PiglinMixin {
         DamageSource damageSource,
         boolean bl
     ) {
-        return MixinHelper.entityCustomDeathLootMultiple(damageSource, original, instance);
+        return MixinHelper.entityCustomDeathLootMultiple(damageSource, original, instance, instance.blockPosition());
     }
 }

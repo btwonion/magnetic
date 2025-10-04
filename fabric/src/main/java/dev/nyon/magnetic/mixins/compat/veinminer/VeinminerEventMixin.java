@@ -41,7 +41,7 @@ public class VeinminerEventMixin {
         BlockPos initialSource
     ) {
         if (!(breaker instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack);
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, stack, pos);
     }
 
     @WrapOperation(

@@ -3,6 +3,7 @@ package dev.nyon.magnetic.utils;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -38,7 +39,7 @@ public class ShearableMixinHelper {
         }
     }
 
-    public static BiConsumer<ServerLevel, ItemStack> changeConsumer(BiConsumer<ServerLevel, ItemStack> original) {
+    public static BiConsumer<ServerLevel, ItemStack> changeConsumer(BiConsumer<ServerLevel, ItemStack> original, BlockPos pos) {
         ServerPlayer player = threadLocal.get();
         if (player == null) return original;
 
@@ -46,7 +47,7 @@ public class ShearableMixinHelper {
             ArrayList<ItemStack> mutableList = new ArrayList<>(List.of(item));
             DropEvent.INSTANCE.getEvent()
                 .invoker()
-                .invoke(mutableList, new MutableInt(0), player);
+                .invoke(mutableList, new MutableInt(0), player, pos);
 
             if (!mutableList.isEmpty()) original.accept(world, item);
         };

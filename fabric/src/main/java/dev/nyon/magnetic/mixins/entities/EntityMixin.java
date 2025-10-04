@@ -34,6 +34,6 @@ public class EntityMixin {
         Mob mob
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, itemStack, instance);
+        return MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, itemStack, instance, instance.blockPosition());
     }
 }

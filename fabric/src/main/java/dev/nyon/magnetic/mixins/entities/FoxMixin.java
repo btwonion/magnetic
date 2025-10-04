@@ -23,6 +23,6 @@ public class FoxMixin {
         ServerLevel serverLevel,
         ItemStack stack
     ) {
-        return MixinHelper.entityDropEquipmentSingle(instance, stack);
+        return MixinHelper.entityDropEquipmentSingle(instance, stack, instance.blockPosition());
     }
 }

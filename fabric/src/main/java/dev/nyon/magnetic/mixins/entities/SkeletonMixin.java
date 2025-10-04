@@ -28,6 +28,6 @@ public class SkeletonMixin {
         DamageSource source,
         boolean playerKill
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(source, new ItemStack(itemLike), instance);
+        return MixinHelper.entityCustomDeathLootSingle(source, new ItemStack(itemLike), instance, instance.blockPosition());
     }
 }

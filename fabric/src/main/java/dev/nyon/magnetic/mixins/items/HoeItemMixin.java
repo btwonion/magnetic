@@ -25,7 +25,7 @@ public class HoeItemMixin {
     private static Consumer<UseOnContext> changeLambda(Consumer<UseOnContext> original, BlockState result, ItemLike droppedItem) {
         return useOnContext -> {
             if (useOnContext.getPlayer() instanceof ServerPlayer player) {
-                if (MixinHelper.wrapWithConditionPlayerItemSingle(player, new ItemStack(droppedItem))) {
+                if (MixinHelper.wrapWithConditionPlayerItemSingle(player, new ItemStack(droppedItem), useOnContext.getClickedPos())) {
                     useOnContext.getLevel().setBlock(useOnContext.getClickedPos(), result, 11);
                     useOnContext.getLevel().gameEvent(GameEvent.BLOCK_CHANGE, useOnContext.getClickedPos(), GameEvent.Context.of(useOnContext.getPlayer(), result));
                 }

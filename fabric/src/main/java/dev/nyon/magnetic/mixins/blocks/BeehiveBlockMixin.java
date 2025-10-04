@@ -70,7 +70,7 @@ public class BeehiveBlockMixin {
         ServerPlayer serverPlayer = threadLocal.get();
         if (serverPlayer == null) return true;
 
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, itemStack);
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, itemStack, blockPos);
     }
 
     @WrapWithCondition(
@@ -89,6 +89,6 @@ public class BeehiveBlockMixin {
         Player player
     ) {
         if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem());
+        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem(), pos);
     }
 }

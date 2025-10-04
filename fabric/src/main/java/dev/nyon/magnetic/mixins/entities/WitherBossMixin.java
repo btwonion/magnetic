@@ -34,7 +34,7 @@ public abstract class WitherBossMixin {
     ) {
         ItemLike original = args.get(1);
 
-        if (MixinHelper.entityCustomDeathLootSingle(damageSource, new ItemStack(original), instance)) return;
+        if (MixinHelper.entityCustomDeathLootSingle(damageSource, new ItemStack(original), instance, instance.blockPosition())) return;
         args.set(1, Items.AIR);
     }
 }

@@ -27,6 +27,6 @@ public class EnderManMixin {
         DamageSource damageSource,
         boolean playerKill
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack, instance);
+        return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack, instance, instance.blockPosition());
     }
 }

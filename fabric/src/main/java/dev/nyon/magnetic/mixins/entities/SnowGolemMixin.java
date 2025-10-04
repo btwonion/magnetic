@@ -46,6 +46,6 @@ public class SnowGolemMixin {
         index = 3
     )
     private BiConsumer<ServerLevel, ItemStack> changeOriginalDropConsumer(BiConsumer<ServerLevel, ItemStack> original) {
-        return ShearableMixinHelper.changeConsumer(original);
+        return ShearableMixinHelper.changeConsumer(original, ((SnowGolem) (Object) this).blockPosition());
     }
 }

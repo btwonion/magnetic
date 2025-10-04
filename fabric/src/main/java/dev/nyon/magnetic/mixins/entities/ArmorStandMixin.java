@@ -32,7 +32,7 @@ public class ArmorStandMixin {
         ServerLevel serverLevel,
         DamageSource damageSource
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance);
+        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance, instance.blockPosition());
     }
 
     @WrapWithCondition(
@@ -49,6 +49,6 @@ public class ArmorStandMixin {
         ServerLevel serverLevel,
         DamageSource damageSource
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance);
+        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance, instance.blockPosition());
     }
 }
