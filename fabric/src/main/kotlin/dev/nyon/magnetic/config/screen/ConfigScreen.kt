@@ -120,6 +120,32 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
                 }
             }
         }
+
+        val animation by groups.registering {
+            val enabled by options.registering {
+                binding(true, { config.animation.enabled }, { config.animation.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val blocksPerSecond by options.registering {
+                binding(1.0, { config.animation.blocksPerSecond }, { config.animation.blocksPerSecond = it })
+                controller = numberField(0.5, Double.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val canOtherPlayersPickup by options.registering {
+                binding(false, { config.animation.canOtherPlayersPickup }, { config.animation.canOtherPlayersPickup = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+        }
     }
 
     save { saveConfig(config) }
