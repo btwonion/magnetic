@@ -2,6 +2,7 @@
 - look for the following phrases via "Find in Files" (Ctrl + Shift + F):
   - dropResources
   - spawnAtLocation
+  - killedEntity
   - destroyBlock
   - spawnAfterBreak
     - the player is given via the threadLocal in this case
