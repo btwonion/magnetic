@@ -3,6 +3,7 @@ package dev.nyon.magnetic
 import com.destroystokyo.paper.event.server.ServerTickStartEvent
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.listen
+import io.papermc.paper.threadedregions.EntityScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,7 +27,12 @@ object Animation {
 
     fun pullItemToPlayer(item: ItemStack, pos: Location, player: Player) {
         player.world.dropItem(pos, item) { itemEntity ->
-            if (!config.animation.canOtherPlayersPickup) itemEntity.owner = player.playerProfile.id
+            if (!config.animation.canOtherPlayersPickup) {
+                val entityScheduler = itemEntity.scheduler
+                entityScheduler.execute(Main.INSTANCE, {
+                    itemEntity.owner = player.playerProfile.id
+                }, null, 0L)
+            }
             animationScope.launch {
                 trackedItemEntitiesMutex.withLock {
                     trackedItemEntities[itemEntity] = player
@@ -43,19 +49,21 @@ object Animation {
             }
 
             copiedItemEntities.forEach { (itemEntity, target) ->
-                val targetPos = target.location
-                val itemEntityPos = itemEntity.location
-                val mcEntity = (itemEntity as CraftEntity).handle
+                itemEntity.scheduler.execute(Main.INSTANCE, {
+                    val targetPos = target.location
+                    val itemEntityPos = itemEntity.location
+                    val mcEntity = (itemEntity as CraftEntity).handle
 
-                val vec = targetPos.subtract(itemEntityPos).toVector()
-                val length = vec.length()
-                val tickPart = blocksPerTick / length
-                val tickVec = Vector(
-                    vec.x * tickPart,
-                    vec.y * (if (mcEntity.horizontalCollision) tickPart * 2 else tickPart),
-                    vec.z * tickPart
-                )
-                itemEntity.velocity = itemEntity.velocity.add(tickVec)
+                    val vec = targetPos.subtract(itemEntityPos).toVector()
+                    val length = vec.length()
+                    val tickPart = blocksPerTick / length
+                    val tickVec = Vector(
+                        vec.x * tickPart,
+                        vec.y * (if (mcEntity.horizontalCollision) tickPart * 2 else tickPart),
+                        vec.z * tickPart
+                    )
+                    itemEntity.velocity = itemEntity.velocity.add(tickVec)
+                }, null, 0L)
             }
         }
     }

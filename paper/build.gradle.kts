@@ -38,7 +38,7 @@ repositories {
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 dependencies {
-    paperweight.paperDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    paperweight.foliaDevBundle("$mcVersion-R0.1-SNAPSHOT")
 
     implementation("dev.nyon:konfig:3.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
@@ -80,6 +80,8 @@ tasks {
         }
     }
 }
+
+runPaper.folia.registerTask()
 
 val changelogText = buildString {
     append("# v${project.version}\n")

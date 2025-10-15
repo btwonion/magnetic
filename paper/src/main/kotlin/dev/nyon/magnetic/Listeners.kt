@@ -39,6 +39,8 @@ import kotlin.time.Instant
 @OptIn(ExperimentalTime::class)
 object Listeners {
 
+    private val regionScheduler = Bukkit.getServer().regionScheduler
+
     @Suppress("unused")
     private val magneticListener = listen<DropEvent> {
         if (!player.isAllowedToUseMagnetic()) return@listen
@@ -204,8 +206,10 @@ object Listeners {
 
         // Destroy the blocks in reversed order - prevent blocks like Cactus Flowers to break through ticking before us
         affectedBlocks.reversed().forEach { affectedBlock ->
-            affectedBlock.type =
-                if ((affectedBlock as CraftBlock).nmsFluid.type is WaterFluid) Material.WATER else Material.AIR
+            regionScheduler.execute(Main.INSTANCE, affectedBlock.location) {
+                affectedBlock.type =
+                    if ((affectedBlock as CraftBlock).nmsFluid.type is WaterFluid) Material.WATER else Material.AIR
+            }
         }
     }
 
