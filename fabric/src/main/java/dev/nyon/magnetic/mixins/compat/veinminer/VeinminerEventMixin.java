@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import de.miraculixx.veinminer.VeinMinerEvent;
 import dev.nyon.magnetic.utils.MixinHelper;
+import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,8 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-
-import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(VeinMinerEvent.class)
 public class VeinminerEventMixin {
@@ -70,13 +69,9 @@ public class VeinminerEventMixin {
             original.call(instance, serverLevel, blockPos, itemStack, b);
             return;
         }
-
-        ServerPlayer previous = threadLocal.get();
-        threadLocal.set(serverPlayer);
-        try {
-            original.call(instance, serverLevel, blockPos, itemStack, b);
-        } finally {
-            threadLocal.set(previous);
-        }
+        WrapOperationHelper.prepareGeneral(
+            serverPlayer,
+            () -> original.call(instance, serverLevel, blockPos, itemStack, b)
+        );
     }
 }

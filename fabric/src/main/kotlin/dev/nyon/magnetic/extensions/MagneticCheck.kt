@@ -4,9 +4,8 @@ import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.config.ignoredEntities
 import dev.nyon.magnetic.config.loadIgnoredEntities
 import dev.nyon.magnetic.datagen.magneticEffectId
-import dev.nyon.magnetic.datagen.rangedWeaponKey
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.item.enchantment.EnchantmentHelper
 
@@ -34,7 +33,7 @@ val EntityType<*>.isIgnored: Boolean
         return ignoredEntities.contains(EntityType.getKey(this))
     }
 
-fun DamageSource?.failsLongRangeCheck(): Boolean {
-    if (this == null) return true
-    return config.ignoreRangedWeapons && weaponItem?.`is`(rangedWeaponKey) == true
+fun Entity.failsLongRangeCheck(player: ServerPlayer): Boolean {
+    if (config.ignoredEntitiesRangeMin == -1.0) return false
+    return !position().closerThan(player.position(), config.ignoredEntitiesRangeMin)
 }

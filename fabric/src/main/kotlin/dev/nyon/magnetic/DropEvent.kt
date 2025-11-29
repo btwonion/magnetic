@@ -56,6 +56,7 @@ object DropEvent {
             if (leftExp > 0) player.giveExperiencePoints(leftExp)
             exp.value = 0
         }
+        println("Dropped")
     }
 
     private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(

@@ -3,6 +3,7 @@ package dev.nyon.magnetic.mixins.entities;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -25,10 +26,11 @@ public abstract class WitherBossMixin {
         )
     )
     protected ItemEntity redirectEquipmentDrop(
-        ItemEntity original, ServerLevel world, DamageSource source, boolean playerKill
+        ItemEntity original, ServerLevel world, DamageSource damageSource, boolean playerKill
     ) {
+        if (!(damageSource.getEntity() instanceof ServerPlayer serverPlayer)) return original;
         ItemStack itemStack = original.getItem();
-        if (MixinHelper.entityCustomDeathLootSingle(source, itemStack, instance, instance.blockPosition())) return original;
+        if (MixinHelper.entityCustomDeathLootSingle(serverPlayer, itemStack, instance, instance.blockPosition())) return original;
         return null;
     }
 }

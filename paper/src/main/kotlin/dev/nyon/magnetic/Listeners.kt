@@ -107,8 +107,8 @@ object Listeners {
 
         listen<EntityDeathEvent> {
             if (entityType.isIgnored) return@listen
-            if (entity.lastDamageCause.failsLongRangeCheck()) return@listen
             val killer = entity.killer ?: return@listen
+            if (entity.failsLongRangeCheck(killer)) return@listen
             val mutableInt = MutableInt(droppedExp)
             val itemStacks = drops.toMutableList()
             DropEvent(itemStacks, mutableInt, killer, entity.location).also(Event::callEvent)

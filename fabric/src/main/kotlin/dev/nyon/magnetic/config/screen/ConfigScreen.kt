@@ -63,9 +63,9 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
                 .build()
         )
 
-        val ignoreRangedWeapons by rootOptions.registering {
-            binding(true, { config.ignoreRangedWeapons }, { config.ignoreRangedWeapons = it })
-            controller = tickBox()
+        val ignoredEntitiesRangeMin by rootOptions.registering {
+            binding(15.0, { config.ignoredEntitiesRangeMin }, { config.ignoredEntitiesRangeMin = it })
+            controller = numberField(-1.0, Double.MAX_VALUE)
             descriptionBuilder {
                 addDefaultText(1)
             }

@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.utils.MixinHelper;
-import dev.nyon.magnetic.utils.ShearableMixinHelper;
+import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -36,7 +36,11 @@ public class BoggedMixin {
         Player player,
         InteractionHand hand
     ) {
-        ShearableMixinHelper.prepare(player, original, instance, world, source, stack);
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            original.call(instance, world, source, stack);
+            return;
+        }
+        WrapOperationHelper.prepareEntity(serverPlayer, instance, () -> original.call(instance, world, source, stack));
     }
 
     @WrapWithCondition(

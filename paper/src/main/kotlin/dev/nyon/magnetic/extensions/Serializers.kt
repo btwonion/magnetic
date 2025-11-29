@@ -12,12 +12,16 @@ import org.bukkit.NamespacedKey
 object IdentifierSerializer : KSerializer<Identifier> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("identifier", PrimitiveKind.STRING)
 
+    fun decodeFromString(value: String): Identifier {
+        val isTag = value.startsWith('#')
+        val namespacedKey = NamespacedKey.fromString(value.run { return@run if (isTag) drop(1) else this@run })
+            ?: error("Magnetic couldn't parse malformed identifier: '$value'.")
+        return Identifier(namespacedKey, isTag)
+    }
+
     override fun deserialize(decoder: Decoder): Identifier {
         val rawString = decoder.decodeString()
-        val isTag = rawString.startsWith('#')
-        val namespacedKey = NamespacedKey.fromString(rawString.run { return@run if (isTag) drop(1) else this@run })
-            ?: error("Magnetic couldn't parse malformed identifier: '$rawString'.")
-        return Identifier(namespacedKey, isTag)
+        return decodeFromString(rawString)
     }
 
     override fun serialize(

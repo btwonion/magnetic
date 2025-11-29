@@ -35,11 +35,8 @@ public class TreeCutEventsMixin {
         BlockEntity blockEntity
     ) {
         if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel)) return true;
-
         MixinHelper.tagSurroundingBlocksWithPlayer(serverPlayer, blockPos, serverLevel);
-
         CollectiveHelper.dropBlock(state, serverLevel, blockPos, blockEntity, serverPlayer);
-
         return false;
     }
 }

@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +33,8 @@ public class ArmorStandMixin {
         ServerLevel serverLevel,
         DamageSource damageSource
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance, instance.blockPosition());
+        if (!(damageSource.getEntity() instanceof ServerPlayer serverPlayer)) return true;
+        return MixinHelper.entityCustomDeathLootSingle(serverPlayer, stack, instance, instance.blockPosition());
     }
 
     @WrapWithCondition(
@@ -49,6 +51,7 @@ public class ArmorStandMixin {
         ServerLevel serverLevel,
         DamageSource damageSource
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, stack, instance, instance.blockPosition());
+        if (!(damageSource.getEntity() instanceof ServerPlayer serverPlayer)) return true;
+        return MixinHelper.entityCustomDeathLootSingle(serverPlayer, stack, instance, instance.blockPosition());
     }
 }

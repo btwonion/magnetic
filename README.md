@@ -56,7 +56,7 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
         "permissionRequired": false, // Requires the player to have a certain permission ('magnetic.ability.use') to use magnetic.
         "itemsAllowed": true, // Allows the player to also pickup items with magnetic.
         "expAllowed": true, // Allows the player to also pickup exp with magnetic.
-        "ignoreRangedWeapons": true, // Ignores drops that were produced via a kill with a long-ranged weapon (e.g. bow, crossbow, etc.).
+        "ignoredEntitiesRangeMin": 15.0, // Ignores drops that were produced by a player that was further away from the entity than this value. If this value is set to -1, no check will be performed.
         "ignoreEntities": [], // The specified entities will not be affected by magnetic when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
         "fullInventoryAlert": {
             "soundAlert": {

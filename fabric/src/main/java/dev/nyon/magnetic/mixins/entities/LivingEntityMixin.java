@@ -2,46 +2,31 @@ package dev.nyon.magnetic.mixins.entities;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.utils.MixinHelper;
+import dev.nyon.magnetic.utils.WrapOperationHelper;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.function.Consumer;
+
+import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
-    @Shadow
-    private @Nullable DamageSource lastDamageSource;
     @Unique
     private LivingEntity instance = (LivingEntity) (Object) this;
-
-    // In case the Entity is an Animal manually set the lastDamageSource.
-    // Otherwise, the exp will not be handled by the dropExperience function as the damageSource cannot be found somehow
-    @Inject(
-        method = "actuallyHurt",
-        at = @At("HEAD")
-    )
-    private void setLastDamageSource(
-        ServerLevel world,
-        DamageSource source,
-        float amount,
-        CallbackInfo ci
-    ) {
-        if (!(instance instanceof Animal)) return;
-        lastDamageSource = source;
-    }
 
     @ModifyExpressionValue(
         method = "dropExperience",
@@ -56,10 +41,33 @@ public abstract class LivingEntityMixin {
         Entity entity
     ) {
         if (MagneticCheckKt.isIgnored(instance.getType())) return original;
-        if (MagneticCheckKt.failsLongRangeCheck(lastDamageSource)) return original;
         if (!(entity instanceof ServerPlayer player)) return original;
+        if (MagneticCheckKt.failsLongRangeCheck(instance, player)) return original;
 
         return MixinHelper.modifyExpressionValuePlayerExp(player, original, instance.blockPosition());
+    }
+
+    @WrapOperation(
+        method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;ZLnet/minecraft/resources/ResourceKey;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/LivingEntity;dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;ZLnet/minecraft/resources/ResourceKey;Ljava/util/function/Consumer;)V"
+        )
+    )
+    public void prepareForLootTableInjection(
+        LivingEntity instance,
+        ServerLevel serverLevel,
+        DamageSource damageSource,
+        boolean b,
+        ResourceKey resourceKey,
+        Consumer consumer,
+        Operation<Void> original
+    ) {
+        if (!(damageSource.getEntity() instanceof ServerPlayer serverPlayer)) {
+            original.call(instance, serverLevel, damageSource, b, resourceKey, consumer);
+            return;
+        }
+        WrapOperationHelper.prepareEntity(serverPlayer, instance, () -> original.call(instance, serverLevel, damageSource, b, resourceKey, consumer));
     }
 
     // Consumer of Lnet/minecraft/world/entity/LivingEntity;dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;ZLnet/minecraft/resources/ResourceKey;)V
@@ -75,7 +83,8 @@ public abstract class LivingEntityMixin {
         ServerLevel serverLevel,
         ItemStack itemStack
     ) {
-        DamageSource damageSource = instance.getLastDamageSource();
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack, instance, instance.blockPosition());
+        ServerPlayer player = threadLocal.get();
+        if (player == null) return true;
+        return MixinHelper.entityCustomDeathLootSingle(player, itemStack, instance, instance.blockPosition());
     }
 }

@@ -17,6 +17,5 @@ class DataGenerator : DataGeneratorEntrypoint {
 
         pack.addProvider(::EnchantmentProvider)
         pack.addProvider(::EnchantmentTagProvider)
-        pack.addProvider(::ItemTagProvider)
     }
 }

@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.utils.MixinHelper;
+import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -41,18 +42,12 @@ public interface CaveVinesMixin {
         BiConsumer biConsumer,
         Operation<Boolean> original
     ) {
-        if (!(entity instanceof ServerPlayer serverPlayer)) {
-            original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer);
-            return false;
-        }
-        ServerPlayer previous = threadLocal.get();
-        threadLocal.set(serverPlayer);
-        try {
-            original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer);
-        } finally {
-            threadLocal.set(previous);
-        }
-        return false;
+        if (!(entity instanceof ServerPlayer serverPlayer))
+            return original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer);
+        return WrapOperationHelper.prepareGeneral(
+            serverPlayer,
+            () -> original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer)
+        );
     }
 
     // Consumer of Lnet/minecraft/world/level/block/CaveVines;use(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/InteractionResult;

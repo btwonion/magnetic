@@ -4,9 +4,9 @@ import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.config.ignoredEntities
 import dev.nyon.magnetic.magneticKey
 import dev.nyon.magnetic.magneticPermission
+import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.inventory.ItemStack
 
 fun ItemStack.hasMagnetic(): Boolean = hasItemMeta() && itemMeta.enchants.any { it.key.key == magneticKey }
@@ -28,7 +28,7 @@ val EntityType.isIgnored: Boolean
         return ignoredEntities.contains(key)
     }
 
-fun EntityDamageEvent?.failsLongRangeCheck(): Boolean {
-    if (this == null) return true
-    return config.ignoreRangedWeapons && cause == EntityDamageEvent.DamageCause.PROJECTILE
+fun Entity.failsLongRangeCheck(player: Player): Boolean {
+    if (config.ignoredEntitiesRangeMin == -1.0) return false
+    return location.distance(player.location) > config.ignoredEntitiesRangeMin
 }

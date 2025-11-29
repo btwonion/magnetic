@@ -72,9 +72,8 @@ public class MixinHelper {
         BlockPos pos
     ) {
         LivingEntity lastAttacker = entity.getLastAttacker();
-        if (MagneticCheckKt.failsLongRangeCheck(entity.getLastDamageSource())) return true;
         if (!(lastAttacker instanceof ServerPlayer player)) return true;
-        return entityWrapWithConditionPlayerItemSingle(player, item, entity, pos);
+        return entityCustomDeathLootSingle(player, item, entity, pos);
     }
 
     public static List<ItemStack> entityDropEquipmentMultiple(
@@ -83,28 +82,17 @@ public class MixinHelper {
         BlockPos pos
     ) {
         if (MagneticCheckKt.isIgnored(entity.getType())) return items;
-        if (MagneticCheckKt.failsLongRangeCheck(entity.getLastDamageSource())) return items;
         LivingEntity lastAttacker = entity.getLastAttacker();
-        if (!(lastAttacker instanceof ServerPlayer player)) return items;
-
-        ArrayList<ItemStack> mutableList = new ArrayList<>(items);
-        DropEvent.INSTANCE.getEvent()
-            .invoker()
-            .invoke(mutableList, new MutableInt(0), player, pos);
-
-        return mutableList;
+        return multiple(lastAttacker, items, entity, pos);
     }
 
     public static boolean entityCustomDeathLootSingle(
-        DamageSource source,
+        ServerPlayer player,
         ItemStack item,
         Entity instance,
         BlockPos pos
     ) {
-        if (MagneticCheckKt.failsLongRangeCheck(source)) return true;
-        Entity lastAttacker = source.getEntity();
-        if (!(lastAttacker instanceof ServerPlayer player)) return true;
-
+        if (MagneticCheckKt.failsLongRangeCheck(instance, player)) return true;
         return entityWrapWithConditionPlayerItemSingle(player, item, instance, pos);
     }
 
@@ -114,10 +102,14 @@ public class MixinHelper {
         Entity instance,
         BlockPos pos
     ) {
-        if (MagneticCheckKt.failsLongRangeCheck(source)) return items;
         if (MagneticCheckKt.isIgnored(instance.getType())) return items;
         Entity lastAttacker = source.getEntity();
+        return multiple(lastAttacker, items, instance, pos);
+    }
+
+    private static List<ItemStack> multiple(Entity lastAttacker, List<ItemStack> items, Entity instance, BlockPos pos) {
         if (!(lastAttacker instanceof ServerPlayer player)) return items;
+        if (MagneticCheckKt.failsLongRangeCheck(instance, player)) return items;
 
         ArrayList<ItemStack> mutableList = new ArrayList<>(items);
         DropEvent.INSTANCE.getEvent()

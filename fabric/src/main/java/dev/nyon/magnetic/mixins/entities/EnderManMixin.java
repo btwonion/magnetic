@@ -3,6 +3,7 @@ package dev.nyon.magnetic.mixins.entities;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.item.ItemStack;
@@ -27,6 +28,7 @@ public class EnderManMixin {
         DamageSource damageSource,
         boolean playerKill
     ) {
-        return MixinHelper.entityCustomDeathLootSingle(damageSource, itemStack, instance, instance.blockPosition());
+        if (!(damageSource.getEntity() instanceof ServerPlayer serverPlayer)) return true;
+        return MixinHelper.entityCustomDeathLootSingle(serverPlayer, itemStack, instance, instance.blockPosition());
     }
 }
