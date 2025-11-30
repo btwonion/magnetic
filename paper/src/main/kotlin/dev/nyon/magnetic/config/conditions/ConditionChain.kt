@@ -3,6 +3,7 @@ package dev.nyon.magnetic.config.conditions
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 
 @Serializable
@@ -21,7 +22,10 @@ class ConditionChain(val raw: String) {
             return validate(player)
         } catch (e: IllegalStateException) {
             e.printStackTrace()
-            player.sendMessage(Component.text("[magnetic] There seems to be an error with the condition statements. Please contact the server administrator to check the logs for more information."))
+            player.sendMessage(
+                Component.text("[magnetic] There seems to be an error with the condition statements. Please contact the server administrator to check the logs for more information.")
+                    .color(NamedTextColor.RED)
+            )
         }
         return false
     }

@@ -2,6 +2,7 @@ package dev.nyon.magnetic.config.conditions
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
@@ -21,7 +22,9 @@ class ConditionChain(val raw: String) {
             return validate(player)
         } catch (e: IllegalStateException) {
             e.printStackTrace()
-            player.sendSystemMessage(Component.literal("[magnetic] There seems to be an error with the condition statements. Please contact the server administrator to check the logs for more information."))
+            player.sendSystemMessage(
+                Component.literal("[magnetic] There seems to be an error with the condition statements. Please contact the server administrator to check the logs for more information.")
+                    .withStyle(ChatFormatting.RED))
         }
         return false
     }
