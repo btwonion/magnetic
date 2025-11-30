@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import dev.nyon.magnetic.DropEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
@@ -13,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.ArrayList;
@@ -21,8 +21,9 @@ import java.util.List;
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin {
 
-    @Shadow
-    private @Nullable Entity hookedIn;
+    @Unique
+    private FishingHook fishingHook = (FishingHook) (Object) this;
+
     @Shadow
     @Final
     private RandomSource syncronizedRandom;
@@ -36,7 +37,7 @@ public abstract class FishingHookMixin {
     )
     public List<ItemStack> modifyFishingDrops(
         List<ItemStack> instance,
-        ItemStack fishingHook
+        ItemStack itemStack
     ) {
         if (!(getPlayerOwner() instanceof ServerPlayer player)) return instance;
 
@@ -45,7 +46,7 @@ public abstract class FishingHookMixin {
             ArrayList<ItemStack> singleList = new ArrayList<>(List.of(item));
             DropEvent.INSTANCE.getEvent()
                 .invoker()
-                .invoke(singleList, new MutableInt(syncronizedRandom.nextInt(6) + 1), player, hookedIn.blockPosition());
+                .invoke(singleList, new MutableInt(syncronizedRandom.nextInt(6) + 1), player, fishingHook.blockPosition());
             return singleList.isEmpty();
         });
 

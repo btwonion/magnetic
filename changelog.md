@@ -10,3 +10,6 @@
   - Operators: AND (&&), OR (||)
   - Conditions: ENCHANTMENT, SNEAK, PERMISSION
   - default: "ENCHANTMENT"
+
+## Fabric
+- fix crash when using the fishing rod with the new animation update [**#59**](https://github.com/btwonion/magnetic/issues/59)
