@@ -1,36 +1,22 @@
 package dev.nyon.magnetic.config
 
-import dev.nyon.konfig.config.config
 import dev.nyon.konfig.config.loadConfig
-import dev.nyon.magnetic.configPath
+import dev.nyon.magnetic.config.conditions.ConditionChain
 import dev.nyon.magnetic.extensions.IdentifierSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
 import org.bukkit.entity.Player
 
-val config: Config by lazy {
-    config(configPath, 4, Config()) { _, element, version ->
-        migrate(element, version)
-    }
-    loadConfig()
-}
+var config: Config = loadConfig()
 
 @Serializable
 data class Config(
-    var enchantmentRequired: Boolean = true,
-    var sneakRequired: Boolean = false,
-    var permissionRequired: Boolean = false,
+    var conditionStatement: ConditionChain = ConditionChain("ENCHANTMENT"),
     var itemsAllowed: Boolean = true,
     var expAllowed: Boolean = true,
     var ignoredEntitiesRangeMin: Double = 15.0,
@@ -97,23 +83,27 @@ data class Config(
     )
 }
 
-private fun migrate(jsonElement: JsonElement, version: Int?): Config? {
+fun migrate(jsonElement: JsonElement, version: Int?): Config? {
     val jsonObject = jsonElement.jsonObject
     return when (version) {
-        1 -> Config(
-            enchantmentRequired = jsonObject["needEnchantment"]?.jsonPrimitive?.boolean ?: return null,
-            sneakRequired = jsonObject["needSneak"]?.jsonPrimitive?.boolean ?: return null,
-            itemsAllowed = jsonObject["itemsAllowed"]?.jsonPrimitive?.boolean ?: return null,
-            expAllowed = jsonObject["expAllowed"]?.jsonPrimitive?.boolean ?: return null
-        )
+        1 -> {
+            val needEnchantment = jsonObject["needEnchantment"]?.jsonPrimitive?.boolean ?: return null
+            val sneakRequired = jsonObject["needSneak"]?.jsonPrimitive?.boolean ?: return null
+            Config(
+                conditionStatement = ConditionChain(if (needEnchantment xor sneakRequired) if (needEnchantment) "ENCHANTMENT" else "SNEAK" else "ENCHANTMENT && SNEAK"),
+                itemsAllowed = jsonObject["itemsAllowed"]?.jsonPrimitive?.boolean ?: return null,
+                expAllowed = jsonObject["expAllowed"]?.jsonPrimitive?.boolean ?: return null
+            )
+        }
         3 -> {
             val fullInventoryAlertObject = jsonObject["fullInventoryAlert"]?.jsonObject ?: return null
             val animationObject = jsonObject["animation"]?.jsonObject ?: return null
 
+            val needEnchantment = jsonObject["enchantmentRequired"]?.jsonPrimitive?.boolean ?: return null
+            val sneakRequired = jsonObject["sneakRequired"]?.jsonPrimitive?.boolean ?: return null
+
             Config(
-                enchantmentRequired = jsonObject["enchantmentRequired"]?.jsonPrimitive?.boolean ?: return null,
-                sneakRequired = jsonObject["sneakRequired"]?.jsonPrimitive?.boolean ?: return null,
-                permissionRequired = jsonObject["permissionRequired"]?.jsonPrimitive?.boolean ?: return null,
+                conditionStatement = ConditionChain(if (needEnchantment xor sneakRequired) if (needEnchantment) "ENCHANTMENT" else "SNEAK" else "ENCHANTMENT && SNEAK"),
                 itemsAllowed = jsonObject["itemsAllowed"]?.jsonPrimitive?.boolean ?: return null,
                 expAllowed = jsonObject["expAllowed"]?.jsonPrimitive?.boolean ?: return null,
                 ignoredEntitiesRangeMin = if (jsonObject["ignoreRangedWeapons"]?.jsonPrimitive?.boolean ?: return null) 15.0 else -1.0,

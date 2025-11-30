@@ -1,17 +1,10 @@
 package dev.nyon.magnetic.config
 
-import dev.nyon.konfig.config.config
 import dev.nyon.konfig.config.loadConfig
+import dev.nyon.magnetic.config.conditions.ConditionChain
 import dev.nyon.magnetic.extensions.IdentifierSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.boolean
-import kotlinx.serialization.json.double
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import net.fabricmc.loader.api.FabricLoader
+import kotlinx.serialization.json.*
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
@@ -20,18 +13,11 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 
-val config: Config by lazy {
-    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 4, Config()) { _, element, version ->
-        migrate(element, version)
-    }
-    loadConfig()
-}
+var config: Config = loadConfig()
 
 @Serializable
 data class Config(
-    var enchantmentRequired: Boolean = true,
-    var sneakRequired: Boolean = false,
-    var permissionRequired: Boolean = false,
+    var conditionStatement: ConditionChain = ConditionChain("ENCHANTMENT"),
     var itemsAllowed: Boolean = true,
     var expAllowed: Boolean = true,
     var ignoredEntitiesRangeMin: Double = 15.0,
@@ -100,53 +86,63 @@ data class Config(
 
     @Serializable
     data class Animation(
-        var enabled: Boolean = true,
-        var blocksPerSecond: Double = 1.0,
-        var canOtherPlayersPickup: Boolean = false
+        var enabled: Boolean = true, var blocksPerSecond: Double = 1.0, var canOtherPlayersPickup: Boolean = false
     )
 }
 
-private fun migrate(jsonElement: JsonElement, version: Int?): Config? {
+fun migrate(jsonElement: JsonElement, version: Int?): Config? {
     val jsonObject = jsonElement.jsonObject
     return when (version) {
-        1 -> Config(
-            enchantmentRequired = jsonObject["needEnchantment"]?.jsonPrimitive?.boolean ?: return null,
-            sneakRequired = jsonObject["needSneak"]?.jsonPrimitive?.boolean ?: return null,
-            itemsAllowed = jsonObject["itemsAllowed"]?.jsonPrimitive?.boolean ?: return null,
-            expAllowed = jsonObject["expAllowed"]?.jsonPrimitive?.boolean ?: return null
-        )
+        1 -> {
+            val needEnchantment = jsonObject["needEnchantment"]?.jsonPrimitive?.boolean ?: return null
+            val sneakRequired = jsonObject["needSneak"]?.jsonPrimitive?.boolean ?: return null
+            Config(
+                conditionStatement = ConditionChain(if (needEnchantment xor sneakRequired) if (needEnchantment) "ENCHANTMENT" else "SNEAK" else "ENCHANTMENT && SNEAK"),
+                itemsAllowed = jsonObject["itemsAllowed"]?.jsonPrimitive?.boolean ?: return null,
+                expAllowed = jsonObject["expAllowed"]?.jsonPrimitive?.boolean ?: return null
+            )
+        }
         3 -> {
             val fullInventoryAlertObject = jsonObject["fullInventoryAlert"]?.jsonObject ?: return null
             val animationObject = jsonObject["animation"]?.jsonObject ?: return null
 
+            val needEnchantment = jsonObject["enchantmentRequired"]?.jsonPrimitive?.boolean ?: return null
+            val sneakRequired = jsonObject["sneakRequired"]?.jsonPrimitive?.boolean ?: return null
+
             Config(
-                enchantmentRequired = jsonObject["enchantmentRequired"]?.jsonPrimitive?.boolean ?: return null,
-                sneakRequired = jsonObject["sneakRequired"]?.jsonPrimitive?.boolean ?: return null,
-                permissionRequired = jsonObject["permissionRequired"]?.jsonPrimitive?.boolean ?: return null,
+                conditionStatement = ConditionChain(if (needEnchantment xor sneakRequired) if (needEnchantment) "ENCHANTMENT" else "SNEAK" else "ENCHANTMENT && SNEAK"),
                 itemsAllowed = jsonObject["itemsAllowed"]?.jsonPrimitive?.boolean ?: return null,
                 expAllowed = jsonObject["expAllowed"]?.jsonPrimitive?.boolean ?: return null,
-                ignoredEntitiesRangeMin = if (jsonObject["ignoreRangedWeapons"]?.jsonPrimitive?.boolean ?: return null) 15.0 else -1.0,
-                ignoreEntities = jsonObject["ignoreEntities"]?.jsonArray?.map { element -> IdentifierSerializer.decodeFromString(element.jsonPrimitive.content) } ?: return null,
+                ignoredEntitiesRangeMin = if (jsonObject["ignoreRangedWeapons"]?.jsonPrimitive?.boolean
+                        ?: return null
+                ) 15.0 else -1.0,
+                ignoreEntities = jsonObject["ignoreEntities"]?.jsonArray?.map { element ->
+                    IdentifierSerializer.decodeFromString(element.jsonPrimitive.content)
+                } ?: return null,
                 fullInventoryAlert = Config.FullInventoryAlert(
                     soundAlert = Config.FullInventoryAlert.SoundAlert(
-                        enabled = fullInventoryAlertObject["soundAlert"]?.jsonObject["enabled"]?.jsonPrimitive?.boolean ?: return null,
-                        cooldownInSeconds = fullInventoryAlertObject["soundAlert"]?.jsonObject["cooldownInSeconds"]?.jsonPrimitive?.int ?: return null
-                    ),
-                    textAlert = Config.FullInventoryAlert.TextAlert(
-                        enabled = fullInventoryAlertObject["textAlert"]?.jsonObject["enabled"]?.jsonPrimitive?.boolean ?: return null,
-                        cooldownInSeconds = fullInventoryAlertObject["textAlert"]?.jsonObject["cooldownInSeconds"]?.jsonPrimitive?.int ?: return null
-                    ),
-                    titleAlert = Config.FullInventoryAlert.TitleAlert(
-                        enabled = fullInventoryAlertObject["titleAlert"]?.jsonObject["enabled"]?.jsonPrimitive?.boolean ?: return null,
-                        cooldownInSeconds = fullInventoryAlertObject["titleAlert"]?.jsonObject["cooldownInSeconds"]?.jsonPrimitive?.int ?: return null
+                        enabled = fullInventoryAlertObject["soundAlert"]?.jsonObject["enabled"]?.jsonPrimitive?.boolean
+                            ?: return null,
+                        cooldownInSeconds = fullInventoryAlertObject["soundAlert"]?.jsonObject["cooldownInSeconds"]?.jsonPrimitive?.int
+                            ?: return null
+                    ), textAlert = Config.FullInventoryAlert.TextAlert(
+                        enabled = fullInventoryAlertObject["textAlert"]?.jsonObject["enabled"]?.jsonPrimitive?.boolean
+                            ?: return null,
+                        cooldownInSeconds = fullInventoryAlertObject["textAlert"]?.jsonObject["cooldownInSeconds"]?.jsonPrimitive?.int
+                            ?: return null
+                    ), titleAlert = Config.FullInventoryAlert.TitleAlert(
+                        enabled = fullInventoryAlertObject["titleAlert"]?.jsonObject["enabled"]?.jsonPrimitive?.boolean
+                            ?: return null,
+                        cooldownInSeconds = fullInventoryAlertObject["titleAlert"]?.jsonObject["cooldownInSeconds"]?.jsonPrimitive?.int
+                            ?: return null
                     )
                 ),
                 animation = Config.Animation(
                     enabled = animationObject["enabled"]?.jsonPrimitive?.boolean ?: return null,
                     blocksPerSecond = animationObject["blocksPerSecond"]?.jsonPrimitive?.double ?: return null,
-                    canOtherPlayersPickup = animationObject["canOtherPlayersPickup"]?.jsonPrimitive?.boolean ?: return null
-                )
-            )
+                    canOtherPlayersPickup = animationObject["canOtherPlayersPickup"]?.jsonPrimitive?.boolean
+                        ?: return null
+                ))
         }
         else -> null
     }

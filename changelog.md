@@ -3,3 +3,10 @@
   - now the ignored drops are calculated by the distance the mob has died in comparison to the player
   - if the value is -1, no check will be performed
   - type: double, default: 15.0
+- introduce `conditionStatement` to replace old requirements
+  - now you can use logical statements to check if a player should be able to use magnetic
+  - the statement will be processed from start to end, so no weight of operators will be respected
+  - if the String is empty, no checks will be applied
+  - Operators: AND (&&), OR (||)
+  - Conditions: ENCHANTMENT, SNEAK, PERMISSION
+  - default: "ENCHANTMENT"

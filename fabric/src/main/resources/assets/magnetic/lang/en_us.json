@@ -1,10 +1,8 @@
 {
     "yacl3.config.magnetic.title": "magnetic",
     "yacl3.config.magnetic.category.general": "General",
-    "yacl3.config.magnetic.category.general.root.option.enchantmentRequired": "Enchantment required",
-    "yacl3.config.magnetic.category.general.root.option.enchantmentRequired.description": "The magnetic ability will only work if the tool in the off- or main-hand is enchanted with magnetic. If this option is set to false, the enchantment will not be available.",
-    "yacl3.config.magnetic.category.general.root.option.sneakRequired": "Only while sneaking",
-    "yacl3.config.magnetic.category.general.root.option.sneakRequired.description": "Requires the player to sneak to use magnetic.",
+    "yacl3.config.magnetic.category.general.root.option.conditionStatement": "Conditions",
+    "yacl3.config.magnetic.category.general.root.option.conditionStatement.description": "Sets the conditions that are required for magnetic to work. The format is a logical operation that processes from start to end of the text and accepts the following statements:\n- Operators: AND (&&), OR (||)\n- Conditions: ENCHANTMENT, SNEAK, PERMISSION\nIf the text is empty, no check will be applied.",
     "yacl3.config.magnetic.category.general.root.option.expAllowed": "Allow exp drops",
     "yacl3.config.magnetic.category.general.root.option.expAllowed.description": "Allows the player to also pickup exp with magnetic.",
     "yacl3.config.magnetic.category.general.root.option.itemsAllowed": "Allow item drops",

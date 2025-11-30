@@ -8,7 +8,6 @@ import dev.nyon.magnetic.extensions.BreakChainedBlocks.breakChainedBlocks
 import dev.nyon.magnetic.extensions.BreakChainedBlocks.ignoredIndirectChainedBlocks
 import dev.nyon.magnetic.extensions.BreakChainedBlocks.trailingBlocks
 import dev.nyon.magnetic.extensions.failsLongRangeCheck
-import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import io.papermc.paper.event.block.PlayerShearBlockEvent
@@ -43,7 +42,7 @@ object Listeners {
 
     @Suppress("unused")
     private val magneticListener = listen<DropEvent> {
-        if (!player.isAllowedToUseMagnetic()) return@listen
+        if (!config.conditionStatement.checkAndReport(player)) return@listen
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
@@ -72,7 +71,7 @@ object Listeners {
     fun listenForBukkitEvents() {
         listen<BlockDropItemEvent> {
             // Return before calling the DropEvent to prevent executing expensive logic
-            if (!player.isAllowedToUseMagnetic()) return@listen
+            if (!config.conditionStatement.checkAndReport(player)) return@listen
 
             val itemStacks = items.map { it.itemStack }.toMutableList()
 

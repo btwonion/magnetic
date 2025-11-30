@@ -2,7 +2,6 @@ package dev.nyon.magnetic
 
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
-import dev.nyon.magnetic.extensions.isAllowedToUseMagnetic
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
@@ -30,7 +29,7 @@ object DropEvent {
 
     @Suppress("unused", "KotlinConstantConditions")
     private val listener = event.register { items, exp, player, pos ->
-        if (!player.isAllowedToUseMagnetic()) return@register
+        if (!config.conditionStatement.checkAndReport(player)) return@register
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
@@ -56,7 +55,6 @@ object DropEvent {
             if (leftExp > 0) player.giveExperiencePoints(leftExp)
             exp.value = 0
         }
-        println("Dropped")
     }
 
     private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(

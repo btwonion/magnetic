@@ -89,11 +89,7 @@ public class MagneticBootstrapper implements PluginBootstrap {
     private boolean needsEnchantment() {
         try {
             List<String> configText = Files.readAllLines(Path.of("./plugins/magnetic/magnetic.json"));
-            String importantLine = configText.stream()
-                .filter(line -> line.contains("enchantmentRequired"))
-                .findFirst()
-                .orElse("true");
-            return importantLine.contains("true");
+            return configText.stream().anyMatch(line -> line.contains("ENCHANTMENT"));
         } catch (Exception e) {
             return true;
         }

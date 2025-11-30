@@ -1,7 +1,12 @@
 package dev.nyon.magnetic
 
+import dev.nyon.konfig.config.config
+import dev.nyon.magnetic.config.Command
+import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.MiniMessageTranslator
+import dev.nyon.magnetic.config.migrate
 import dev.nyon.magnetic.config.reloadIgnoredEntities
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
@@ -24,9 +29,18 @@ class Main : JavaPlugin() {
         INSTANCE = this
         val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
+        config(dev.nyon.magnetic.configPath, 4, Config()) { _, element, version ->
+            migrate(element, version)
+        }
         reloadIgnoredEntities()
         MiniMessageTranslator.loadTranslations()
         GlobalTranslator.translator().addSource(MiniMessageTranslator)
+        lifecycleManager.registerEventHandler(
+            LifecycleEvents.COMMANDS
+        ) { event ->
+            event.registrar().register(Command.root.build())
+        }
+        Command.root
     }
 
     override fun onEnable() {

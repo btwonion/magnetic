@@ -5,6 +5,7 @@ import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.dsl.*
 import dev.nyon.konfig.config.saveConfig
 import dev.nyon.magnetic.config.Identifier
+import dev.nyon.magnetic.config.conditions.ConditionChain
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.IdentifierSerializer
 import net.minecraft.client.gui.screens.Screen
@@ -12,17 +13,9 @@ import net.minecraft.network.chat.Component
 
 fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("magnetic") {
     val general by categories.registering {
-        val enchantmentRequired by rootOptions.registering {
-            binding(true, { config.enchantmentRequired }, { config.enchantmentRequired = it })
-            controller = tickBox()
-            descriptionBuilder {
-                addDefaultText(1)
-            }
-        }
-
-        val sneakRequired by rootOptions.registering {
-            binding(false, { config.sneakRequired }, { config.sneakRequired = it })
-            controller = tickBox()
+        val conditionStatement by rootOptions.registering {
+            binding("ENCHANTMENT", { config.conditionStatement.raw }, { config.conditionStatement = ConditionChain(it) })
+            controller = stringField()
             descriptionBuilder {
                 addDefaultText(1)
             }

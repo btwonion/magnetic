@@ -1,10 +1,8 @@
 {
     "yacl3.config.magnetic.title": "magnetic",
     "yacl3.config.magnetic.category.general": "Allgemein",
-    "yacl3.config.magnetic.category.general.root.option.enchantmentRequired": "Enchantment benötigt",
-    "yacl3.config.magnetic.category.general.root.option.enchantmentRequired.description": "Wenn diese Option aktiviert ist, ist die Magnetic-Fähigkeit nur verfügbar, wenn der Spieler ein Item in der Hand hält, das mit Magnetic verzaubert ist. Wenn diese Option deaktiviert ist, wird die Magnetic Verzauberung nicht verfügbar sein.",
-    "yacl3.config.magnetic.category.general.root.option.sneakRequired": "Nur beim Schleichen",
-    "yacl3.config.magnetic.category.general.root.option.sneakRequired.description": "Setzt voraus, dass der Spieler schleicht, damit die Magnetic-Fähigkeit funktioniert.",
+    "yacl3.config.magnetic.category.general.root.option.conditionStatement": "Vorraussetzungen",
+    "yacl3.config.magnetic.category.general.root.option.conditionStatement.description": "Setzt die Vorraussetzungen die benötigt sind, um Magnetic auszuführen. Das Format ist eine logische Operation, die vom Start bis zum Ende des Textes durchgeführt wird und akzeptiert folgende Aussagen:\n- Operatoren: AND (&&), OR (||)\n- Vorraussetzungen: ENCHANTMENT, SNEAK, PERMISSION\nWenn der Text leer ist, wird keine Überprüfung durchgeführt.",
     "yacl3.config.magnetic.category.general.root.option.expAllowed": "XP-Beute erlaubt",
     "yacl3.config.magnetic.category.general.root.option.expAllowed.description": "Legt fest, ob die Magnetic-Fähigkeit auch XP aufsammeln soll.",
     "yacl3.config.magnetic.category.general.root.option.itemsAllowed": "Item-Beute erlaubt",
