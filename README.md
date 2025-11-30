@@ -35,11 +35,13 @@ No more running around to collect drops—just break, kill, or mine, and let the
   The enchantment can be found like any vanilla enchantment. By trading, in treasures or via the enchantment table.
 
 - **Do I need to use the enchantment?**
-  No, just toggle the `needEnchantment` option! Like this, the enchantment will be removed completely.
+  No, just change the condition statement to exclude the `ENCHANTMENT` condition!
+  Like this, the enchantment will be removed completely.
 
 - **Can I configure the mod/plugin to only work on people that have a certain permission?**
-  Yes, you can toggle the `needPermission` option!
-  If you disable `needEnchantment` as well, the permission will function as a drop-in replacement for the enchantment
+  Yes, you can add the `PERMISSION` to the condition statement. For example: `ENCHANTMENT || PERMISSION` will work for
+  players that have the enchantment or the required permission.
+  The permission to check for is `magnetic.ability.use`.
 
 ---
 
@@ -49,15 +51,17 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
 
 ```json5
 {
-    "version": 2, // For migration purposes only, just ignore this.
+    "version": 4,
+    // For migration purposes only, just ignore this.
     "config": {
-        "enchantmentRequired": true, // The magnetic ability will only work if the tool in the off- or main-hand is enchanted with magnetic. If this option is set to false, the enchantment will not be available.
-        "sneakRequired": false, // Requires the player to sneak to use magnetic.
-        "permissionRequired": false, // Requires the player to have a certain permission ('magnetic.ability.use') to use magnetic.
-        "itemsAllowed": true, // Allows the player to also pickup items with magnetic.
-        "expAllowed": true, // Allows the player to also pickup exp with magnetic.
+        "conditionStatement": {
+            "raw": "ENCHANTMENT"
+            // Sets the conditions that are required for magnetic to work. The format is a logical operation that processes from start to end of the text and accepts the following statements: Operators: AND (&&), OR (||), Conditions: ENCHANTMENT, SNEAK, PERMISSIONIf the text is empty, no check will be applied.
+        },
+        "itemsAllowed": true, // Allows the player to also pick up items with magnetic.
+        "expAllowed": true, // Allows the player to also pick up exp with magnetic.
         "ignoredEntitiesRangeMin": 15.0, // Ignores drops that were produced by a player that was further away from the entity than this value. If this value is set to -1, no check will be performed.
-        "ignoreEntities": [], // The specified entities will not be affected by magnetic when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
+        "ignoreEntities": [], // Magnetic will not affect the specified entities when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
         "fullInventoryAlert": {
             "soundAlert": {
                 "enabled": true, // Enables sound alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
@@ -73,7 +77,7 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
             }
         },
         "animation": {
-            "enabled": true, // When enabled, all of the items that are handled by magnetic will be pulled towards you instead of directly being put in your inventory.
+            "enabled": true, // When enabled, all the items that are handled by magnetic will be pulled towards you instead of directly being put in your inventory.
             "blocksPerSecond": 1.0, // Defines how fast the items should be pulled towards a player.
             "canOtherPlayersPickup": false // Toggles whether other players can intercept the floating items and pick them up.
         }
