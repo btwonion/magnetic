@@ -55,8 +55,7 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
     // For migration purposes only, just ignore this.
     "config": {
         "conditionStatement": {
-            "raw": "ENCHANTMENT"
-            // Sets the conditions that are required for magnetic to work. The format is a logical operation that processes from start to end of the text and accepts the following statements: Operators: AND (&&), OR (||), Conditions: ENCHANTMENT, SNEAK, PERMISSIONIf the text is empty, no check will be applied.
+            "raw": "ENCHANTMENT" // Sets the conditions that are required for magnetic to work. The format is a logical operation that processes from start to end of the text and accepts the following statements: Operators: AND (&&), OR (||), Conditions: ENCHANTMENT, SNEAK, PERMISSIONIf the text is empty, no check will be applied.
         },
         "itemsAllowed": true, // Allows the player to also pick up items with magnetic.
         "expAllowed": true, // Allows the player to also pick up exp with magnetic.
