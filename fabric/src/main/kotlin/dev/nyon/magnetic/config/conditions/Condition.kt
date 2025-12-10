@@ -1,7 +1,11 @@
 package dev.nyon.magnetic.config.conditions
 
 import dev.nyon.magnetic.datagen.magneticEffectId
+import dev.nyon.magnetic.extensions.PlayerPermissionSupplier
+import net.minecraft.commands.Commands
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.permissions.Permission
+import net.minecraft.server.permissions.PermissionCheck
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.enchantment.EnchantmentHelper
 
@@ -33,8 +37,10 @@ object SneakCondition : Condition {
 
 object PermissionCondition : Condition {
     override val identifiers: Set<String> = setOf("PERMISSION")
+    private val permission = Permission.Atom.create("magnetic.ability.use")
 
     override fun check(player: ServerPlayer): Boolean {
-        return me.lucko.fabric.api.permissions.v0.Permissions.check(player, "magnetic.ability.use")
+        return Commands.hasPermission<PlayerPermissionSupplier>(PermissionCheck.Require(permission))
+            .test(PlayerPermissionSupplier(player))
     }
 }

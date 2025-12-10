@@ -73,10 +73,10 @@ dependencies {
         officialMojangMappings()
     })
 
-    implementation("org.vineflower:vineflower:1.11.1")
-    modImplementation("net.fabricmc:fabric-loader:0.17.2")
+    implementation("org.vineflower:vineflower:1.11.2")
+    modImplementation("net.fabricmc:fabric-loader:0.18.2")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fapi")!!}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.3+kotlin.2.1.21")
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
 
     modImplementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
     modCompileOnly("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
@@ -89,8 +89,6 @@ dependencies {
     modCompileOnly("maven.modrinth:balm:VY97Mtm9")
     modCompileOnly("curse.maven:tree-harvester-367178:6355493")
     modCompileOnly("curse.maven:collective-342584:6390780")
-
-    modCompileOnly("me.lucko:fabric-permissions-api:0.4.1")
 
     include(implementation("dev.nyon:konfig:3.0.1")!!)
 }

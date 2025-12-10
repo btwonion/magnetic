@@ -44,8 +44,12 @@ public class BeehiveBlockMixin {
         BiConsumer biConsumer,
         Operation<Boolean> original
     ) {
-        if (!(entity instanceof ServerPlayer serverPlayer)) return original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer);
-        return WrapOperationHelper.prepareGeneral(serverPlayer, () -> original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer));
+        if (!(entity instanceof ServerPlayer serverPlayer))
+            return original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer);
+        return WrapOperationHelper.prepareGeneral(
+            serverPlayer,
+            () -> original.call(serverLevel, resourceKey, blockState, blockEntity, itemStack, entity, biConsumer)
+        );
     }
 
     // Consumer of Lnet/minecraft/world/level/block/BeehiveBlock;dropHoneycomb(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/BlockEntity;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)V
@@ -67,7 +71,7 @@ public class BeehiveBlockMixin {
         return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, itemStack, blockPos);
     }
 
-    @WrapWithCondition(
+    @WrapOperation(
         method = "playerWillDestroy",
         at = @At(
             value = "INVOKE",
@@ -77,12 +81,18 @@ public class BeehiveBlockMixin {
     private boolean useMagneticInsteadOfDrop(
         Level instance,
         Entity entity,
+        Operation<Boolean> original,
         Level world,
         BlockPos pos,
         BlockState state,
         Player player
     ) {
-        if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem(), pos);
+        if (!(player instanceof ServerPlayer serverPlayer)) return original.call(instance, entity);
+        return WrapOperationHelper.wrapOperationPlayerItemSingle(
+            serverPlayer,
+            ((ItemEntity) entity).getItem(),
+            pos,
+            () -> original.call(instance, entity)
+        ) == null;
     }
 }

@@ -11,7 +11,6 @@ import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
 
 var config: Config = loadConfig()
 
@@ -47,7 +46,7 @@ data class Config(
             }
 
             override fun invoke(player: ServerPlayer) {
-                player.playNotifySound(sound, SoundSource.MASTER, 1f, 1f)
+                player.playSound(sound, 1f, 1f)
             }
         }
 

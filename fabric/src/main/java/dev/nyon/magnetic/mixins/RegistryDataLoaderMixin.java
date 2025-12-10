@@ -35,7 +35,7 @@ public class RegistryDataLoaderMixin {
         if (!ConfigKt.getConfig()
             .getConditionStatement()
             .getRaw()
-            .contains("ENCHANTMENT") && registryKey.location()
+            .contains("ENCHANTMENT") && registryKey.identifier()
             .equals(DataGeneratorKt.getMagneticEnchantmentId())) ci.cancel();
     }
 }

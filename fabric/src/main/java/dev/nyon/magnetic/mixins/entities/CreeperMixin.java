@@ -1,15 +1,14 @@
 package dev.nyon.magnetic.mixins.entities;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,24 +41,35 @@ public class CreeperMixin {
             original.call(instance, serverLevel, damageSource, b, resourceKey, consumer);
             return;
         }
-        WrapOperationHelper.prepareEntity(serverPlayer, instance, () -> original.call(instance, serverLevel, damageSource, b, resourceKey, consumer));
+        WrapOperationHelper.prepareEntity(
+            serverPlayer,
+            instance,
+            () -> original.call(instance, serverLevel, damageSource, b, resourceKey, consumer)
+        );
     }
 
     // Consumer of Lnet/minecraft/world/entity/monster/Creeper;killedEntity(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;)Z
-    @WrapWithCondition(
+    @WrapOperation(
         method = "method_72496",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
-    private boolean modifyCustomDeathLoot(
+    private ItemEntity modifyCustomDeathLoot(
         LivingEntity instance,
         ServerLevel serverLevel,
-        ItemStack itemStack
+        ItemStack itemStack,
+        Operation<ItemEntity> original
     ) {
         ServerPlayer player = threadLocal.get();
-        if (player == null) return true;
-        return MixinHelper.entityCustomDeathLootSingle(player, itemStack, instance, instance.blockPosition());
+        if (player == null) return original.call(instance, serverLevel, itemStack);
+        return WrapOperationHelper.entityWrapOperationPlayerItemSingle(
+            player,
+            itemStack,
+            instance,
+            instance.blockPosition(),
+            () -> original.call(instance, serverLevel, itemStack)
+        );
     }
 }

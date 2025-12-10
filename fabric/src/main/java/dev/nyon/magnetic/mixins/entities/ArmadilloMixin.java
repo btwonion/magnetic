@@ -29,13 +29,20 @@ public class ArmadilloMixin {
         )
     )
     private void modifyScuteDrop(
-        Args args, @Nullable Entity entity, ItemStack stack
+        Args args,
+        @Nullable Entity entity,
+        ItemStack stack
     ) {
         if (!(entity instanceof ServerPlayer serverPlayer)) return;
         BiConsumer<ServerLevel, ItemStack> original = args.get(5);
         args.set(
             5, (BiConsumer<ServerLevel, ItemStack>) (level, item) -> {
-                if (MixinHelper.entityWrapWithConditionPlayerItemSingle(serverPlayer, stack, instance, instance.blockPosition())) original.accept(level, item);
+                if (MixinHelper.entityWrapWithConditionPlayerItemSingle(
+                    serverPlayer,
+                    stack,
+                    instance,
+                    instance.blockPosition()
+                )) original.accept(level, item);
             }
         );
     }

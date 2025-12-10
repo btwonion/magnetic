@@ -1,9 +1,7 @@
 package dev.nyon.magnetic.mixins.blocks;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -51,7 +49,7 @@ public class PumpkinBlockMixin {
     }
 
     // Consumer of Lnet/minecraft/world/level/block/PumpkinBlock;useItemOn(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;
-    @WrapWithCondition(
+    @WrapOperation(
         method = "method_72609",
         at = @At(
             value = "INVOKE",
@@ -60,16 +58,18 @@ public class PumpkinBlockMixin {
     )
     private static boolean redirectPumpkinSeeds(
         Level instance,
-        Entity entity
+        Entity entity,
+        Operation<Boolean> original
     ) {
-        if (!(entity instanceof ItemEntity itemEntity)) return true;
+        if (!(entity instanceof ItemEntity itemEntity)) return original.call(instance, entity);
         ServerPlayer serverPlayer = threadLocal.get();
-        if (serverPlayer == null) return true;
+        if (serverPlayer == null) return original.call(instance, entity);
 
-        return MixinHelper.wrapWithConditionPlayerItemSingle(
+        return WrapOperationHelper.wrapOperationPlayerItemSingle(
             serverPlayer,
             itemEntity.getItem(),
-            itemEntity.blockPosition()
-        );
+            itemEntity.blockPosition(),
+            () -> original.call(instance, entity)
+        ) == null;
     }
 }

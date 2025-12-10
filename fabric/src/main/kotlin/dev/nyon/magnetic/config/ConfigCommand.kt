@@ -13,7 +13,7 @@ object ConfigCommand {
             Commands.literal("magnetic")
                 .then(
                     Commands.literal("reload")
-                        .requires { it.hasPermission(4) }
+                        .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
                         .executes { ctx ->
                             config = loadConfig<Config>()
                             reloadIgnoredEntities()

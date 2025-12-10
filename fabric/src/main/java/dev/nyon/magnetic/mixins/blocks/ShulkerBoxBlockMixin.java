@@ -1,7 +1,8 @@
 package dev.nyon.magnetic.mixins.blocks;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import dev.nyon.magnetic.utils.MixinHelper;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(ShulkerBoxBlock.class)
 public class ShulkerBoxBlockMixin {
 
-    @WrapWithCondition(
+    @WrapOperation(
         method = "playerWillDestroy",
         at = @At(
             value = "INVOKE",
@@ -26,12 +27,18 @@ public class ShulkerBoxBlockMixin {
     private boolean useMagneticInsteadOfDrop(
         Level instance,
         Entity entity,
+        Operation<Boolean> original,
         Level world,
         BlockPos pos,
         BlockState state,
         Player player
     ) {
-        if (!(player instanceof ServerPlayer serverPlayer)) return true;
-        return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, ((ItemEntity) entity).getItem(), pos);
+        if (!(player instanceof ServerPlayer serverPlayer)) return original.call(instance, entity);
+        return WrapOperationHelper.wrapOperationPlayerItemSingle(
+            serverPlayer,
+            ((ItemEntity) entity).getItem(),
+            pos,
+            () -> original.call(instance, entity)
+        ) == null;
     }
 }

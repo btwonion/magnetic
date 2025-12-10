@@ -1,9 +1,13 @@
 package dev.nyon.magnetic.mixins.entities;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import dev.nyon.magnetic.utils.MixinHelper;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,33 +15,27 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(AbstractHorse.class)
 public class AbstractHorseMixin {
 
-    @WrapWithCondition(
+    @WrapOperation(
         method = "dropEquipment",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
+            target = "Lnet/minecraft/world/entity/animal/equine/AbstractHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
         )
     )
-    public boolean modifyEquipmentDrop(
+    public ItemEntity modifyEquipmentDrop(
         AbstractHorse instance,
         ServerLevel serverLevel,
-        ItemStack stack
+        ItemStack itemStack,
+        Operation<ItemEntity> original
     ) {
-        return MixinHelper.entityDropEquipmentSingle(instance, stack, instance.blockPosition());
-    }
-
-    @WrapWithCondition(
-        method = "dropEquipment",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;spawnAtLocation(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/item/ItemEntity;"
-        )
-    )
-    public boolean modifyEquipmentDrops(
-        AbstractHorse instance,
-        ServerLevel serverLevel,
-        ItemStack stack
-    ) {
-        return MixinHelper.entityDropEquipmentSingle(instance, stack, instance.blockPosition());
+        LivingEntity lastAttacker = instance.getLastAttacker();
+        if (!(lastAttacker instanceof ServerPlayer player)) return original.call(instance, serverLevel, itemStack);
+        return WrapOperationHelper.entityWrapOperationPlayerItemSingle(
+            player,
+            itemStack,
+            instance,
+            instance.blockPosition(),
+            () -> original.call(instance, serverLevel, itemStack)
+        );
     }
 }

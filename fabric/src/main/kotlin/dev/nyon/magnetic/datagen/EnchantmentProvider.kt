@@ -5,8 +5,8 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.registries.Registries
+import net.minecraft.resources.Identifier
 import net.minecraft.resources.ResourceKey
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.entity.EquipmentSlotGroup
 import net.minecraft.world.item.enchantment.Enchantment
 import net.minecraft.world.item.enchantment.Enchantment.EnchantmentDefinition
@@ -32,7 +32,7 @@ class EnchantmentProvider(
         )
 
         val enchantment = Enchantment.enchantment(enchantmentDefinition).build(
-            ResourceLocation.fromNamespaceAndPath("magnetic", "magnetic.name")
+            Identifier.fromNamespaceAndPath("magnetic", "magnetic.name")
         )
         entries.add(ResourceKey.create(Registries.ENCHANTMENT, magneticEnchantmentId), enchantment)
     }
