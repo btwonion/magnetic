@@ -3,6 +3,7 @@
   - ignoredEntitiesRangeMin: 15 -> 50
   - titleAlert - enabled: true -> false
 - capitalize enchantment names everywhere [**#64**](https://github.com/btwonion/magnetic/issues/64)
+- do not animate items when the player's inventory is full [**#65**](https://github.com/btwonion/magnetic/issues/65)
 
 ## Paper
 
