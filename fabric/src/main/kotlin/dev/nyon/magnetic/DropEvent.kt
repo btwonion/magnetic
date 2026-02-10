@@ -49,9 +49,9 @@ object DropEvent {
             }
         }
         if (config.expAllowed) {
-            val fakeExperienceOrb = ExperienceOrb(player.level(), 0.0, 0.0, 0.0, exp.value)
+            val fakeExperienceOrb = ExperienceOrb(player.level(), 0.0, 0.0, 0.0, exp.get() as Int)
             player.take(fakeExperienceOrb, 1)
-            val leftExp = (fakeExperienceOrb as ExperienceOrbInvoker).invokeRepairPlayerItems(player, exp.value)
+            val leftExp = (fakeExperienceOrb as ExperienceOrbInvoker).invokeRepairPlayerItems(player, exp.get() as Int)
             if (leftExp > 0) player.giveExperiencePoints(leftExp)
             exp.value = 0
         }

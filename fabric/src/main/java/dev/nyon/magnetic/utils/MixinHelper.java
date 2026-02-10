@@ -63,17 +63,7 @@ public class MixinHelper {
             .invoker()
             .invoke(new ArrayList<>(), mutableInt, player, pos);
 
-        return mutableInt.getValue();
-    }
-
-    public static boolean entityDropEquipmentSingle(
-        LivingEntity entity,
-        ItemStack item,
-        BlockPos pos
-    ) {
-        LivingEntity lastAttacker = entity.getLastAttacker();
-        if (!(lastAttacker instanceof ServerPlayer player)) return true;
-        return entityCustomDeathLootSingle(player, item, entity, pos);
+        return (int) mutableInt.get();
     }
 
     public static List<ItemStack> entityDropEquipmentMultiple(
