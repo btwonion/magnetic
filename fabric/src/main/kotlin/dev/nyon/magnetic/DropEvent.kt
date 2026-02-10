@@ -9,9 +9,10 @@ import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.stats.Stats
 import net.minecraft.world.entity.ExperienceOrb
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import org.apache.commons.lang3.mutable.MutableInt
-import java.util.UUID
+import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
@@ -33,7 +34,7 @@ object DropEvent {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
-                if (config.animation.enabled) {
+                if (config.animation.enabled && canAddItem(item, player)) {
                     Animation.pullItemToPlayer(item, pos.center, player)
                     return@removeIf true
                 }
@@ -72,6 +73,14 @@ object DropEvent {
                 alert.invoke(player)
             }
         }
+    }
+
+    private fun canAddItem(stack: ItemStack, player: Player): Boolean {
+        if (player.inventory.freeSlot >= 0) return true
+        if (player.hasInfiniteMaterials()) return true
+        if (stack.isDamaged) return false
+        if (player.inventory.getSlotWithRemainingSpace(stack) > -1) return true
+        return false
     }
 }
 

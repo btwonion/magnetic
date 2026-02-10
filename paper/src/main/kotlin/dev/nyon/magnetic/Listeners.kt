@@ -20,6 +20,8 @@ import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import org.bukkit.craftbukkit.block.CraftBlock
+import org.bukkit.craftbukkit.entity.CraftPlayer
+import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
@@ -46,7 +48,7 @@ object Listeners {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
-                if (config.animation.enabled) {
+                if (config.animation.enabled && canAddItem(item, player)) {
                     Animation.pullItemToPlayer(item, pos.toCenterLocation(), player)
                     return@removeIf true
                 }
@@ -66,6 +68,16 @@ object Listeners {
             player.giveExp(exp.value, true)
             exp.value = 0
         }
+    }
+
+    private fun canAddItem(stack: ItemStack, player: Player): Boolean {
+        val nmsPlayer = (player as CraftPlayer).handle
+        if (nmsPlayer.inventory.freeSlot >= 0) return true
+        if (nmsPlayer.hasInfiniteMaterials()) return true
+        val nmsItem = (stack as CraftItemStack).handle
+        if (nmsItem.isDamaged) return false
+        if (nmsPlayer.inventory.getSlotWithRemainingSpace(nmsItem) > -1) return true
+        return false
     }
 
     fun listenForBukkitEvents() {
