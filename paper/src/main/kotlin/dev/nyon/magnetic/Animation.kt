@@ -52,6 +52,10 @@ object Animation {
                 itemEntity.scheduler.execute(Main.INSTANCE, {
                     val targetPos = target.location
                     val itemEntityPos = itemEntity.location
+                    if (targetPos.world.uid != itemEntityPos.world.uid) {
+                        untrackEntity(itemEntity)
+                        return@execute
+                    }
                     val mcEntity = (itemEntity as CraftEntity).handle
 
                     val vec = targetPos.subtract(itemEntityPos).toVector()
@@ -69,6 +73,10 @@ object Animation {
     }
 
     private val playerPickupItemListener = listen<PlayerAttemptPickupItemEvent>(EventPriority.HIGHEST) {
+        untrackEntity(item)
+    }
+
+    private fun untrackEntity(item: Item) {
         animationScope.launch {
             trackedItemEntitiesMutex.withLock {
                 if (trackedItemEntities.containsKey(item)) trackedItemEntities.remove(item)
