@@ -19,7 +19,7 @@ data class Config(
     var conditionStatement: ConditionChain = ConditionChain("ENCHANTMENT"),
     var itemsAllowed: Boolean = true,
     var expAllowed: Boolean = true,
-    var ignoredEntitiesRangeMin: Double = 15.0,
+    var ignoredEntitiesRangeMin: Double = 50.0,
     var ignoreEntities: List<Identifier> = listOf(),
     var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert(),
     var animation: Animation = Animation()
@@ -63,7 +63,7 @@ data class Config(
 
         @Serializable
         data class TitleAlert(
-            override var enabled: Boolean = true, override var cooldownInSeconds: Int = 5
+            override var enabled: Boolean = false, override var cooldownInSeconds: Int = 5
         ) : Alert {
             override fun invoke(player: ServerPlayer) {
                 val titlePacket = ClientboundSetTitleTextPacket(
