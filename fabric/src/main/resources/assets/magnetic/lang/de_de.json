@@ -1,5 +1,5 @@
 {
-    "yacl3.config.magnetic.title": "magnetic",
+    "yacl3.config.magnetic.title": "Magnetic",
     "yacl3.config.magnetic.category.general": "Allgemein",
     "yacl3.config.magnetic.category.general.root.option.conditionStatement": "Vorraussetzungen",
     "yacl3.config.magnetic.category.general.root.option.conditionStatement.description": "Setzt die Vorraussetzungen die benötigt sind, um Magnetic auszuführen. Das Format ist eine logische Operation, die vom Start bis zum Ende des Textes durchgeführt wird und akzeptiert folgende Aussagen:\n- Operatoren: AND (&&), OR (||)\n- Vorraussetzungen: ENCHANTMENT, SNEAK, PERMISSION\nWenn der Text leer ist, wird keine Überprüfung durchgeführt.",
@@ -32,7 +32,7 @@
     "yacl3.config.magnetic.category.general.group.animation.option.canOtherPlayersPickup": "Aufsammeln durch andere Spieler",
     "yacl3.config.magnetic.category.general.group.animation.option.canOtherPlayersPickup.description": "Legt fest, ob die zum Spieler schwebenden Gegenstände von anderen Spieler abefangen und aufgesammelt werden können.",
     "enchantment.magnetic.magnetic.name": "Magnetic",
-    "chat.message.fullinventoryalert.text": "[magnetic] Dein Inventar ist voll!",
+    "chat.message.fullinventoryalert.text": "[Magnetic] Dein Inventar ist voll!",
     "chat.message.fullinventoryalert.title.main": "!!!",
     "chat.message.fullinventoryalert.title.subtitle": "Dein Inventar ist voll!",
     "tag.item.magnetic.ranged_weapons": "Fernkampfwaffen"
