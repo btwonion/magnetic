@@ -15,3 +15,4 @@
   worlds [**#71**](https://github.com/btwonion/magnetic/issues/71)
 - ignore player drops on death if GravesX is present [**#73**](https://github.com/btwonion/magnetic/issues/73)
 - init tags before flattening the registry
+- fix enchantment registration on first launch after updating to v3.9.0 [**#69**](https://github.com/btwonion/magnetic/issues/69), [**#70**](https://github.com/btwonion/magnetic/issues/70)

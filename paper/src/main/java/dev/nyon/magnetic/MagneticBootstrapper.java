@@ -11,7 +11,6 @@ import io.papermc.paper.registry.event.RegistryEvents;
 import io.papermc.paper.registry.keys.tags.EnchantmentTagKeys;
 import io.papermc.paper.registry.keys.tags.ItemTypeTagKeys;
 import io.papermc.paper.registry.tag.TagKey;
-import io.papermc.paper.tag.PostFlattenTagRegistrar;
 import io.papermc.paper.tag.PreFlattenTagRegistrar;
 import io.papermc.paper.tag.TagEntry;
 import net.kyori.adventure.key.Key;
@@ -89,7 +88,13 @@ public class MagneticBootstrapper implements PluginBootstrap {
     private boolean needsEnchantment() {
         try {
             List<String> configText = Files.readAllLines(Path.of("./plugins/magnetic/magnetic.json"));
-            return configText.stream().anyMatch(line -> line.contains("ENCHANTMENT"));
+            // Check for the enchantment option in the current config format
+            if (configText.stream()
+                .anyMatch(line -> line.contains("ENCHANTMENT"))) return true;
+            // Check for the enchantment option in the past config formats
+            return configText.stream()
+                .anyMatch(line -> (line.contains("needEnchantment") || line.contains("enchantmentRequired")) &&
+                    line.contains("true"));
         } catch (Exception e) {
             return true;
         }
