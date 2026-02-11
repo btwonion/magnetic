@@ -33,6 +33,8 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.nyon.dev/releases")
+    maven("https://nexus.neetgames.com/repository/maven-public") // mcMMO
+    maven("https://maven.enginehub.org/repo/") // dependency of mcMMO
 }
 
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
@@ -46,6 +48,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     compileOnly("de.miraculixx:veinminer:2.4.7")
+    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.050-SNAPSHOT")
 }
 
 val modId = property("modId").toString()
@@ -60,6 +63,7 @@ paperPluginYaml {
     apiVersion = "1.21"
 
     dependencies.server("Veinminer", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
+    dependencies.server("mcMMO", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
 }
 
 tasks {

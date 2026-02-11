@@ -171,22 +171,6 @@ object Listeners {
         }
     }
 
-    fun listenForModEvents() { // Add Veinminer integration
-        if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) {
-            listen<de.miraculixx.veinminer.VeinMinerEvent.VeinminerDropEvent> {
-                val mutableInt = MutableInt(exp)
-                val itemStacks = items.toMutableList()
-                DropEvent(itemStacks, mutableInt, player, block.location).also(Event::callEvent)
-                exp = mutableInt.value
-
-                // Delete items that have been added to the inventory
-                items.removeIf { item ->
-                    itemStacks.none { stack -> stack.isSimilar(item) }
-                }
-            }
-        }
-    }
-
     private fun handleBreakChainedBlocks(
         block: Block,
         blockState: BlockState,

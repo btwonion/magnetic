@@ -1,11 +1,9 @@
 package dev.nyon.magnetic
 
 import dev.nyon.konfig.config.config
-import dev.nyon.magnetic.config.Command
-import dev.nyon.magnetic.config.Config
-import dev.nyon.magnetic.config.MiniMessageTranslator
-import dev.nyon.magnetic.config.migrate
-import dev.nyon.magnetic.config.reloadIgnoredEntities
+import dev.nyon.magnetic.compat.McMMOCompat
+import dev.nyon.magnetic.compat.VeinminerCompat
+import dev.nyon.magnetic.config.*
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
@@ -45,7 +43,9 @@ class Main : JavaPlugin() {
 
     override fun onEnable() {
         Listeners.listenForBukkitEvents()
-        Listeners.listenForModEvents()
+
+        if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) McMMOCompat.listenForEvents()
+        if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) VeinminerCompat.listenForEvents()
     }
 
     private fun moveConfigToNewPath(newPath: Path) {
