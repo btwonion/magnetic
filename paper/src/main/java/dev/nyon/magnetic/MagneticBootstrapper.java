@@ -77,11 +77,11 @@ public class MagneticBootstrapper implements PluginBootstrap {
 
         // Add enchantment to enchantment table, etc.
         manager.registerEventHandler(
-            LifecycleEvents.TAGS.postFlatten(RegistryKey.ENCHANTMENT), event -> {
-                final PostFlattenTagRegistrar<Enchantment> registrar = event.registrar();
-                registrar.addToTag(EnchantmentTagKeys.TRADEABLE, Set.of(MAGNETIC));
-                registrar.addToTag(EnchantmentTagKeys.TREASURE, Set.of(MAGNETIC));
-                registrar.addToTag(EnchantmentTagKeys.IN_ENCHANTING_TABLE, Set.of(MAGNETIC));
+            LifecycleEvents.TAGS.preFlatten(RegistryKey.ENCHANTMENT), event -> {
+                final PreFlattenTagRegistrar<Enchantment> registrar = event.registrar();
+                registrar.addToTag(EnchantmentTagKeys.TRADEABLE, Set.of(TagEntry.valueEntry(MAGNETIC)));
+                registrar.addToTag(EnchantmentTagKeys.TREASURE, Set.of(TagEntry.valueEntry(MAGNETIC)));
+                registrar.addToTag(EnchantmentTagKeys.IN_ENCHANTING_TABLE, Set.of(TagEntry.valueEntry(MAGNETIC)));
             }
         );
     }

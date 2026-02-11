@@ -10,3 +10,4 @@
 - fix console log spam that occurs when the animation is enabled and an item and a player are in different
   worlds [**#71**](https://github.com/btwonion/magnetic/issues/71)
 - ignore player drops on death if GravesX is present [**#73**](https://github.com/btwonion/magnetic/issues/73)
+- init tags before flattening the registry
