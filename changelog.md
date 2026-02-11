@@ -19,3 +19,4 @@
 - init tags before flattening the registry
 - fix enchantment registration on first launch after updating to v3.9.0 [**#69**](https://github.com/btwonion/magnetic/issues/69), [**#70**](https://github.com/btwonion/magnetic/issues/70)
 - compat: add mcMMO [**#63**](https://github.com/btwonion/magnetic/issues/63)
+- compat: add AuraSkills [**#61**](https://github.com/btwonion/magnetic/issues/61)
