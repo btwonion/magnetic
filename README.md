@@ -51,15 +51,14 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
 
 ```json5
 {
-    "version": 4,
-    // For migration purposes only, just ignore this.
+    "version": 4, // For migration purposes only, just ignore this.
     "config": {
         "conditionStatement": {
             "raw": "ENCHANTMENT" // Sets the conditions that are required for magnetic to work. The format is a logical operation that processes from start to end of the text and accepts the following statements: Operators: AND (&&), OR (||), Conditions: ENCHANTMENT, SNEAK, PERMISSIONIf the text is empty, no check will be applied.
         },
         "itemsAllowed": true, // Allows the player to also pick up items with magnetic.
         "expAllowed": true, // Allows the player to also pick up exp with magnetic.
-        "ignoredEntitiesRangeMin": 15.0, // Ignores drops that were produced by a player that was further away from the entity than this value. If this value is set to -1, no check will be performed.
+        "ignoredEntitiesRangeMin": 50.0, // Ignores drops that were produced by a player that was further away from the entity than this value. If this value is set to -1, no check will be performed.
         "ignoreEntities": [], // Magnetic will not affect the specified entities when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
         "fullInventoryAlert": {
             "soundAlert": {
@@ -71,7 +70,7 @@ Configuration is handled via the `magnetic.json` file and can be edited as well 
                 "cooldownInSeconds": 60 // The time that has to pass to show the message alert again.
             },
             "titleAlert": {
-                "enabled": true, // Enables title alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
+                "enabled": false, // Enables title alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
                 "cooldownInSeconds": 5 // The time that has to pass to show the title alert again.
             }
         },

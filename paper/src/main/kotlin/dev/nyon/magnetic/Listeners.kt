@@ -22,6 +22,7 @@ import org.bukkit.block.BlockState
 import org.bukkit.craftbukkit.block.CraftBlock
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
@@ -120,6 +121,7 @@ object Listeners {
             if (entityType.isIgnored) return@listen
             val killer = entity.killer ?: return@listen
             if (entity.failsLongRangeCheck(killer)) return@listen
+            if (entityType == EntityType.PLAYER && Bukkit.getPluginManager().isPluginEnabled("GravesX")) return@listen // Disable player death drops in favor of GravesX
             val mutableInt = MutableInt(droppedExp)
             val itemStacks = drops.toMutableList()
             DropEvent(itemStacks, mutableInt, killer, entity.location).also(Event::callEvent)
