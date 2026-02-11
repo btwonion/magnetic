@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.utils.WrapOperationHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.Item;
@@ -16,6 +17,24 @@ import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(VehicleEntity.class)
 public class VehicleEntityMixin {
+
+    @WrapOperation(
+        method = "hurtServer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/vehicle/VehicleEntity;destroy(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V"
+        )
+    )
+    private void injectPlayerIntoDestroy(
+        VehicleEntity instance,
+        ServerLevel level,
+        DamageSource damageSource,
+        Operation<Void> original
+    ) {
+        if (damageSource.getEntity() instanceof ServerPlayer player)
+            WrapOperationHelper.prepareEntity(player, instance, () -> original.call(instance, level, damageSource));
+    }
+
     @WrapOperation(
         method = "destroy(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/Item;)V",
         at = @At(

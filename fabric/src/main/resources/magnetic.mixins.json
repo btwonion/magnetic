@@ -11,7 +11,9 @@
         "blocks.BrushableBlockEntityMixin",
         "blocks.CandleCakeBlockMixin",
         "blocks.CaveVinesMixin",
+        "blocks.ContainersMixin",
         "blocks.PumpkinBlockMixin",
+        "blocks.ServerPlayerGameModeMixin",
         "blocks.ShulkerBoxBlockMixin",
         "blocks.SpawnerBlockMixin",
         "blocks.SweetBerryBushBlockMixin",
@@ -60,5 +62,5 @@
     ],
     "injectors": {
         "defaultRequire": 1
-    }
+  }
 }

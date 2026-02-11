@@ -5,6 +5,10 @@
 - capitalize enchantment names everywhere [**#64**](https://github.com/btwonion/magnetic/issues/64)
 - do not animate items when the player's inventory is full [**#65**](https://github.com/btwonion/magnetic/issues/65)
 
+## Fabric
+- handle container blocks again
+  - also adds drops of decorated pots [**#68**](https://github.com/btwonion/magnetic/issues/68)
+
 ## Paper
 
 - fix console log spam that occurs when the animation is enabled and an item and a player are in different

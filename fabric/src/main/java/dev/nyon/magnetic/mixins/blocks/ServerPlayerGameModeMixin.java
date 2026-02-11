@@ -1,0 +1,37 @@
+package dev.nyon.magnetic.mixins.blocks;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.nyon.magnetic.utils.WrapOperationHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+
+@Mixin(ServerPlayerGameMode.class)
+public class ServerPlayerGameModeMixin {
+
+    @Shadow
+    @Final
+    protected ServerPlayer player;
+
+    @WrapOperation(
+        method = "destroyBlock",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"
+        )
+    )
+    private boolean injectPlayerIntoDestroyChain(
+        ServerLevel instance,
+        BlockPos blockPos,
+        boolean b,
+        Operation<Boolean> original
+    ) {
+        return WrapOperationHelper.prepareGeneral(player, () -> original.call(instance, blockPos, b));
+    }
+}
