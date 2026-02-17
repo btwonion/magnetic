@@ -7,7 +7,7 @@ Inspired by the Hypixel Skyblock Telekinesis enchantment.
 
 ## Demo
 
-![Magnetic auto-pickup demo](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-showcase-cave.gif)
+![Magnetic auto-pickup demo](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-demo-cave.gif)
 
 ---
 
@@ -81,6 +81,14 @@ Apply changes with **`/magnetic reload`** or use the **config screen** on the cl
 - **`ENCHANTMENT`** (default)
 - **`ENCHANTMENT || PERMISSION`**
 - **`SNEAK`**
+
+---
+
+## Screenshots
+
+![Before and after](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-before-after.png)
+![Mining without Magnetic](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-before.gif)
+![Mining with Magnetic](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-after.gif)
 
 ---
 
