@@ -26,6 +26,8 @@ Magnetic is designed to feel **instant**, **lightweight**, and **configurable** 
 - **Rule-based activation:** Enchantment, sneak, or permission conditions.
 - **Server-friendly:** Lightweight and low overhead.
 
+![Mining comparison (without Magnetic, then with Magnetic)](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-compare.gif)
+
 ---
 
 ## Compatibility
@@ -81,12 +83,6 @@ Apply changes with **`/magnetic reload`** or use the **config screen** on the cl
 - **`ENCHANTMENT`** (default)
 - **`ENCHANTMENT || PERMISSION`**
 - **`SNEAK`**
-
----
-
-## Screenshots
-
-![Mining comparison (without Magnetic, then with Magnetic)](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-compare.gif)
 
 ---
 
