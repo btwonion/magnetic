@@ -1,93 +1,115 @@
 # Magnetic (Telekinesis for Minecraft)
 
-**Magnetically move items and experience directly into your inventory!
-Inspired by the Hypixel Skyblock Telekinesis enchantment.**  
-No more running around to collect drops—just break, kill, or mine, and let the loot fly to you!
+Pick up drops and XP instantly. No running around, no missed loot.
+Inspired by the Hypixel Skyblock Telekinesis enchantment.
 
 ---
 
-## ✨ Features
+## Demo
 
-- 🧲 **Automatic Pickup**: Items and experience orbs zip straight into your inventory.
-- ⚙️ **Configurable**: Fine-tune exactly how magnetic works for you.
-- 🚀 **Performance-Friendly**: Lightweight, designed for both servers and single-player.
-- 🔄 **Flexible**: Easy toggling and customizability.
+![Magnetic auto-pickup demo](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-showcase-cave.gif)
 
 ---
 
-## 🎬 Demo
+## Why this mod exists
 
-![Block drop auto-pickup preview](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-showcase-cave.gif)
-
-*Watch items and XP zip right to you!*
+**Collecting drops is busywork.** Magnetic removes the cleanup loop so you can stay focused on building, mining, and combat.
 
 ---
 
-## ❓ FAQ
+## Highlights
 
-- **Does this work in multiplayer?**  
-  Yes, both on servers and singleplayer!
+Magnetic is designed to feel **instant**, **lightweight**, and **configurable** without getting in your way.
 
-- **Is it compatible with other mods/plugins?**  
-  Designed for broad compatibility, but let us know if you find issues!
-
-- **Where can I find the enchantment?**
-  The enchantment can be found like any vanilla enchantment. By trading, in treasures or via the enchantment table.
-
-- **Do I need to use the enchantment?**
-  No, just change the condition statement to exclude the `ENCHANTMENT` condition!
-  Like this, the enchantment will be removed completely.
-
-- **Can I configure the mod/plugin to only work on people that have a certain permission?**
-  Yes, you can add the `PERMISSION` to the condition statement. For example: `ENCHANTMENT || PERMISSION` will work for
-  players that have the enchantment or the required permission.
-  The permission to check for is `magnetic.ability.use`.
+- **Auto-pickup:** Items and XP go straight to you.
+- **Optional animation:** Items fly to you instead of popping in.
+- **Rule-based activation:** Enchantment, sneak, or permission conditions.
+- **Server-friendly:** Lightweight and low overhead.
 
 ---
 
-## ⚙️ Configuration
+## Compatibility
 
-Configuration is handled via the `magnetic.json` file and can be edited as well in the config screen on the client:
+**Works with:**
+- **Fabric:** FallingTree, KleeSlabs, RightClickHarvest, TreeHarvester, Veinminer
+- **Paper:** mcMMO, AuraSkills, GravesX
+
+---
+
+## Usage
+
+**Equip a Magnetic-enchanted tool**, break or kill something, and **watch drops fly to you**.
+Prefer always-on? Remove `ENCHANTMENT` from the condition statement.
+
+---
+
+## Commands and Permissions
+
+**Commands:**
+- **`/magnetic reload`** (OP/level 3) reloads the config
+
+**Permission gate:**
+- **`magnetic.ability.use`**
+
+---
+
+## Configuration
+
+**Config file:** `magnetic.json`
+
+Minimal example:
 
 ```json5
 {
-    "version": 4, // For migration purposes only, just ignore this.
-    "config": {
-        "conditionStatement": {
-            "raw": "ENCHANTMENT" // Sets the conditions that are required for magnetic to work. The format is a logical operation that processes from start to end of the text and accepts the following statements: Operators: AND (&&), OR (||), Conditions: ENCHANTMENT, SNEAK, PERMISSIONIf the text is empty, no check will be applied.
-        },
-        "itemsAllowed": true, // Allows the player to also pick up items with magnetic.
-        "expAllowed": true, // Allows the player to also pick up exp with magnetic.
-        "ignoredEntitiesRangeMin": 50.0, // Ignores drops that were produced by a player that was further away from the entity than this value. If this value is set to -1, no check will be performed.
-        "ignoreEntities": [], // Magnetic will not affect the specified entities when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.
-        "fullInventoryAlert": {
-            "soundAlert": {
-                "enabled": true, // Enables sound alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
-                "cooldownInSeconds": 5 // The time that has to pass to play the sound alert again.
-            },
-            "textAlert": {
-                "enabled": true, // Enables text message alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
-                "cooldownInSeconds": 60 // The time that has to pass to show the message alert again.
-            },
-            "titleAlert": {
-                "enabled": false, // Enables title alerts that trigger when magnetic tries to add an item to the inventory, but the inventory is already full.
-                "cooldownInSeconds": 5 // The time that has to pass to show the title alert again.
-            }
-        },
-        "animation": {
-            "enabled": true, // When enabled, all the items that are handled by magnetic will be pulled towards you instead of directly being put in your inventory.
-            "blocksPerSecond": 1.0, // Defines how fast the items should be pulled towards a player.
-            "canOtherPlayersPickup": false // Toggles whether other players can intercept the floating items and pick them up.
-        }
+  "config": {
+    "conditionStatement": {
+      "raw": "ENCHANTMENT"
+    },
+    "itemsAllowed": true,
+    "expAllowed": true,
+    "animation": {
+      "enabled": true
     }
+  }
 }
 ```
 
-Changes require a server or game restart to take effect.
+Apply changes with **`/magnetic reload`** or use the **config screen** on the client.
+**Full reference:** [`docs/CONFIG.md`](https://github.com/btwonion/magnetic/blob/master/docs/CONFIG.md)
+
+**Condition examples:**
+- **`ENCHANTMENT`** (default)
+- **`ENCHANTMENT || PERMISSION`**
+- **`SNEAK`**
 
 ---
 
-## 💬 Support & Feedback
+## FAQ
 
-- Open an [issue](https://github.com/btwonion/magnetic/issues) for bugs or suggestions.
-- Join our [Discord](https://nyon.dev/discord) for help and community.
+**Does this work in multiplayer?**  
+Yes — **servers and singleplayer** are supported.
+
+**Where do I get the enchantment?**  
+It’s **vanilla-style**: trading, loot, or the enchantment table.
+
+**Do I have to use the enchantment?**  
+No. Remove `ENCHANTMENT` from the condition statement.
+
+**Can I restrict Magnetic to permissions only?**  
+Yes. Use `PERMISSION` in the condition statement and grant **`magnetic.ability.use`**.
+
+**Can I disable item or XP pickup separately?**  
+Yes. Toggle **`itemsAllowed`** and **`expAllowed`** in the config.
+
+**My inventory is full — what happens?**  
+Magnetic can play a **sound**, **message**, or **title** alert. Configure cooldowns in **`fullInventoryAlert`**.
+
+**Can other players steal the floating items?**  
+Optional. Set **`animation.canOtherPlayersPickup`** to control interception.
+
+---
+
+## Support
+
+- **Issues:** https://github.com/btwonion/magnetic/issues
+- **Discord:** https://nyon.dev/discord
