@@ -86,9 +86,7 @@ Apply changes with **`/magnetic reload`** or use the **config screen** on the cl
 
 ## Screenshots
 
-![Before and after](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-before-after.png)
-![Mining without Magnetic](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-before.gif)
-![Mining with Magnetic](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-after.gif)
+![Mining comparison (without Magnetic, then with Magnetic)](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-compare.gif)
 
 ---
 
