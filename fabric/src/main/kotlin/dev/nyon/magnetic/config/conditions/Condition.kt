@@ -1,5 +1,6 @@
 package dev.nyon.magnetic.config.conditions
 
+import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.datagen.magneticEffectId
 import dev.nyon.magnetic.extensions.PlayerPermissionSupplier
 import net.minecraft.commands.Commands
@@ -24,7 +25,7 @@ object EnchantmentCondition : Condition {
     override fun check(player: ServerPlayer): Boolean {
         return listOf(
             player.mainHandItem, player.offhandItem
-        ).any { it.hasMagnetic() || it.`is`(Items.BUCKET) }
+        ).any { it.hasMagnetic() || config.buckets.enabled && it.`is`(Items.BUCKET) }
     }
 }
 
