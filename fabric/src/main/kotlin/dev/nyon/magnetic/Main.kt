@@ -11,7 +11,7 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.commands.Commands
 
 fun init() {
-    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 4, Config()) { _, element, version ->
+    config(FabricLoader.getInstance().configDir.resolve("magnetic.json"), 5, Config()) { _, element, version ->
         migrate(element, version)
     }
     DropEvent

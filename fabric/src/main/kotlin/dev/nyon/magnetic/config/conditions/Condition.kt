@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.permissions.Permission
 import net.minecraft.server.permissions.PermissionCheck
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import net.minecraft.world.item.enchantment.EnchantmentHelper
 
 internal val conditions: Set<Condition> = setOf(EnchantmentCondition, SneakCondition, PermissionCondition)
@@ -23,7 +24,7 @@ object EnchantmentCondition : Condition {
     override fun check(player: ServerPlayer): Boolean {
         return listOf(
             player.mainHandItem, player.offhandItem
-        ).any { it.hasMagnetic() }
+        ).any { it.hasMagnetic() || it.`is`(Items.BUCKET) }
     }
 }
 
