@@ -1,6 +1,6 @@
 package dev.nyon.magnetic.utils;
 
-import dev.nyon.magnetic.BreakChainedPlayerHolder;
+import dev.nyon.magnetic.holders.BreakChainedPlayerHolder;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import net.minecraft.core.BlockPos;
@@ -114,8 +114,9 @@ public class MixinHelper {
         return mutableList;
     }
 
-    public static @Nullable ServerPlayer holdsValidPlayer(Block block) {
+    public static @Nullable ServerPlayer blockHoldsValidPlayer(Block block) {
         BreakChainedPlayerHolder holder = (BreakChainedPlayerHolder) block;
+        if (holder.getInitialBreaker() == null) return null;
         Long rootBroken = holder.getRootBroken();
         if (rootBroken == null || System.currentTimeMillis() - rootBroken > 5000) {
             holder.setInitialBreaker(null);

@@ -30,7 +30,7 @@ public class SpongeBlockMixin {
         BlockEntity blockEntity
     ) {
         if (blockEntity == null) return;
-        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer(blockState.getBlock());
+        ServerPlayer initialBreaker = MixinHelper.blockHoldsValidPlayer(blockState.getBlock());
         Block.dropResources(blockState, blockEntity.getLevel(), blockPos, null, initialBreaker, Items.AIR.getDefaultInstance());
     }
 }

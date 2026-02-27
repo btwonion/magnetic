@@ -25,7 +25,7 @@ public class GrowingPlantBlockMixin {
         BlockPos blockPos,
         boolean b
     ) {
-        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer((Block) (Object) this);
+        ServerPlayer initialBreaker = MixinHelper.blockHoldsValidPlayer((Block) (Object) this);
         return instance.destroyBlock(blockPos, b, initialBreaker);
     }
 }

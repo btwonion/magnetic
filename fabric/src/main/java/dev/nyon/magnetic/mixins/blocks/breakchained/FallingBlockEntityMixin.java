@@ -28,7 +28,7 @@ public class FallingBlockEntityMixin {
         ItemLike itemLike,
         Operation<ItemEntity> original
     ) {
-        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer(instance.getBlockState()
+        ServerPlayer initialBreaker = MixinHelper.blockHoldsValidPlayer(instance.getBlockState()
             .getBlock());
         if (initialBreaker == null) return original.call(instance, serverLevel, itemLike);
         return WrapOperationHelper.wrapOperationPlayerItemSingle(

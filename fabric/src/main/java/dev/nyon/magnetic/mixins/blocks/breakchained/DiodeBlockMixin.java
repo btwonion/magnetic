@@ -38,7 +38,7 @@ public class DiodeBlockMixin {
         @Nullable Orientation orientation,
         boolean notify
     ) {
-        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer((Block) (Object) this);
+        ServerPlayer initialBreaker = MixinHelper.blockHoldsValidPlayer((Block) (Object) this);
         Block.dropResources(blockState, world, blockPos, null, initialBreaker, Items.AIR.getDefaultInstance());
     }
 }
