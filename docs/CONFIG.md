@@ -6,13 +6,17 @@ Config file structure:
 
 ```json5
 {
-  "version": 4,
+  "version": 5,
   "config": {
     "conditionStatement": {
       "raw": "ENCHANTMENT"
     },
     "itemsAllowed": true,
     "expAllowed": true,
+    "buckets": {
+      "enabled": true,
+      "abilityTimeout": 10000
+    },
     "ignoredEntitiesRangeMin": 50.0,
     "ignoreEntities": [],
     "fullInventoryAlert": {
@@ -64,6 +68,16 @@ If `true`, items are pulled into the inventory.
 
 ## expAllowed
 If `true`, XP orbs are pulled into the inventory.
+
+## buckets
+Controls the behavior of buckets.
+
+### buckets.enabled
+If `true`, drops that are caused by a placed bucket are pulled into the inventory.
+
+### buckets.abilityTimeout
+The amount of time (in milliseconds) that the Magnetic ability will work for for a newly placed bucket.
+
 
 ## ignoredEntitiesRangeMin
 Ignores drops if the player was farther than this distance from the entity.
