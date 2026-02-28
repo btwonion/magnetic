@@ -1,7 +1,9 @@
 package dev.nyon.magnetic.config.conditions
 
+import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.magneticKey
 import dev.nyon.magnetic.magneticPermission
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -20,7 +22,7 @@ object EnchantmentCondition : Condition {
         return listOf(
             player.inventory.itemInMainHand,
             player.inventory.itemInOffHand
-        ).any { it.hasMagnetic() }
+        ).any { it.hasMagnetic() || config.buckets.enabled && it.type == Material.BUCKET }
     }
 }
 

@@ -5,6 +5,10 @@ import dev.nyon.magnetic.compat.AuraSkillsCompat
 import dev.nyon.magnetic.compat.McMMOCompat
 import dev.nyon.magnetic.compat.VeinminerCompat
 import dev.nyon.magnetic.config.*
+import dev.nyon.magnetic.listeners.BlockListeners
+import dev.nyon.magnetic.listeners.DropEventListener
+import dev.nyon.magnetic.listeners.ItemListeners
+import dev.nyon.magnetic.listeners.FluidListeners
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
@@ -28,22 +32,19 @@ class Main : JavaPlugin() {
         INSTANCE = this
         val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
-        config(dev.nyon.magnetic.configPath, 4, Config()) { _, element, version ->
+        config(dev.nyon.magnetic.configPath, 5, Config()) { _, element, version ->
             migrate(element, version)
         }
         reloadIgnoredEntities()
-        MiniMessageTranslator.loadTranslations()
-        GlobalTranslator.translator().addSource(MiniMessageTranslator)
-        lifecycleManager.registerEventHandler(
-            LifecycleEvents.COMMANDS
-        ) { event ->
-            event.registrar().register(Command.root.build())
-        }
-        Command.root
+        registerTranslations()
+        registerCommand()
     }
 
     override fun onEnable() {
-        Listeners.listenForBukkitEvents()
+        DropEventListener
+        ItemListeners
+        BlockListeners
+        FluidListeners
 
         if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) McMMOCompat.listenForEvents()
         if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) VeinminerCompat.listenForEvents()
@@ -53,6 +54,20 @@ class Main : JavaPlugin() {
     private fun moveConfigToNewPath(newPath: Path) {
         val oldPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic.json")
         if (oldPath.exists()) oldPath.moveTo(newPath.createParentDirectories(), overwrite = true)
+    }
+
+    private fun registerTranslations() {
+        MiniMessageTranslator.loadTranslations()
+        GlobalTranslator.translator().addSource(MiniMessageTranslator)
+    }
+
+    private fun registerCommand() {
+        lifecycleManager.registerEventHandler(
+            LifecycleEvents.COMMANDS
+        ) { event ->
+            event.registrar().register(Command.root.build())
+        }
+        Command.root
     }
 }
 

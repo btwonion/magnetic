@@ -82,4 +82,6 @@ object Animation {
             }
         }
     }
+
+    fun tracksItem(item: Item) = trackedItemEntities.containsKey(item)
 }
