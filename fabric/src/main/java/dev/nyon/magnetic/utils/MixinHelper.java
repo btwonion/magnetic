@@ -1,8 +1,10 @@
 package dev.nyon.magnetic.utils;
 
-import dev.nyon.magnetic.BreakChainedPlayerHolder;
+import dev.nyon.magnetic.config.ConfigKt;
+import dev.nyon.magnetic.holders.BreakChainedPlayerHolder;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
+import dev.nyon.magnetic.holders.FluidPlayerHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -13,6 +15,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.WaterFluid;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,8 +118,9 @@ public class MixinHelper {
         return mutableList;
     }
 
-    public static @Nullable ServerPlayer holdsValidPlayer(Block block) {
+    public static @Nullable ServerPlayer blockHoldsValidPlayer(Block block) {
         BreakChainedPlayerHolder holder = (BreakChainedPlayerHolder) block;
+        if (holder.getInitialBreaker() == null) return null;
         Long rootBroken = holder.getRootBroken();
         if (rootBroken == null || System.currentTimeMillis() - rootBroken > 5000) {
             holder.setInitialBreaker(null);
@@ -123,6 +128,18 @@ public class MixinHelper {
             return null;
         }
         return holder.getInitialBreaker();
+    }
+
+    public static @Nullable ServerPlayer fluidHoldsValidPlayer(FlowingFluid fluid) {
+        FluidPlayerHolder holder = (FluidPlayerHolder) fluid;
+        if (holder.getPlayer() == null) return null;
+        Long placedAt = holder.getPlacedAt();
+        if (placedAt == null || placedAt != -1 && System.currentTimeMillis() - placedAt > ConfigKt.getConfig().getBuckets().getAbilityTimeout()) {
+            holder.setPlayer(null);
+            holder.setPlacedAt(null);
+            return null;
+        }
+        return holder.getPlayer();
     }
 
     public static void tagSurroundingBlocksWithPlayer(ServerPlayer serverPlayer, BlockPos rootPos, ServerLevel level) {

@@ -31,7 +31,7 @@ public class LeafEventsMixin {
     ) {
         BlockState blockState = level.getBlockState(pos);
         Block block = blockState.getBlock();
-        ServerPlayer serverPlayer = MixinHelper.holdsValidPlayer(block);
+        ServerPlayer serverPlayer = MixinHelper.blockHoldsValidPlayer(block);
         if (serverPlayer == null) return true;
 
         MixinHelper.tagSurroundingBlocksWithPlayer(serverPlayer, pos, level);

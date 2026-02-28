@@ -27,7 +27,7 @@ public class RedStoneWireBlockMixin {
         Level level,
         BlockPos blockPos
     ) {
-        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer((Block) (Object) this);
+        ServerPlayer initialBreaker = MixinHelper.blockHoldsValidPlayer((Block) (Object) this);
         Block.dropResources(blockState, level, blockPos, null, initialBreaker, Items.AIR.getDefaultInstance());
     }
 }

@@ -37,6 +37,24 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
         }
 
+        val buckets by groups.registering {
+            val enabled by options.registering {
+                binding(true, { config.buckets.enabled }, { config.buckets.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val abilityTimeout by options.registering {
+                binding(10000, { config.buckets.abilityTimeout }, { config.buckets.abilityTimeout = it })
+                controller = numberField(-1, Long.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+        }
+
         val ignoreEntities = rootOptions.register(
             "ignoreKilledEntities",
             ListOption.createBuilder<String>()

@@ -3,7 +3,7 @@ package dev.nyon.magnetic.mixins.blocks;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.nyon.magnetic.BreakChainedPlayerHolder;
+import dev.nyon.magnetic.holders.BreakChainedPlayerHolder;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
@@ -127,7 +127,7 @@ public abstract class BlockMixin implements BreakChainedPlayerHolder {
         int maxUpdateDepth
     ) {
         Block toDestroy = instance.getBlockState(blockPos).getBlock();
-        ServerPlayer initialBreaker = MixinHelper.holdsValidPlayer(toDestroy);
+        ServerPlayer initialBreaker = MixinHelper.blockHoldsValidPlayer(toDestroy);
         return instance.destroyBlock(blockPos, b, initialBreaker, maxUpdateDepth);
     }
 

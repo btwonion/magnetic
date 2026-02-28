@@ -3,7 +3,6 @@ package dev.nyon.magnetic
 import com.destroystokyo.paper.event.server.ServerTickStartEvent
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.listen
-import io.papermc.paper.threadedregions.EntityScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -83,4 +82,6 @@ object Animation {
             }
         }
     }
+
+    fun tracksItem(item: Item) = trackedItemEntities.containsKey(item)
 }
