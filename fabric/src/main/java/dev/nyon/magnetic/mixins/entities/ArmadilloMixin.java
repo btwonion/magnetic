@@ -34,12 +34,12 @@ public class ArmadilloMixin {
         ItemStack stack
     ) {
         if (!(entity instanceof ServerPlayer serverPlayer)) return;
-        BiConsumer<ServerLevel, ItemStack> original = args.get(5);
+        BiConsumer<ServerLevel, ItemStack> original = args.get(4);
         args.set(
-            5, (BiConsumer<ServerLevel, ItemStack>) (level, item) -> {
+            4, (BiConsumer<ServerLevel, ItemStack>) (level, item) -> {
                 if (MixinHelper.entityWrapWithConditionPlayerItemSingle(
                     serverPlayer,
-                    stack,
+                    item,
                     instance,
                     instance.blockPosition()
                 )) original.accept(level, item);
