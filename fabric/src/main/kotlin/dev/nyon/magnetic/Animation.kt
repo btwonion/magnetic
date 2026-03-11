@@ -1,6 +1,7 @@
 package dev.nyon.magnetic
 
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.utils.MixinHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,7 +23,12 @@ object Animation {
     fun pullItemToPlayer(item: ItemStack, pos: Vec3, player: ServerPlayer) {
         val itemEntity = ItemEntity(player.level(), pos.x, pos.y, pos.z, item)
         if (!config.animation.canOtherPlayersPickup) itemEntity.setTarget(player.uuid)
-        player.level().addFreshEntity(itemEntity)
+        MixinHelper.animationSkip.set(true)
+        try {
+            player.level().addFreshEntity(itemEntity)
+        } finally {
+            MixinHelper.animationSkip.set(null)
+        }
         animationScope.launch {
             trackedItemEntitiesMutex.withLock {
                 trackedItemEntities[itemEntity] = player
@@ -30,7 +36,8 @@ object Animation {
         }
     }
 
-    private val tickListener = ServerTickEvents.END_WORLD_TICK.register { level ->
+    @Suppress("unused")
+    private val tickListener = ServerTickEvents.END_WORLD_TICK.register { _ ->
         animationScope.launch {
             val copiedItemEntities: Map<ItemEntity, ServerPlayer>
             trackedItemEntitiesMutex.withLock {

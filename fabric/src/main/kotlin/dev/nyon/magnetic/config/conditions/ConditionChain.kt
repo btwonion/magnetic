@@ -24,7 +24,8 @@ class ConditionChain(val raw: String) {
             e.printStackTrace()
             player.sendSystemMessage(
                 Component.literal("[magnetic] There seems to be an error with the condition statements. Please contact the server administrator to check the logs for more information.")
-                    .withStyle(ChatFormatting.RED))
+                    .withStyle(ChatFormatting.RED)
+            )
         }
         return false
     }
@@ -38,12 +39,9 @@ class ConditionChain(val raw: String) {
      * @throws IllegalStateException If the statement has an invalid syntax. To check this, it will ignore empty spaces,
      * illegal statements, but it won't accept two statements of the same type followed by one another.
      */
-    fun validate(player: ServerPlayer): Boolean {
-        // Will be instantiated as soon as the first condition is processed and will not be changed afterward
-        var firstCondition: Condition? = null
-        // Will be changed everytime an operator is processed
-        var operatorToApply: Operator? = null
-        // Always set the previously processed statement
+    fun validate(player: ServerPlayer): Boolean { // Will be instantiated as soon as the first condition is processed and will not be changed afterward
+        var firstCondition: Condition? = null // Will be changed everytime an operator is processed
+        var operatorToApply: Operator? = null // Always set the previously processed statement
         var previousBoolean = true
         parsedStatements.forEachIndexed { index, statement ->
             if (index == 0) if (statement !is Condition) throw IllegalStateException("A statement must start with a condition.")

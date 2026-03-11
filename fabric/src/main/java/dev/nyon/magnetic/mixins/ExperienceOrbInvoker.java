@@ -13,4 +13,10 @@ public interface ExperienceOrbInvoker {
         ServerPlayer serverPlayer,
         int i
     );
+
+    @Invoker("getValue")
+    int invokeGetValue();
+
+    @Invoker("setValue")
+    void invokeSetValue(int value);
 }

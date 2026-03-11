@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.nyon.magnetic.utils.MixinHelper;
-import dev.nyon.magnetic.utils.WrapOperationHelper;
 import io.github.jamalam360.rightclickharvest.RightClickHarvest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -53,10 +52,12 @@ public class RightClickHarvestMixin {
             original.call(instance, consumer);
             return;
         }
-        WrapOperationHelper.prepareGeneral(
-            serverPlayer,
-            () -> original.call(instance, consumer)
-        );
+        threadLocal.set(serverPlayer);
+        try {
+            original.call(instance, consumer);
+        } finally {
+            threadLocal.remove();
+        }
     }
 
     @WrapWithCondition(
@@ -92,7 +93,8 @@ public class RightClickHarvestMixin {
         BlockHitResult hitResult,
         boolean initialCall,
         CallbackInfoReturnable<InteractionResult> cir,
-        @Local(ordinal = 1) BlockPos breakPos
+        @Local(ordinal = 1)
+        BlockPos breakPos
     ) {
         if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel)) return;
         MixinHelper.tagSurroundingBlocksWithPlayer(serverPlayer, breakPos, serverLevel);

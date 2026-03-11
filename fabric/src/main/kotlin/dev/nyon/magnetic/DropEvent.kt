@@ -63,6 +63,7 @@ object DropEvent {
         config.fullInventoryAlert.textAlert to mutableMapOf(),
         config.fullInventoryAlert.titleAlert to mutableMapOf()
     )
+
     private fun tickInventoryAlert(player: ServerPlayer) {
         val currentTime = Clock.System.now()
         cooldowns.forEach { (alert, playerCooldowns) ->

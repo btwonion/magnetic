@@ -23,7 +23,8 @@ public class RightClickHarvestMixinPlugin implements IMixinConfigPlugin {
         String targetClassName,
         String mixinClassName
     ) {
-        return FabricLoader.getInstance().isModLoaded("rightclickharvest");
+        return FabricLoader.getInstance()
+            .isModLoaded("rightclickharvest");
     }
 
     @Override

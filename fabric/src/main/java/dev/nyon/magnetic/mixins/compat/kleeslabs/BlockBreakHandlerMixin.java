@@ -27,7 +27,8 @@ public class BlockBreakHandlerMixin {
         Entity entity,
         BreakBlockEvent event
     ) {
-        if (!(event.getPlayer() instanceof ServerPlayer serverPlayer) || !(event.getLevel() instanceof ServerLevel)) return true;
+        if (!(event.getPlayer() instanceof ServerPlayer serverPlayer) || !(event.getLevel() instanceof ServerLevel))
+            return true;
         if (!(entity instanceof ItemEntity itemEntity)) return true;
         return MixinHelper.wrapWithConditionPlayerItemSingle(serverPlayer, itemEntity.getItem(), event.getPos());
     }

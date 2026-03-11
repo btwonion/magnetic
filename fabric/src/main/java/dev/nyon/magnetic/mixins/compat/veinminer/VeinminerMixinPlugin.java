@@ -23,7 +23,8 @@ public class VeinminerMixinPlugin implements IMixinConfigPlugin {
         String targetClassName,
         String mixinClassName
     ) {
-        return FabricLoader.getInstance().isModLoaded("veinminer");
+        return FabricLoader.getInstance()
+            .isModLoaded("veinminer");
     }
 
     @Override

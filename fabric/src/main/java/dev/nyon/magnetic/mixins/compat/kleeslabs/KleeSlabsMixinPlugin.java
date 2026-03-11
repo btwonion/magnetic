@@ -23,7 +23,8 @@ public class KleeSlabsMixinPlugin implements IMixinConfigPlugin {
         String targetClassName,
         String mixinClassName
     ) {
-        return FabricLoader.getInstance().isModLoaded("kleeslabs");
+        return FabricLoader.getInstance()
+            .isModLoaded("kleeslabs");
     }
 
     @Override
