@@ -33,6 +33,7 @@ public class VehicleEntityMixin {
     ) {
         if (damageSource.getEntity() instanceof ServerPlayer player)
             WrapOperationHelper.prepareEntity(player, instance, () -> original.call(instance, level, damageSource));
+        else original.call(instance, level, damageSource);
     }
 
     @WrapOperation(
