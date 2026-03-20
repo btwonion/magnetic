@@ -43,12 +43,7 @@
         ]
     },
     "mixins": [
-        "magnetic.mixins.json",
-        "compat.fallingtree.mixins.json",
-        "compat.kleeslabs.mixins.json",
-        "compat.rightclickharvest.mixins.json",
-        "compat.treeharvester.mixins.json",
-        "compat.veinminer.mixins.json"
+        "magnetic.mixins.json"
     ],
     "accessWidener": "magnetic.classtweaker",
     "custom": {

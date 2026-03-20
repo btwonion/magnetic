@@ -9,7 +9,7 @@
         "ItemEntityMixin",
         "LevelMixin",
         "LivingEntityMixin",
-        "RegistryDataLoaderMixin",
+        "RegistryLoadTaskMixin",
         "ServerGamePacketListenerMixin",
         "ServerLevelMixin",
         "ServerPlayerGameModeMixin",

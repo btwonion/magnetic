@@ -41,14 +41,15 @@ MixinHelper.threadLocal.remove();     // RETURN inject — always use .remove(),
 
 Each mixin follows the same pattern — set threadLocal at HEAD, remove at RETURN:
 
-| Mixin | Hook | Covers |
-|-------|------|--------|
-| `ServerPlayerGameModeMixin` | `destroyBlock`, `useItemOn` | Block breaking, item interactions (berries, beehives, pumpkins, etc.) |
-| `LevelMixin` | `destroyBlock` | Chain-broken blocks (falls back to PositionTracker lookup) |
-| `LivingEntityMixin` | `dropAllDeathLoot` | Mob death drops |
-| `ServerGamePacketListenerMixin` | `handleInteract` | Entity interactions |
-| `FishingHookMixin` | `retrieve` | Fishing drops |
-| `BucketItemMixin` | bucket use | Records placement in PositionTracker for fluid tracking |
+| Mixin                           | Hook                        | Covers                                                                                |
+|---------------------------------|-----------------------------|---------------------------------------------------------------------------------------|
+| `ServerPlayerGameModeMixin`     | `destroyBlock`, `useItemOn` | Block breaking, item interactions (berries, beehives, pumpkins, etc.)                 |
+| `LevelMixin`                    | `destroyBlock`              | Chain-broken blocks (falls back to PositionTracker lookup)                            |
+| `LivingEntityMixin`             | `dropAllDeathLoot`          | Mob death drops                                                                       |
+| `ServerGamePacketListenerMixin` | `handleInteract`            | Entity interactions                                                                   |
+| `FishingHookMixin`              | `retrieve`                  | Fishing drops                                                                         |
+| `BucketItemMixin`               | bucket use                  | Records placement in PositionTracker for fluid tracking                               |
+| `FlowingFluidMixin`             | `spreadTo`                  | Water flow destroying blocks (looks up player from PositionTracker, sets threadLocal) |
 
 ### Mixin Target Class Rule
 
@@ -56,12 +57,12 @@ Mixin method references must target the class that **defines** the method, not a
 
 ### Conditional Compat Mixins
 
-Each compatibility mod has its own `IMixinConfigPlugin` that checks `FabricLoader.getInstance().isModLoaded("modid")` in `shouldApplyMixin()`. Compat mixin configs are separate JSON files (e.g., `compat.veinminer.mixins.json`).
+Fabric compat mixins have been removed. Paper still has compat event listeners (see below).
 
 ### Access Patterns
 
 - `@Invoker` for private/protected methods (e.g., `ExperienceOrbInvoker` for `getValue()`/`setValue()`)
-- Access widener (`magnetic.accesswidener`) for fields/methods needed at compile time
+- Class tweaker (`magnetic.classtweaker`) for fields/methods needed at compile time
 
 ## Configuration
 
@@ -80,8 +81,8 @@ Three condition types:
 
 ## Compatibility Mods
 
-### Fabric (via conditional mixins)
-FallingTree, KleeSlabs, RightClickHarvest, TreeHarvester, Veinminer
+### Fabric
+None (compat mixins removed in 26.1)
 
 ### Paper (via event listeners)
 mcMMO, AuraSkills, Veinminer
@@ -108,7 +109,7 @@ After implementing a feature or fix, ask the user to test it in-game rather than
 - `fabric/src/main/kotlin/dev/nyon/magnetic/config/Config.kt` — config data class
 - `fabric/src/main/kotlin/dev/nyon/magnetic/config/conditions/` — condition system
 - `fabric/src/main/kotlin/dev/nyon/magnetic/utils/PositionTracker.kt` — block→player tracking
-- `fabric/src/main/java/dev/nyon/magnetic/utils/MixinHelper.java` — ThreadLocal + helpers
+- `fabric/src/main/kotlin/dev/nyon/magnetic/utils/MixinHelper.kt` — ThreadLocal + helpers
 - `fabric/src/main/java/dev/nyon/magnetic/mixins/ServerLevelMixin.java` — central interception
 - `fabric/src/main/resources/magnetic.mixins.json` — mixin registry
 

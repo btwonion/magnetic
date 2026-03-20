@@ -71,16 +71,16 @@ dependencies {
     implementation("net.fabricmc:fabric-language-kotlin:1.13.9+kotlin.2.3.10")
 
     implementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
-    compileOnly("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
+    implementation("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
 
     // Compatibility mods
-    compileOnly("maven.modrinth:rightclickharvest:9jOYB5rp")
-    compileOnly("maven.modrinth:veinminer:n6Nt0h4H")
-    compileOnly("maven.modrinth:fallingtree:hB7NfdzA")
-    compileOnly("maven.modrinth:kleeslabs:VzuAv5q8")
-    compileOnly("maven.modrinth:balm:VY97Mtm9")
-    compileOnly("curse.maven:tree-harvester-367178:6355493")
-    compileOnly("curse.maven:collective-342584:6390780")
+//    compileOnly("maven.modrinth:rightclickharvest:9jOYB5rp")
+//    compileOnly("maven.modrinth:veinminer:n6Nt0h4H")
+//    compileOnly("maven.modrinth:fallingtree:hB7NfdzA")
+//    compileOnly("maven.modrinth:kleeslabs:VzuAv5q8")
+//    compileOnly("maven.modrinth:balm:VY97Mtm9")
+//    compileOnly("curse.maven:tree-harvester-367178:6355493")
+//    compileOnly("curse.maven:collective-342584:6390780")
 
     include(implementation("dev.nyon:konfig:3.0.1")!!)
 }

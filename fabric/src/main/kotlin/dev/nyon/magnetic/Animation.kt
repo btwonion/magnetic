@@ -27,7 +27,7 @@ object Animation {
         try {
             player.level().addFreshEntity(itemEntity)
         } finally {
-            MixinHelper.animationSkip.set(null)
+            MixinHelper.animationSkip.remove()
         }
         animationScope.launch {
             trackedItemEntitiesMutex.withLock {

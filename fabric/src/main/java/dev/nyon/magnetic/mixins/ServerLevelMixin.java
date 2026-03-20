@@ -55,7 +55,7 @@ public class ServerLevelMixin implements ServerLevelHolder {
         Entity entity,
         CallbackInfoReturnable<Boolean> cir
     ) {
-        if (animationSkip.get()) return;
+        if (Boolean.TRUE.equals(animationSkip.get())) return;
 
         ServerPlayer player = threadLocal.get();
         if (player == null) {
