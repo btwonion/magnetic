@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
-    id("fabric-loom")
+    id("net.fabricmc.fabric-loom")
 
     id("me.modmuss50.mod-publish-plugin")
 
@@ -28,8 +28,7 @@ base {
 }
 
 loom {
-    accessWidenerPath = project.file("src/main/resources/magnetic.accesswidener")
-    mixin { useLegacyMixinAp = false }
+    accessWidenerPath = project.file("src/main/resources/magnetic.classtweaker")
 }
 
 fabricApi {
@@ -41,7 +40,6 @@ fabricApi {
 repositories {
     mavenCentral()
     maven("https://maven.terraformersmc.com")
-    maven("https://maven.quiltmc.org/repository/release/")
     maven("https://repo.nyon.dev/releases")
     maven("https://maven.isxander.dev/releases")
 
@@ -67,28 +65,22 @@ repositories {
 
 dependencies {
     minecraft("com.mojang:minecraft:$mcVersion")
-    mappings(loom.layered {
-        val quiltMappings: String = property("deps.quiltmappings").toString()
-        if (quiltMappings.isNotEmpty()) mappings("org.quiltmc:quilt-mappings:$quiltMappings:intermediary-v2")
-        officialMojangMappings()
-    })
 
-    implementation("org.vineflower:vineflower:1.11.2")
-    modImplementation("net.fabricmc:fabric-loader:0.18.2")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fapi")!!}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.7+kotlin.2.2.21")
+    implementation("net.fabricmc:fabric-loader:0.18.4")
+    implementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fapi")!!}")
+    implementation("net.fabricmc:fabric-language-kotlin:1.13.9+kotlin.2.3.10")
 
-    modImplementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
-    modCompileOnly("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
+    implementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
+    compileOnly("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
 
     // Compatibility mods
-    modCompileOnly("maven.modrinth:rightclickharvest:9jOYB5rp")
-    modCompileOnly("maven.modrinth:veinminer:n6Nt0h4H")
-    modCompileOnly("maven.modrinth:fallingtree:hB7NfdzA")
-    modCompileOnly("maven.modrinth:kleeslabs:VzuAv5q8")
-    modCompileOnly("maven.modrinth:balm:VY97Mtm9")
-    modCompileOnly("curse.maven:tree-harvester-367178:6355493")
-    modCompileOnly("curse.maven:collective-342584:6390780")
+    compileOnly("maven.modrinth:rightclickharvest:9jOYB5rp")
+    compileOnly("maven.modrinth:veinminer:n6Nt0h4H")
+    compileOnly("maven.modrinth:fallingtree:hB7NfdzA")
+    compileOnly("maven.modrinth:kleeslabs:VzuAv5q8")
+    compileOnly("maven.modrinth:balm:VY97Mtm9")
+    compileOnly("curse.maven:tree-harvester-367178:6355493")
+    compileOnly("curse.maven:collective-342584:6390780")
 
     include(implementation("dev.nyon:konfig:3.0.1")!!)
 }
@@ -123,13 +115,9 @@ tasks {
         dependsOn("publish")
     }
 
-    withType<JavaCompile> {
-        options.release = 21
-    }
-
     withType<KotlinCompile> {
         compilerOptions {
-            jvmTarget = JvmTarget.fromTarget("21")
+            jvmTarget = JvmTarget.JVM_25
         }
     }
 }
@@ -141,7 +129,7 @@ val changelogText = buildString {
 
 publishMods {
     displayName = "v${project.version}"
-    file = tasks.remapJar.get().archiveFile
+    file = tasks.jar.get().archiveFile
     changelog = changelogText
     type = if (beta != null) BETA else STABLE
     modLoaders.addAll("fabric", "quilt")
@@ -203,7 +191,7 @@ publishing {
 java {
     withSourcesJar()
 
-    JavaVersion.VERSION_21.let {
+    JavaVersion.VERSION_25.let {
         sourceCompatibility = it
         targetCompatibility = it
     }

@@ -1,6 +1,6 @@
 package dev.nyon.magnetic.datagen
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.HolderLookup
@@ -14,7 +14,7 @@ import net.minecraft.world.item.enchantment.Enchantment.dynamicCost
 import java.util.concurrent.CompletableFuture
 
 class EnchantmentProvider(
-    output: FabricDataOutput, registriesFuture: CompletableFuture<HolderLookup.Provider>
+    output: FabricPackOutput, registriesFuture: CompletableFuture<HolderLookup.Provider>
 ) : FabricDynamicRegistryProvider(output, registriesFuture) {
     override fun getName(): String {
         return "Magnetic Enchantment Generation"

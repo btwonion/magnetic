@@ -30,7 +30,7 @@ object Animation {
         }
     }
 
-    private val tickListener = ServerTickEvents.END_WORLD_TICK.register { level ->
+    private val tickListener = ServerTickEvents.END_LEVEL_TICK.register { _ ->
         animationScope.launch {
             val copiedItemEntities: Map<ItemEntity, ServerPlayer>
             trackedItemEntitiesMutex.withLock {

@@ -1,0 +1,3 @@
+classTweaker v1 official
+
+accessible field net/minecraft/world/entity/player/Inventory items Lnet/minecraft/core/NonNullList;
