@@ -23,7 +23,8 @@ public class FallingTreeMixinPlugin implements IMixinConfigPlugin {
         String targetClassName,
         String mixinClassName
     ) {
-        return FabricLoader.getInstance().isModLoaded("fallingtree");
+        return FabricLoader.getInstance()
+            .isModLoaded("fallingtree");
     }
 
     @Override

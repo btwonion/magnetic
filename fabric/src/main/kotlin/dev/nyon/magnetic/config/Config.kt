@@ -27,8 +27,7 @@ data class Config(
 ) {
     @Serializable
     data class Buckets(
-        var enabled: Boolean = true,
-        var abilityTimeout: Long = 30000
+        var enabled: Boolean = true, var abilityTimeout: Long = 30000
     )
 
     @Serializable

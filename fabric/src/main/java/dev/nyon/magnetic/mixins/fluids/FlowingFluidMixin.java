@@ -1,47 +1,23 @@
 package dev.nyon.magnetic.mixins.fluids;
 
-import dev.nyon.magnetic.holders.FluidPlayerHolder;
-import dev.nyon.magnetic.utils.MixinHelper;
+import dev.nyon.magnetic.config.ConfigKt;
+import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.PositionTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.FluidState;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FlowingFluid.class)
-public class FlowingFluidMixin implements FluidPlayerHolder {
-    @Unique
-    private ServerPlayer placer = null;
-    @Unique
-    private Long placedAt = null;
-
-    @Override
-    public @Nullable ServerPlayer getPlayer() {
-        return placer;
-    }
-
-    @Override
-    public void setPlayer(@Nullable ServerPlayer serverPlayer) {
-        placer = serverPlayer;
-    }
-
-    @Override
-    public @Nullable Long getPlacedAt() {
-        return placedAt;
-    }
-
-    @Override
-    public void setPlacedAt(@Nullable Long aLong) {
-        placedAt = aLong;
-    }
+public class FlowingFluidMixin {
 
     @Inject(
         method = "spreadTo",
@@ -51,7 +27,7 @@ public class FlowingFluidMixin implements FluidPlayerHolder {
             shift = At.Shift.AFTER
         )
     )
-    private void setPlayerInSpreadTo(
+    private void propagateFluidPlayer(
         LevelAccessor world,
         BlockPos pos,
         BlockState state,
@@ -59,11 +35,16 @@ public class FlowingFluidMixin implements FluidPlayerHolder {
         FluidState fluidState,
         CallbackInfo ci
     ) {
-        ServerPlayer player = MixinHelper.fluidHoldsValidPlayer((FlowingFluid) (Object) this);
-        if (player == null) return;
-        if (!(world.getFluidState(pos).getType() instanceof FlowingFluid newFluid)) return;
-        FluidPlayerHolder playerHolder = (FluidPlayerHolder) newFluid;
-        playerHolder.setPlayer(player);
-        playerHolder.setPlacedAt(getPlacedAt());
+        if (!(world instanceof ServerLevel serverLevel)) return;
+        PositionTracker tracker = ((ServerLevelHolder) serverLevel).getPositionTracker();
+        long timeout = ConfigKt.getConfig()
+            .getBuckets()
+            .getAbilityTimeout();
+        // Check if the source position (opposite direction) has a tracked player
+        BlockPos sourcePos = pos.relative(direction.getOpposite());
+        ServerPlayer player = tracker.lookupFluid(sourcePos, timeout);
+        if (player != null) {
+            tracker.record(pos, player, timeout);
+        }
     }
 }
