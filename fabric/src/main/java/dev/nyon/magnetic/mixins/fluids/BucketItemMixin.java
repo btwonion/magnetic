@@ -1,12 +1,14 @@
 package dev.nyon.magnetic.mixins.fluids;
 
-import dev.nyon.magnetic.holders.FluidPlayerHolder;
+import dev.nyon.magnetic.config.ConfigKt;
+import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.PositionTracker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +26,7 @@ public class BucketItemMixin {
             shift = At.Shift.AFTER
         )
     )
-    private void injectPlayerToFluid(
+    private void recordBucketPlacement(
         LivingEntity entity,
         Level world,
         BlockPos pos,
@@ -32,9 +34,18 @@ public class BucketItemMixin {
         CallbackInfoReturnable<Boolean> cir
     ) {
         if (!(entity instanceof ServerPlayer serverPlayer)) return;
-        if (!(world.getFluidState(pos).getType() instanceof FlowingFluid flowingFluid)) return;
-        FluidPlayerHolder playerHolder = (FluidPlayerHolder) flowingFluid;
-        playerHolder.setPlayer(serverPlayer);
-        playerHolder.setPlacedAt(System.currentTimeMillis());
+        if (!(world instanceof ServerLevel serverLevel)) return;
+        if (!ConfigKt.getConfig()
+            .getBuckets()
+            .getEnabled()) return;
+
+        PositionTracker tracker = ((ServerLevelHolder) serverLevel).getPositionTracker();
+        tracker.record(
+            pos,
+            serverPlayer,
+            ConfigKt.getConfig()
+                .getBuckets()
+                .getAbilityTimeout()
+        );
     }
 }

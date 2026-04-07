@@ -4,8 +4,8 @@
     "name": "${name}",
     "description": "${description}",
     "contact": {
-        "issues": "https://github.com/btwonion/magnetic/issues",
-        "sources": "https://github.com/btwonion/magnetic"
+        "issues": "https://github.com/${github}/issues",
+        "sources": "https://github.com/${github}"
     },
     "icon": "assets/magnetic/icon.png",
     "authors": [
@@ -43,14 +43,9 @@
         ]
     },
     "mixins": [
-        "magnetic.mixins.json",
-        "compat.fallingtree.mixins.json",
-        "compat.kleeslabs.mixins.json",
-        "compat.rightclickharvest.mixins.json",
-        "compat.treeharvester.mixins.json",
-        "compat.veinminer.mixins.json"
+        "magnetic.mixins.json"
     ],
-    "accessWidener": "magnetic.accesswidener",
+    "accessWidener": "magnetic.classtweaker",
     "custom": {
         "modmenu": {
             "links": {

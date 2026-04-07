@@ -1,2 +1,4 @@
 ## Fabric
-- fix vehicles twitching indefinitely instead of breaking and dropping the item [**#82**](https://github.com/btwonion/magnetic/issues/82), [**#83**](https://github.com/btwonion/magnetic/issues/83)
+- update to 26.1
+- updated drops logic from the ground up 
+  - **Please report bugs!!!**
