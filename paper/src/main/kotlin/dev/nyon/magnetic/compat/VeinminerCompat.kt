@@ -12,7 +12,7 @@ object VeinminerCompat {
             val mutableInt = MutableInt(exp)
             val itemStacks = items.toMutableList()
             DropEvent(itemStacks, mutableInt, player, block.location).also(Event::callEvent)
-            exp = mutableInt.value
+            exp = mutableInt.toInt()
 
             // Delete items that have been added to the inventory
             items.removeIf { item ->

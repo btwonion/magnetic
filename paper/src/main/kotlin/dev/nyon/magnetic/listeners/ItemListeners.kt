@@ -25,7 +25,7 @@ object ItemListeners {
         val mutableInt = MutableInt(droppedExp)
         val itemStacks = drops.toMutableList()
         DropEvent(itemStacks, mutableInt, killer, entity.location).also(Event::callEvent)
-        droppedExp = mutableInt.value
+        droppedExp = mutableInt.toInt()
 
         // Delete items that have been added to the inventory
         drops.removeIf { item ->
@@ -47,6 +47,6 @@ object ItemListeners {
         if (caught == null) return@listen
         val mutableInt = MutableInt(expToDrop)
         DropEvent(mutableListOf(), mutableInt, player, caught!!.location).also(Event::callEvent)
-        expToDrop = mutableInt.value
+        expToDrop = mutableInt.toInt()
     }
 }

@@ -76,7 +76,7 @@ object BlockListeners {
     private val blockBreakEvent = listen<BlockBreakEvent> {
         val mutableInt = MutableInt(expToDrop)
         DropEvent(mutableListOf(), mutableInt, player, block.location).also(Event::callEvent)
-        expToDrop = mutableInt.value
+        expToDrop = mutableInt.toInt()
     }
 
     private fun handleBreakChainedBlocks(
@@ -113,7 +113,7 @@ object BlockListeners {
         affectedBlocks.reversed().forEach { affectedBlock ->
             Main.INSTANCE.server.regionScheduler.execute(Main.Companion.INSTANCE, affectedBlock.location) {
                 affectedBlock.type =
-                    if ((affectedBlock as CraftBlock).nmsFluid.type is WaterFluid) Material.WATER else Material.AIR
+                    if ((affectedBlock as CraftBlock).blockState.fluidState.type is WaterFluid) Material.WATER else Material.AIR
             }
         }
     }

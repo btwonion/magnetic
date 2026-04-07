@@ -18,7 +18,7 @@ plugins {
 
     id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT" apply false
 
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
     id("xyz.jpenilla.resource-factory-paper-convention") version "1.3.1" apply false
 }

@@ -41,7 +41,7 @@ repositories {
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 dependencies {
-    paperweight.foliaDevBundle("$mcVersion-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle(mcVersion)
 
     implementation("dev.nyon:konfig:3.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
@@ -77,13 +77,9 @@ tasks {
         dependsOn("publish")
     }
 
-    withType<JavaCompile> {
-        options.release = 21
-    }
-
     withType<KotlinCompile> {
         compilerOptions {
-            jvmTarget = JvmTarget.fromTarget("21")
+            jvmTarget = JvmTarget.JVM_25
         }
     }
 }
@@ -141,7 +137,7 @@ publishing {
 java {
     withSourcesJar()
 
-    JavaVersion.VERSION_21.let {
+    JavaVersion.VERSION_25.let {
         sourceCompatibility = it
         targetCompatibility = it
     }

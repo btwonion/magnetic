@@ -40,7 +40,7 @@ object DropEventListener {
             }
         }
         if (config.expAllowed) {
-            player.giveExp(exp.value, true)
+            player.giveExp(exp.toInt(), true)
             exp.value = 0
         }
     }
