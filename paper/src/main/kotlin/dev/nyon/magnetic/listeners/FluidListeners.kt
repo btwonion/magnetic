@@ -69,12 +69,14 @@ object FluidListeners {
             val holder =
                 runBlocking { fluidHolderMutex.withLock { storedFluidHolders[itemPos.toBlockLocation().toVector()] } } ?: return@execute
 
-            val itemStacks = mutableListOf(entity.itemStack)
-            DropEvent(itemStacks, MutableInt(), holder.player, itemPos).also(Event::callEvent)
+            entity.scheduler.execute(Main.INSTANCE, {
+                val itemStacks = mutableListOf(entity.itemStack)
+                DropEvent(itemStacks, MutableInt(), holder.player, itemPos).also(Event::callEvent)
 
-            if (itemStacks.isEmpty()) {
-                entity.scheduler.execute(Main.INSTANCE, { entity.remove() }, null, 1)
-            }
+                if (itemStacks.isEmpty()) {
+                    entity.scheduler.execute(Main.INSTANCE, { entity.remove() }, null, 1)
+                }
+            }, null, 0L)
         }
     }
 
