@@ -42,6 +42,7 @@ repositories {
     maven("https://maven.terraformersmc.com")
     maven("https://repo.nyon.dev/releases")
     maven("https://maven.isxander.dev/releases")
+    maven("https://maven.nucleoid.xyz")
 
     exclusiveContent {
         forRepository {
@@ -69,6 +70,8 @@ dependencies {
     implementation("net.fabricmc:fabric-loader:0.18.4")
     implementation("net.fabricmc.fabric-api:fabric-api:${property("deps.fapi")!!}")
     implementation("net.fabricmc:fabric-language-kotlin:1.13.9+kotlin.2.3.10")
+
+    implementation("xyz.nucleoid:server-translations-api:3.0.3+26.1")
 
     implementation("dev.isxander:yet-another-config-lib:${property("deps.yacl")!!}")
     implementation("com.terraformersmc:modmenu:${property("deps.modMenu")!!}")
