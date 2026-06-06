@@ -2,6 +2,7 @@ package dev.nyon.magnetic
 
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.centerVec
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.event.EventFactory
@@ -35,7 +36,7 @@ object DropEvent {
         if (config.itemsAllowed) {
             items.removeIf { item ->
                 if (config.animation.enabled && canAddItem(item, player)) {
-                    Animation.pullItemToPlayer(item, pos.center, player)
+                    Animation.pullItemToPlayer(item, pos.centerVec(), player)
                     return@removeIf true
                 }
 
