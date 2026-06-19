@@ -1,7 +1,6 @@
 package dev.nyon.magnetic.compat
 
 import dev.nyon.magnetic.DropEvent
-import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.listen
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
@@ -50,7 +49,6 @@ object TreeCapitatorCompat {
         listen<ServerLoadEvent> {
             refreshDatapackState()
         }
-        Main.INSTANCE.server.globalRegionScheduler.runDelayed(Main.INSTANCE, { refreshDatapackState() }, 1L)
     }
 
     private fun refreshDatapackState() {
@@ -70,7 +68,7 @@ object TreeCapitatorCompat {
         listen<BlockBreakEvent>(EventPriority.MONITOR) {
             if (!treeCapitatorEnabled) return@listen
             if (isCancelled || !block.type.isTreeCapitatorRoot()) return@listen
-            if (!player.passesMagneticCondition()) return@listen
+            if (!config.conditionStatement.checkAndReport(player)) return@listen
 
             cleanup()
             val worldId = block.world.uid
@@ -165,13 +163,5 @@ object TreeCapitatorCompat {
 
     private fun Location.toMagneticBlockKey(): BlockKey {
         return BlockKey(world.uid, blockX, blockY, blockZ)
-    }
-
-    private fun Player.passesMagneticCondition(): Boolean {
-        return try {
-            config.conditionStatement.validate(this)
-        } catch (_: IllegalStateException) {
-            false
-        }
     }
 }
