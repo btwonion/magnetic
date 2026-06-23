@@ -3,6 +3,7 @@ package dev.nyon.magnetic
 import dev.nyon.konfig.config.config
 import dev.nyon.magnetic.compat.AuraSkillsCompat
 import dev.nyon.magnetic.compat.McMMOCompat
+import dev.nyon.magnetic.compat.TreeCapitatorCompat
 import dev.nyon.magnetic.compat.VeinminerCompat
 import dev.nyon.magnetic.config.*
 import dev.nyon.magnetic.listeners.BlockListeners
@@ -49,6 +50,7 @@ class Main : JavaPlugin() {
         if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) McMMOCompat.listenForEvents()
         if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) VeinminerCompat.listenForEvents()
         if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills")) AuraSkillsCompat.listenForEvents()
+        TreeCapitatorCompat.listenForEvents()
     }
 
     private fun moveConfigToNewPath(newPath: Path) {

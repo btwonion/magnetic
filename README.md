@@ -34,7 +34,7 @@ Magnetic is designed to feel **instant**, **lightweight**, and **configurable** 
 
 **Works with:**
 - **Fabric:** FallingTree, KleeSlabs, RightClickHarvest, TreeHarvester, Veinminer
-- **Paper:** mcMMO, AuraSkills, GravesX
+- **Paper:** mcMMO, AuraSkills, GravesX, TreeCapitator datapack
 
 ---
 
