@@ -2,7 +2,9 @@ package dev.nyon.magnetic.compat
 
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.SingleListener
 import dev.nyon.magnetic.extensions.listen
+import dev.nyon.magnetic.extensions.unregister
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
@@ -42,7 +44,8 @@ object TreeCapitatorCompat {
 
     private val sessionsByWorld = mutableMapOf<UUID, MutableList<Session>>()
     private val spawnSkipsByWorld = mutableMapOf<UUID, MutableList<SpawnSkip>>()
-    private var registered = false
+    private var blockBreakListener: SingleListener<BlockBreakEvent>? = null
+    private var itemSpawnListener: SingleListener<ItemSpawnEvent>? = null
     private var treeCapitatorEnabled = false
 
     fun listenForEvents() {
@@ -56,16 +59,16 @@ object TreeCapitatorCompat {
         if (!treeCapitatorEnabled) {
             sessionsByWorld.clear()
             spawnSkipsByWorld.clear()
+            unregisterDropListeners()
             return
         }
         registerDropListeners()
     }
 
     private fun registerDropListeners() {
-        if (registered) return
-        registered = true
+        if (blockBreakListener != null || itemSpawnListener != null) return
 
-        listen<BlockBreakEvent>(EventPriority.MONITOR) {
+        blockBreakListener = listen<BlockBreakEvent>(EventPriority.MONITOR) {
             if (!treeCapitatorEnabled) return@listen
             if (isCancelled || !block.type.isTreeCapitatorRoot()) return@listen
             if (!config.conditionStatement.checkAndReport(player)) return@listen
@@ -76,7 +79,7 @@ object TreeCapitatorCompat {
                 .add(Session(player, block.location.toCenterLocation(), Clock.System.now() + SESSION_TTL_MS.milliseconds))
         }
 
-        listen<ItemSpawnEvent>(EventPriority.HIGHEST) {
+        itemSpawnListener = listen<ItemSpawnEvent>(EventPriority.HIGHEST) {
             if (!treeCapitatorEnabled) return@listen
             cleanup()
             val worldId = location.world?.uid ?: return@listen
@@ -108,6 +111,13 @@ object TreeCapitatorCompat {
                 entity.itemStack = items.first()
             }
         }
+    }
+
+    private fun unregisterDropListeners() {
+        blockBreakListener?.unregister()
+        itemSpawnListener?.unregister()
+        blockBreakListener = null
+        itemSpawnListener = null
     }
 
     private fun Session.loadMarkerPositions() {
