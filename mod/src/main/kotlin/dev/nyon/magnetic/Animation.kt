@@ -8,7 +8,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.item.ItemStack
@@ -36,7 +35,7 @@ object Animation {
         }
     }
 
-    private val tickListener = ServerTickEvents.END_LEVEL_TICK.register { _ ->
+    internal fun tick() {
         animationScope.launch {
             val copiedItemEntities: Map<ItemEntity, ServerPlayer>
             trackedItemEntitiesMutex.withLock {
@@ -46,12 +45,13 @@ object Animation {
             copiedItemEntities.forEach { (itemEntity, target) ->
                 val targetPos = target.position()
                 val itemEntityPos = itemEntity.position()
-
                 val vec = targetPos.subtract(itemEntityPos)
                 val length = vec.length()
                 val tickPart = blocksPerTick / length
                 val tickVec = vec.multiply(
-                    tickPart, if (itemEntity.horizontalCollision) tickPart * 2 else tickPart, tickPart
+                    tickPart,
+                    if (itemEntity.horizontalCollision) tickPart * 2 else tickPart,
+                    tickPart
                 )
                 itemEntity.addDeltaMovement(tickVec)
             }
