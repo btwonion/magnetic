@@ -1,6 +1,7 @@
 @file:Suppress("SpellCheckingInspection", "UnstableApiUsage", "RedundantNullableReturnType")
 
 import net.fabricmc.loom.api.fabricapi.FabricApiExtension
+import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -80,6 +81,14 @@ if (isFabric) {
     extensions.configure<FabricApiExtension> {
         configureDataGeneration {
             client = true
+        }
+    }
+}
+
+if (!isFabric) {
+    tasks.named<ProcessResources>("processResources") {
+        from(rootProject.layout.projectDirectory.dir("mod/src/main/generated")) {
+            exclude(".cache/**")
         }
     }
 }

@@ -18,3 +18,9 @@ modId = "minecraft"
 versionRange = "${mc}"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "yet_another_config_lib_v3"
+versionRange = "[${yacl},)"
+ordering = "NONE"
+side = "CLIENT"
