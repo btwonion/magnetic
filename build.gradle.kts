@@ -16,8 +16,6 @@ plugins {
     kotlin("plugin.serialization") version "2.3.10"
     id("me.modmuss50.mod-publish-plugin") version "1.1.+"
 
-    id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT" apply false
-
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
     id("xyz.jpenilla.run-paper") version "3.0.2" apply false
     id("xyz.jpenilla.resource-factory-paper-convention") version "1.3.1" apply false
@@ -30,13 +28,14 @@ repositories {
 val beta: Int? = property("beta").toString().toIntOrNull() // Pattern is '1.0.0-beta1-1.20.6-pre.2'
 val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
 val supportedMcVersions: List<String> =
-    project("fabric").property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
+    project(":mod:26.2-fabric").property("vers.supportedMcVersions").toString()
+        .split(',').map(String::trim).filter(String::isNotEmpty)
 
 tasks {
     register("releaseAllPlatforms") {
         group = "publishing"
 
-        dependsOn(":fabric:releaseMod")
+        dependsOn(":mod:26.2-fabric:releaseMod")
         dependsOn(":paper:releasePlugin")
     }
 
@@ -48,7 +47,7 @@ tasks {
         val changelogText = rootProject.file("changelog.md").readText()
         val webhook = DiscordWebhook(
             username = "${rootProject.name} Release Notifier",
-            avatarUrl = "https://raw.githubusercontent.com/btwonion/magnetic/master/fabric/src/main/resources/assets/magnetic/icon.png",
+            avatarUrl = "https://raw.githubusercontent.com/btwonion/magnetic/master/mod/src/main/resources/assets/magnetic/icon.png",
             embeds = listOf(
                 Embed(
                     title = "v$featureVersion of ${rootProject.name} released!",
