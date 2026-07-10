@@ -33,7 +33,7 @@ MixinHelper.threadLocal.remove();     // RETURN inject — always use .remove(),
 
 ### Central Entity Interception
 
-`ServerLevelMixin.addFreshEntity()` is the single interception point. When an `ItemEntity` or `ExperienceOrb` is about to spawn, it looks up the responsible player from `threadLocal` or `PositionTracker`, fires a `DropEvent`, and cancels the entity spawn if the drop is collected.
+`ServerLevelMixin.addFreshEntity()` is the single interception point. When an `ItemEntity` or `ExperienceOrb` is about to spawn, it looks up the responsible player from `threadLocal` or `PositionTracker`, invokes the `DropEvent` handler, and cancels the entity spawn if the drop is collected.
 
 ### PositionTracker
 
@@ -107,7 +107,7 @@ After implementing a feature or fix, ask the user to test it in-game rather than
 ### Mod
 - `mod/src/main/kotlin/dev/nyon/magnetic/Main.kt` — loader-branched entry point
 - `mod/src/main/kotlin/dev/nyon/magnetic/Animation.kt` — item fly animation
-- `mod/src/main/kotlin/dev/nyon/magnetic/DropEvent.kt` — event definition + handler
+- `mod/src/main/kotlin/dev/nyon/magnetic/DropEvent.kt` — drop handler
 - `mod/src/main/kotlin/dev/nyon/magnetic/config/Config.kt` — config data class
 - `mod/src/main/kotlin/dev/nyon/magnetic/config/conditions/` — condition system
 - `mod/src/main/kotlin/dev/nyon/magnetic/utils/PositionTracker.kt` — block→player tracking
