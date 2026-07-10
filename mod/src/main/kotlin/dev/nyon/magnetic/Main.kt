@@ -7,6 +7,7 @@ import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.ConfigCommand
 import dev.nyon.magnetic.config.migrate
 import java.nio.file.Path
+import java.util.concurrent.atomic.AtomicBoolean
 
 /*? if fabric {*/
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -20,6 +21,12 @@ fun init() {
         if (environment != Commands.CommandSelection.DEDICATED) return@register
         ConfigCommand.registerCommand(dispatcher)
     }
+}
+
+private val animationTickRegistered = AtomicBoolean()
+
+internal fun registerAnimationTick() {
+    if (!animationTickRegistered.compareAndSet(false, true)) return
     ServerTickEvents.END_LEVEL_TICK.register { Animation.tick() }
 }
 /*?} else if neoforge {*//*
@@ -44,15 +51,21 @@ object MagneticEntrypoint {
             if (event.commandSelection != Commands.CommandSelection.DEDICATED) return@addListener
             ConfigCommand.registerCommand(event.dispatcher)
         }
-        NeoForge.EVENT_BUS.addListener<LevelTickEvent.Post> {
-            Animation.tick()
-        }
 
         if (loader.dist == Dist.CLIENT) {
             ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory::class.java) {
                 IConfigScreenFactory { _, parent -> generateConfigScreen(parent) }
             }
         }
+    }
+}
+
+private val animationTickRegistered = AtomicBoolean()
+
+internal fun registerAnimationTick() {
+    if (!animationTickRegistered.compareAndSet(false, true)) return
+    NeoForge.EVENT_BUS.addListener<LevelTickEvent.Post> {
+        Animation.tick()
     }
 }
 *//*?}*/

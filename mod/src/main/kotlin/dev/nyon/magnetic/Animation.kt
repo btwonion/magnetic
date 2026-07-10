@@ -20,6 +20,7 @@ object Animation {
     private val trackedItemEntitiesMutex = Mutex()
 
     fun pullItemToPlayer(item: ItemStack, pos: Vec3, player: ServerPlayer) {
+        registerAnimationTick()
         val itemEntity = ItemEntity(player.level(), pos.x, pos.y, pos.z, item)
         if (!config.animation.canOtherPlayersPickup) itemEntity.setTarget(player.uuid)
         MixinHelper.animationSkip.set(true)
