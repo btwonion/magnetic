@@ -2,20 +2,22 @@
 
 ## Project Overview
 
-**Magnetic** is a dual-platform Minecraft mod (Fabric + Paper) that adds a "Magnetic" enchantment (formerly "Telekinesis"). When a player has the enchantment, item drops and XP fly directly into their inventory with an optional animation. The mod ID is `magnetic`.
+**Magnetic** is a Minecraft project for Fabric/Quilt, staged NeoForge, and Paper that adds a "Magnetic" enchantment (formerly "Telekinesis"). When a player has the enchantment, item drops and XP fly directly into their inventory with an optional animation. The mod ID is `magnetic`.
 
 ## Project Structure
 
+```text
+mod/                         # Stonecutter + ModStitch multiloader mod
+  src/main/java/             # Shared Java mixins
+  src/main/kotlin/           # Shared/preprocessed Kotlin logic
+  src/main/resources/        # Shared runtime resources and class tweaker
+  src/main/templates/        # Fabric and NeoForge metadata templates
+  versions/26.2-fabric/      # Active Fabric version node
+paper/                       # Independent Paper plugin
+docs/                        # CONFIG.md documentation
 ```
-fabric/          # Fabric mod (Mixin-based)
-  src/main/java/   dev/nyon/magnetic/mixins/     # Mixin classes (Java)
-  src/main/kotlin/ dev/nyon/magnetic/             # Mod logic (Kotlin)
-  src/main/resources/                             # Mixin configs, fabric.mod.json, access widener
-paper/           # Paper plugin (Bukkit event-based)
-  src/main/java/   dev/nyon/magnetic/             # Bootstrapper, Loader (Java)
-  src/main/kotlin/ dev/nyon/magnetic/             # Plugin logic (Kotlin)
-docs/            # CONFIG.md documentation
-```
+
+Loader-specific branches in shared mod sources use Stonecutter directives. Fabric is the only active version node; NeoForge source and metadata are staged, but no NeoForge node is configured or built yet.
 
 ## Fabric Mixin Architecture
 
@@ -102,16 +104,16 @@ After implementing a feature or fix, ask the user to test it in-game rather than
 
 ## Key Files
 
-### Fabric
-- `fabric/src/main/kotlin/dev/nyon/magnetic/Main.kt` — entry point
-- `fabric/src/main/kotlin/dev/nyon/magnetic/Animation.kt` — item fly animation
-- `fabric/src/main/kotlin/dev/nyon/magnetic/DropEvent.kt` — event definition + handler
-- `fabric/src/main/kotlin/dev/nyon/magnetic/config/Config.kt` — config data class
-- `fabric/src/main/kotlin/dev/nyon/magnetic/config/conditions/` — condition system
-- `fabric/src/main/kotlin/dev/nyon/magnetic/utils/PositionTracker.kt` — block→player tracking
-- `fabric/src/main/kotlin/dev/nyon/magnetic/utils/MixinHelper.kt` — ThreadLocal + helpers
-- `fabric/src/main/java/dev/nyon/magnetic/mixins/ServerLevelMixin.java` — central interception
-- `fabric/src/main/resources/magnetic.mixins.json` — mixin registry
+### Mod
+- `mod/src/main/kotlin/dev/nyon/magnetic/Main.kt` — loader-branched entry point
+- `mod/src/main/kotlin/dev/nyon/magnetic/Animation.kt` — item fly animation
+- `mod/src/main/kotlin/dev/nyon/magnetic/DropEvent.kt` — event definition + handler
+- `mod/src/main/kotlin/dev/nyon/magnetic/config/Config.kt` — config data class
+- `mod/src/main/kotlin/dev/nyon/magnetic/config/conditions/` — condition system
+- `mod/src/main/kotlin/dev/nyon/magnetic/utils/PositionTracker.kt` — block→player tracking
+- `mod/src/main/kotlin/dev/nyon/magnetic/utils/MixinHelper.kt` — ThreadLocal + helpers
+- `mod/src/main/java/dev/nyon/magnetic/mixins/ServerLevelMixin.java` — central interception
+- `mod/src/main/resources/magnetic.mixins.json` — mixin registry
 
 ### Paper
 - `paper/src/main/kotlin/dev/nyon/magnetic/Main.kt` — plugin entry point
