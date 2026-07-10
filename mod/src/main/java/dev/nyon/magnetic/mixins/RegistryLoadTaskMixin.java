@@ -1,7 +1,7 @@
 package dev.nyon.magnetic.mixins;
 
 import dev.nyon.magnetic.config.ConfigKt;
-import dev.nyon.magnetic.datagen.DataGeneratorKt;
+import dev.nyon.magnetic.datagen.MagneticIdsKt;
 import net.minecraft.resources.RegistryLoadTask;
 import net.minecraft.resources.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,6 +26,6 @@ public class RegistryLoadTaskMixin {
             .getConditionStatement()
             .getRaw()
             .contains("ENCHANTMENT") && key.identifier()
-            .equals(DataGeneratorKt.getMagneticEnchantmentId())) ci.cancel();
+            .equals(MagneticIdsKt.getMagneticEnchantmentId())) ci.cancel();
     }
 }

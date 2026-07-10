@@ -1,5 +1,6 @@
 package dev.nyon.magnetic.datagen
 
+/*? if fabric {*/
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagsProvider
 import net.minecraft.core.HolderLookup
@@ -10,7 +11,8 @@ import net.minecraft.world.item.enchantment.Enchantment
 import java.util.concurrent.CompletableFuture
 
 class EnchantmentTagProvider(
-    output: FabricPackOutput, completableFuture: CompletableFuture<HolderLookup.Provider>
+    output: FabricPackOutput,
+    completableFuture: CompletableFuture<HolderLookup.Provider>
 ) : FabricTagsProvider<Enchantment>(output, Registries.ENCHANTMENT, completableFuture) {
     override fun addTags(registries: HolderLookup.Provider) {
         val enchantmentResourceKey = ResourceKey.create(Registries.ENCHANTMENT, magneticEnchantmentId)
@@ -19,8 +21,7 @@ class EnchantmentTagProvider(
             builder(EnchantmentTags.TRADEABLE),
             builder(EnchantmentTags.IN_ENCHANTING_TABLE),
             builder(EnchantmentTags.TREASURE)
-        ).forEach {
-            it.addOptional(enchantmentResourceKey)
-        }
+        ).forEach { it.addOptional(enchantmentResourceKey) }
     }
 }
+/*?}*/

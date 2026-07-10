@@ -68,9 +68,12 @@ public class ServerLevelMixin implements ServerLevelHolder {
             if (stack.isEmpty()) return;
 
             ArrayList<ItemStack> items = new ArrayList<>(List.of(stack.copy()));
-            DropEvent.INSTANCE.getEvent()
-                .invoker()
-                .invoke(items, new MutableInt(0), player, entity.blockPosition());
+            DropEvent.INSTANCE.invoke(
+                items,
+                new MutableInt(0),
+                player,
+                entity.blockPosition()
+            );
 
             if (items.isEmpty()) {
                 cir.setReturnValue(false);

@@ -15,7 +15,7 @@ object MixinHelper {
     @JvmStatic
     fun modifyExpressionValuePlayerExp(player: ServerPlayer, exp: Int, pos: BlockPos): Int {
         val mutableInt = MutableInt(exp)
-        DropEvent.event.invoker().invoke(ArrayList(), mutableInt, player, pos)
+        DropEvent(ArrayList(), mutableInt, player, pos)
         return mutableInt.toInt()
     }
 }

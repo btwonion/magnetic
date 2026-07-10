@@ -4,8 +4,6 @@ import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.centerVec
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
-import net.fabricmc.fabric.api.event.Event
-import net.fabricmc.fabric.api.event.EventFactory
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.stats.Stats
@@ -13,7 +11,7 @@ import net.minecraft.world.entity.ExperienceOrb
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import org.apache.commons.lang3.mutable.MutableInt
-import java.util.*
+import java.util.UUID
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
@@ -21,17 +19,14 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 object DropEvent {
-    val event: Event<DropEventConsumer> = EventFactory.createArrayBacked(DropEventConsumer::class.java) { listeners ->
-        DropEventConsumer { items, exp, player, pos ->
-            listeners.forEach {
-                it(items, exp, player, pos)
-            }
-        }
-    }
-
-    @Suppress("unused", "KotlinConstantConditions")
-    private val listener = event.register { items, exp, player, pos ->
-        if (!config.conditionStatement.checkAndReport(player)) return@register
+    @Suppress("KotlinConstantConditions")
+    operator fun invoke(
+        items: MutableList<ItemStack>,
+        exp: MutableInt,
+        player: ServerPlayer,
+        pos: BlockPos
+    ) {
+        if (!config.conditionStatement.checkAndReport(player)) return
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
@@ -50,10 +45,12 @@ object DropEvent {
                 true
             }
         }
+
         if (config.expAllowed) {
-            val fakeExperienceOrb = ExperienceOrb(player.level(), 0.0, 0.0, 0.0, exp.get() as Int)
+            val fakeExperienceOrb = ExperienceOrb(player.level(), 0.0, 0.0, 0.0, exp.toInt())
             player.take(fakeExperienceOrb, 1)
-            val leftExp = (fakeExperienceOrb as ExperienceOrbInvoker).invokeRepairPlayerItems(player, exp.get() as Int)
+            val leftExp = (fakeExperienceOrb as ExperienceOrbInvoker)
+                .invokeRepairPlayerItems(player, exp.toInt())
             if (leftExp > 0) player.giveExperiencePoints(leftExp)
             exp.value = 0
         }
@@ -81,11 +78,6 @@ object DropEvent {
         if (player.inventory.freeSlot >= 0) return true
         if (player.hasInfiniteMaterials()) return true
         if (stack.isDamaged) return false
-        if (player.inventory.getSlotWithRemainingSpace(stack) > -1) return true
-        return false
+        return player.inventory.getSlotWithRemainingSpace(stack) > -1
     }
-}
-
-fun interface DropEventConsumer {
-    operator fun invoke(items: MutableList<ItemStack>, exp: MutableInt, player: ServerPlayer, pos: BlockPos)
 }
