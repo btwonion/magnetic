@@ -144,4 +144,3 @@ git status --short
 ```
 
 Expected: the commit contains only the entrypoint consolidation; status still shows `D  CLAUDE.md` and ` M mod/build.gradle.kts`.
-
