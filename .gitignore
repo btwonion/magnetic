@@ -5,4 +5,5 @@
 **/build/
 .kotlin
 **/.cache
-.superpowers/
+superpowers/
+.superpowers
