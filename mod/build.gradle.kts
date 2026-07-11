@@ -19,6 +19,8 @@ val beta: Int? = property("beta").toString().toIntOrNull()
 val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
 val mcVersion = property("vers.mcVersion").toString()
 val mcVersionName = property("vers.versionName").toString()
+val generatedResources =
+    rootProject.layout.projectDirectory.dir("mod/generated/$mcVersionName")
 version = "$featureVersion-$mcVersionName+$loader"
 group = "dev.nyon"
 
@@ -81,13 +83,14 @@ if (isFabric) {
     extensions.configure<FabricApiExtension> {
         configureDataGeneration {
             client = true
+            outputDirectory = generatedResources.asFile
         }
     }
 }
 
 if (!isFabric) {
     tasks.named<ProcessResources>("processResources") {
-        from(rootProject.layout.projectDirectory.dir("mod/src/main/generated")) {
+        from(generatedResources) {
             exclude(".cache/**")
         }
     }
