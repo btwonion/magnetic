@@ -88,8 +88,9 @@ if (isFabric) {
     }
 }
 
-if (!isFabric) {
-    tasks.named<ProcessResources>("processResources") {
+tasks.named<ProcessResources>("processResources") {
+    dependsOn("stonecutterGenerate")
+    if (!isFabric) {
         from(generatedResources) {
             exclude(".cache/**")
         }
