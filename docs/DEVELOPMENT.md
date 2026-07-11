@@ -1,0 +1,84 @@
+# Development guide
+
+## Project structure
+
+Magnetic is a Gradle multi-project build:
+
+```text
+.
+├── mod/                         Fabric and NeoForge mod
+│   ├── src/main/                Shared, actively edited sources
+│   ├── generated/<version>/     Tracked datagen output
+│   └── versions/<target>/       Stonecutter node properties and build output
+├── paper/                       Paper plugin
+├── docs/                        User and developer documentation
+├── settings.gradle.kts          Stonecutter target registration
+└── build.gradle.kts             Root aggregation and release tasks
+```
+
+Stonecutter evaluates `mod/build.gradle.kts` once for every registered target. Target names combine a logical Minecraft version and loader, such as `26.1.2-fabric` and `26.1.2-neoforge`.
+
+`mod/src/main` is the shared source tree. Stonecutter conditional comments select loader- or version-specific code while generating each node's build sources. Files in `mod/versions/<target>/gradle.properties` provide Minecraft, loader, and dependency versions.
+
+Do not put tracked datagen output below `mod/src` or `mod/versions/*/src`. Stonecutter manages source-set directories during version switching and may relocate files found there.
+
+## Selecting an active target
+
+The active target controls IDE source state and is declared in `mod/stonecutter.gradle.kts`. Switch it with Stonecutter's Gradle tasks or IDE integration, and return to the VCS target before committing source-comment changes:
+
+```bash
+./gradlew ':mod:Set active project to 26.1.2-fabric'
+./gradlew ':mod:Reset active project'
+```
+
+Building does not require switching targets; Gradle generates sources for every requested node.
+
+## Building
+
+Build every mod target and Paper:
+
+```bash
+./gradlew build
+```
+
+Build one target:
+
+```bash
+./gradlew :mod:26.1.2-fabric:build
+./gradlew :mod:26.1.2-neoforge:build
+```
+
+Artifacts are written below each target's `build/libs` directory.
+
+## Data generation
+
+Fabric is the canonical data generator for each Minecraft version. Matching Fabric and NeoForge targets package the same tracked directory:
+
+```text
+mod/generated/<vers.versionName>/
+```
+
+Generate one version explicitly or every registered Fabric version:
+
+```bash
+./gradlew :mod:26.1.2-fabric:runDatagen
+./gradlew runDatagen
+```
+
+Each Fabric task writes to a different logical-version directory, so all-version generation does not mix outputs. Review and commit generated JSON; `.cache` entries are ignored. NeoForge does not run a second generator—its `processResources` task copies the matching directory.
+
+## Adding a Minecraft version
+
+1. Register Fabric and NeoForge target names and logical versions in `settings.gradle.kts`.
+2. Add `mod/versions/<version>-fabric/gradle.properties` with Minecraft metadata, Fabric API, YACL, Mod Menu, and `modstitch.platform=fabric-loom`.
+3. Add `mod/versions/<version>-neoforge/gradle.properties` with Minecraft metadata, NeoForge, YACL, KotlinLangForge, and `modstitch.platform=moddevgradle`.
+4. Compile both targets, using the narrowest Stonecutter condition only when Minecraft APIs differ.
+5. Run the Fabric target's `runDatagen` task.
+6. Build both targets and confirm their jars contain identical generated resources.
+7. Run the root `build` task before committing.
+
+Use `vers.versionName` for the generated directory. This lets targets backed by different exact game artifacts share data when they represent the same logical release.
+
+## Documentation scope
+
+`docs/DEVELOPMENT.md` describes repository development. `docs/CONFIG.md` documents the end-user `magnetic.json` format.
