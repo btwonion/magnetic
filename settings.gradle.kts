@@ -20,7 +20,7 @@ stonecutter {
     shared {
         version("26.1.2-fabric", "26.1.2")
         version("26.1.2-neoforge", "26.1.2")
-        version("26.2-fabric", "26.2-pre-4")
+        version("26.2-fabric", "26.2")
         version("26.2-neoforge", "26.2")
         vcsVersion = "26.2-fabric"
     }

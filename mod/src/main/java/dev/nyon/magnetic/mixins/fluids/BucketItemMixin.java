@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BucketItemMixin {
 
     @Inject(
-        method = "emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z",
+        method =  /*? if fabric {*/ "emptyContents" /*?} else {*/ /*"emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z" *//*?}*/,
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/item/BucketItem;playEmptySound(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;)V",
@@ -32,7 +32,7 @@ public class BucketItemMixin {
         Level level,
         BlockPos pos,
         BlockHitResult hitResult,
-        ItemStack containerItem,
+        /*? if neoforge {*/ /*ItemStack containerItem, *//*?}*/
         CallbackInfoReturnable<Boolean> cir
     ) {
         if (!(user instanceof ServerPlayer serverPlayer)) return;
