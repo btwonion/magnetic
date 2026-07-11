@@ -98,7 +98,6 @@ repositories {
     maven("https://maven.terraformersmc.com")
     maven("https://repo.nyon.dev/releases")
     maven("https://maven.isxander.dev/releases")
-    maven("https://maven.nucleoid.xyz")
     maven("https://maven.neoforged.net/releases/")
 }
 

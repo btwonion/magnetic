@@ -29,8 +29,8 @@ internal fun registerAnimationTick() {
     if (!animationTickRegistered.compareAndSet(false, true)) return
     ServerTickEvents.END_LEVEL_TICK.register { Animation.tick() }
 }
-/*?} else if neoforge {*//*
-import dev.nyon.magnetic.config.screen.generateConfigScreen
+/*?} else if neoforge {*/
+/*import dev.nyon.magnetic.config.screen.generateConfigScreen
 import net.minecraft.commands.Commands
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.fml.ModLoadingContext

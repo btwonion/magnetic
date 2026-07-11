@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BucketItemMixin {
 
     @Inject(
-        method = "emptyContents",
+        method = "emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/item/BucketItem;playEmptySound(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;)V",
@@ -27,14 +28,15 @@ public class BucketItemMixin {
         )
     )
     private void recordBucketPlacement(
-        LivingEntity entity,
-        Level world,
+        LivingEntity user,
+        Level level,
         BlockPos pos,
-        BlockHitResult result,
+        BlockHitResult hitResult,
+        ItemStack containerItem,
         CallbackInfoReturnable<Boolean> cir
     ) {
-        if (!(entity instanceof ServerPlayer serverPlayer)) return;
-        if (!(world instanceof ServerLevel serverLevel)) return;
+        if (!(user instanceof ServerPlayer serverPlayer)) return;
+        if (!(level instanceof ServerLevel serverLevel)) return;
         if (!ConfigKt.getConfig()
             .getBuckets()
             .getEnabled()) return;
