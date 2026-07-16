@@ -27,10 +27,13 @@ private val animationTickRegistered = AtomicBoolean()
 
 internal fun registerAnimationTick() {
     if (!animationTickRegistered.compareAndSet(false, true)) return
-    ServerTickEvents.END_LEVEL_TICK.register { Animation.tick() }
+    /*? if >=1.21.11 {*/ ServerTickEvents.END_LEVEL_TICK /*?} else {*/ /*ServerTickEvents.END_WORLD_TICK *//*?}*/.register { Animation.tick() }
 }
 /*?} else if neoforge {*/
 /*import dev.nyon.magnetic.config.screen.generateConfigScreen
+/*? if <1.21.11 {*/
+import dev.nyon.magnetic.extensions.MAGNETIC_PERMISSION
+/*?}*/
 import net.minecraft.commands.Commands
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.fml.ModLoadingContext
@@ -39,19 +42,28 @@ import net.neoforged.fml.loading.FMLLoader
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.RegisterCommandsEvent
+/*? if <1.21.11 {*/
+import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent
+/*?}*/
 import net.neoforged.neoforge.event.tick.LevelTickEvent
 
 @Mod("magnetic")
 object MagneticEntrypoint {
-    private val loader = FMLLoader.getCurrent()
+    private val gameDir = /*? if >=1.21.9 {*/ FMLLoader.getCurrent().gameDir /*?} else {*/ /*FMLLoader.getGamePath() *//*?}*/
+    private val dist = /*? if >=1.21.9 {*/ FMLLoader.getCurrent().dist /*?} else {*/ /*FMLLoader.getDist() *//*?}*/
 
     init {
-        initialize(loader.gameDir.resolve("config/magnetic.json"))
+        initialize(gameDir.resolve("config/magnetic.json"))
         NeoForge.EVENT_BUS.addListener<RegisterCommandsEvent> { event ->
             if (event.commandSelection != Commands.CommandSelection.DEDICATED) return@addListener
             ConfigCommand.registerCommand(event.dispatcher)
         }
-        when (loader.dist) {
+        /*? if <1.21.11 {*/
+        NeoForge.EVENT_BUS.addListener<PermissionGatherEvent.Nodes> { event ->
+            event.addNodes(MAGNETIC_PERMISSION)
+        }
+        /*?}*/
+        when (dist) {
             Dist.CLIENT -> {
                 ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory::class.java) {
                     IConfigScreenFactory { _, parent -> generateConfigScreen(parent) }

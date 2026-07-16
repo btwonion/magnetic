@@ -11,7 +11,9 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
+/*? if >=1.21.11 {*/
 import org.jspecify.annotations.NonNull;
+/*?}*/
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,7 +34,7 @@ public class ServerLevelMixin implements ServerLevelHolder {
     private final PositionTracker magnetic$positionTracker = new PositionTracker();
 
     @Override
-    public @NonNull PositionTracker getPositionTracker() {
+    public /*? if >=1.21.11 {*/ @NonNull /*?}*/ PositionTracker getPositionTracker() {
         return magnetic$positionTracker;
     }
 
