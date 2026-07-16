@@ -86,11 +86,17 @@ if (isFabric) {
             outputDirectory = generatedResources.asFile
         }
     }
+
+    tasks.named<ProcessResources>("generateModMetadata") {
+        dependsOn("stonecutterGenerate")
+    }
 }
 
 tasks.named<ProcessResources>("processResources") {
     dependsOn("stonecutterGenerate")
-    if (!isFabric) {
+    if (isFabric) {
+        dependsOn("generateModMetadata")
+    } else {
         from(generatedResources) {
             exclude(".cache/**")
         }
@@ -233,6 +239,12 @@ publishing {
 
 java {
     withSourcesJar()
+}
+
+if (isFabric) {
+    tasks.named("sourcesJar") {
+        dependsOn("generateModMetadata")
+    }
 }
 
 fun <T> prop(property: String, block: (String) -> T?): T? =
