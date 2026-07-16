@@ -11,7 +11,9 @@ object ConfigCommand {
     fun registerCommand(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
             Commands.literal("magnetic").then(
-                Commands.literal("reload").requires(Commands.hasPermission(Commands.LEVEL_ADMINS)).executes { ctx ->
+                Commands.literal("reload")
+                    .requires(/*? if >=1.21.11 {*/ Commands.hasPermission(Commands.LEVEL_ADMINS) /*?} else {*/ /*{ it.hasPermission(2) } *//*?}*/)
+                    .executes { ctx ->
                         config = loadConfig<Config>()
                         reloadIgnoredEntities()
                         ctx.source.sendSystemMessage(Component.literal("Successfully reloaded config."))

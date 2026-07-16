@@ -1,12 +1,12 @@
 package dev.nyon.magnetic.datagen
 
 /*? if fabric {*/
+import dev.nyon.magnetic.extensions.minecraftIdentifier
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.registries.Registries
-import net.minecraft.resources.Identifier
 import net.minecraft.resources.ResourceKey
 import net.minecraft.world.entity.EquipmentSlotGroup
 import net.minecraft.world.item.enchantment.Enchantment
@@ -31,7 +31,7 @@ class EnchantmentProvider(
             EquipmentSlotGroup.HAND
         )
         val enchantment = Enchantment.enchantment(enchantmentDefinition).build(
-            Identifier.fromNamespaceAndPath("magnetic", "magnetic.name")
+            minecraftIdentifier("magnetic", "magnetic.name")
         )
         entries.add(ResourceKey.create(Registries.ENCHANTMENT, magneticEnchantmentId), enchantment)
     }

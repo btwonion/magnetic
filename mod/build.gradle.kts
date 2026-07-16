@@ -143,6 +143,10 @@ dependencies {
         )
     }
 
+    if (isFabric && stonecutter.eval(mcVersion, "<1.21.11")) {
+        modDependency("maven.modrinth:fabric-permissions-api:0.3.3", compileOnly = true)
+    }
+
     propModDependency("yacl", { "dev.isxander:yet-another-config-lib:$it" })
     modstitchApi(libs.konfig)
     modstitchJiJ(libs.konfig)

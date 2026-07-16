@@ -18,7 +18,7 @@ object IdentifierSerializer : KSerializer<Identifier> {
     fun decodeFromString(string: String): Identifier {
         val isTag = string.startsWith('#')
         val namespacedKey =
-            net.minecraft.resources.Identifier.tryParse(string.run { return@run if (isTag) drop(1) else this@run })
+            MinecraftIdentifier.tryParse(string.run { return@run if (isTag) drop(1) else this@run })
                 ?: error(
                     "Magnetic couldn't parse malformed identifier: '$string'."
                 )

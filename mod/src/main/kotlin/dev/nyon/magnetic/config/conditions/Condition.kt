@@ -2,11 +2,17 @@ package dev.nyon.magnetic.config.conditions
 
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.datagen.magneticEffectId
+/*? if >=1.21.11 {*/
 import dev.nyon.magnetic.extensions.PlayerPermissionSupplier
+/*?} else {*/
+/*import dev.nyon.magnetic.extensions.hasMagneticPermission
+*//*?}*/
 import net.minecraft.commands.Commands
 import net.minecraft.server.level.ServerPlayer
+/*? if >=1.21.11 {*/
 import net.minecraft.server.permissions.Permission
 import net.minecraft.server.permissions.PermissionCheck
+/*?}*/
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.enchantment.EnchantmentHelper
@@ -39,10 +45,12 @@ object SneakCondition : Condition {
 
 object PermissionCondition : Condition {
     override val identifiers: Set<String> = setOf("PERMISSION")
+    /*? if >=1.21.11 {*/
     private val permission = Permission.Atom.create("magnetic.ability.use")
+    /*?}*/
 
     override fun check(player: ServerPlayer): Boolean {
-        return Commands.hasPermission<PlayerPermissionSupplier>(PermissionCheck.Require(permission))
-            .test(PlayerPermissionSupplier(player))
+        return /*? if >=1.21.11 {*/ Commands.hasPermission<PlayerPermissionSupplier>(PermissionCheck.Require(permission))
+            .test(PlayerPermissionSupplier(player)) /*?} else {*/ /*player.hasMagneticPermission() *//*?}*/
     }
 }
