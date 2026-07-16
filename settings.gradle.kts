@@ -18,6 +18,8 @@ stonecutter {
     kotlinController = true
     centralScript = "build.gradle.kts"
     shared {
+        version("1.21.1-fabric", "1.21.1")
+        version("1.21.1-neoforge", "1.21.1")
         version("26.1.2-fabric", "26.1.2")
         version("26.1.2-neoforge", "26.1.2")
         version("26.2-fabric", "26.2")
