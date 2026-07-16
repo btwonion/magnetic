@@ -1,8 +1,12 @@
 package dev.nyon.magnetic.datagen
 
 /*? if fabric {*/
+import dev.nyon.magnetic.extensions.MinecraftIdentifier
 import dev.nyon.magnetic.extensions.minecraftIdentifier
+/*? if >=1.21.11 {*/
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput
+/*?} else {*/
+/*import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput*//*?}*/
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags
 import net.minecraft.core.HolderLookup
@@ -15,7 +19,7 @@ import net.minecraft.world.item.enchantment.Enchantment.dynamicCost
 import java.util.concurrent.CompletableFuture
 
 class EnchantmentProvider(
-    output: FabricPackOutput,
+    output: /*? if >=1.21.11 {*/ FabricPackOutput /*?} else {*/ /*FabricDataOutput *//*?}*/,
     registriesFuture: CompletableFuture<HolderLookup.Provider>
 ) : FabricDynamicRegistryProvider(output, registriesFuture) {
     override fun getName(): String = "Magnetic Enchantment Generation"
@@ -30,9 +34,8 @@ class EnchantmentProvider(
             7,
             EquipmentSlotGroup.HAND
         )
-        val enchantment = Enchantment.enchantment(enchantmentDefinition).build(
-            minecraftIdentifier("magnetic", "magnetic.name")
-        )
+        val descriptionId: MinecraftIdentifier = minecraftIdentifier("magnetic", "magnetic.name")
+        val enchantment = Enchantment.enchantment(enchantmentDefinition).build(descriptionId)
         entries.add(ResourceKey.create(Registries.ENCHANTMENT, magneticEnchantmentId), enchantment)
     }
 }
