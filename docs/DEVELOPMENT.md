@@ -44,9 +44,13 @@ Build every mod target and Paper:
 Build one target:
 
 ```bash
+./gradlew :mod:1.21.1-fabric:build
+./gradlew :mod:1.21.1-neoforge:build
 ./gradlew :mod:26.1.2-fabric:build
 ./gradlew :mod:26.1.2-neoforge:build
 ```
+
+Obfuscated Minecraft releases such as 1.21.1 use `modstitch.platform=fabric-loom-remap` so the Fabric production jar is remapped. Unobfuscated 26.x releases use `modstitch.platform=fabric-loom`. Both publish the artifact produced by `modstitch.finalJarTask`.
 
 Artifacts are written below each target's `build/libs` directory.
 
@@ -70,7 +74,7 @@ Each Fabric task writes to a different logical-version directory, so all-version
 ## Adding a Minecraft version
 
 1. Register Fabric and NeoForge target names and logical versions in `settings.gradle.kts`.
-2. Add `mod/versions/<version>-fabric/gradle.properties` with Minecraft metadata, Fabric API, YACL, Mod Menu, and `modstitch.platform=fabric-loom`.
+2. Add `mod/versions/<version>-fabric/gradle.properties` with Minecraft metadata, Fabric API, YACL, and Mod Menu. Use `modstitch.platform=fabric-loom-remap` for obfuscated Minecraft releases and `modstitch.platform=fabric-loom` for unobfuscated 26.x releases.
 3. Add `mod/versions/<version>-neoforge/gradle.properties` with Minecraft metadata, NeoForge, YACL, KotlinLangForge, and `modstitch.platform=moddevgradle`.
 4. Compile both targets, using the narrowest Stonecutter condition only when Minecraft APIs differ.
 5. Run the Fabric target's `runDatagen` task.
