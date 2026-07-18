@@ -45,7 +45,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent
 /*? if <1.21.11 {*/
 import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent
 /*?}*/
-import net.neoforged.neoforge.event.tick.LevelTickEvent
+import net.neoforged.neoforge.event.tick.ServerTickEvent
 
 @Mod("magnetic")
 object MagneticEntrypoint {
@@ -79,7 +79,7 @@ private val animationTickRegistered = AtomicBoolean()
 
 internal fun registerAnimationTick() {
     if (!animationTickRegistered.compareAndSet(false, true)) return
-    NeoForge.EVENT_BUS.addListener<LevelTickEvent.Post> {
+    NeoForge.EVENT_BUS.addListener<ServerTickEvent.Post> {
         Animation.tick()
     }
 }
