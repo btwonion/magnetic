@@ -12,13 +12,14 @@ import java.net.http.HttpResponse
 import java.time.Instant
 
 plugins {
-    kotlin("jvm") version "2.3.10"
-    kotlin("plugin.serialization") version "2.3.10"
-    id("me.modmuss50.mod-publish-plugin") version "1.1.+"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinx.serialization)
+}
 
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
-    id("xyz.jpenilla.run-paper") version "3.0.2" apply false
-    id("xyz.jpenilla.resource-factory-paper-convention") version "1.3.1" apply false
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    }
 }
 
 repositories {

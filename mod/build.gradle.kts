@@ -1,5 +1,6 @@
 @file:Suppress("SpellCheckingInspection", "UnstableApiUsage", "RedundantNullableReturnType")
 
+import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
 import net.fabricmc.loom.api.fabricapi.FabricApiExtension
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -188,6 +189,8 @@ publishMods {
         projectId = "LLfA8jAD"
         accessToken = providers.environmentVariable("MODRINTH_API_KEY")
         minecraftVersions.addAll(supportedMcVersions)
+        environment = ModrinthEnvironment.CLIENT_AND_SERVER
+
         if (isFabric) {
             requires { slug = "fabric-api" }
             requires { slug = "fabric-language-kotlin" }
@@ -205,6 +208,9 @@ publishMods {
             val split = it.split('-')
             if (split.size > 1) "${split[0]}-Snapshot" else it
         }.toSet())
+        client = true
+        server = true
+
         if (isFabric) {
             requires { slug = "fabric-api" }
             requires { slug = "fabric-language-kotlin" }
