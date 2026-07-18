@@ -105,7 +105,9 @@ tasks.named<ProcessResources>("processResources") {
 
 repositories {
     mavenCentral()
-    maven("https://maven.terraformersmc.com")
+    // maven("https://maven.terraformersmc.com")
+    // Replacement of terraformers as long as it is failing
+    maven("https://maven.gnomecraft.net/releases")
     maven("https://repo.nyon.dev/releases")
     maven("https://maven.isxander.dev/releases")
     maven("https://maven.neoforged.net/releases/")
