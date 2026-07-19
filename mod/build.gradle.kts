@@ -139,7 +139,7 @@ dependencies {
         modDependency("net.fabricmc:fabric-language-kotlin:$fabricLanguageKotlin")
         propModDependency("modMenu", { "com.terraformersmc:modmenu:$it" })
         if (stonecutter.eval(mcVersion, "<1.21.11"))
-            modDependency("maven.modrinth:fabric-permissions-api:0.3.3", api = true)
+            modDependency("me.lucko:fabric-permissions-api:0.5.0", api = true)
     } else {
         propModDependency(
             "klf",
