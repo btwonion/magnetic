@@ -43,8 +43,7 @@ tasks {
     register("releaseAllPlatforms") {
         group = "publishing"
 
-        dependsOn(":mod:26.2-fabric:releaseMod")
-        dependsOn(":mod:26.2-neoforge:releaseMod")
+        dependsOn(":mod:releaseMod")
         dependsOn(":paper:releasePlugin")
     }
 

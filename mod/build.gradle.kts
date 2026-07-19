@@ -138,16 +138,14 @@ dependencies {
         propModDependency("fapi", { "net.fabricmc.fabric-api:fabric-api:$it" }, api = true)
         modDependency("net.fabricmc:fabric-language-kotlin:$fabricLanguageKotlin")
         propModDependency("modMenu", { "com.terraformersmc:modmenu:$it" })
+        if (stonecutter.eval(mcVersion, "<1.21.11"))
+            modDependency("maven.modrinth:fabric-permissions-api:0.3.3", api = true)
     } else {
         propModDependency(
             "klf",
             { "dev.nyon:KotlinLangForge:2.11.2-k${libs.versions.kotlin.get()}-$it+neoforge" },
             api = true
         )
-    }
-
-    if (isFabric && stonecutter.eval(mcVersion, "<1.21.11")) {
-        modDependency("maven.modrinth:fabric-permissions-api:0.3.3", compileOnly = true)
     }
 
     propModDependency("yacl", { "dev.isxander:yet-another-config-lib:$it" })
@@ -158,6 +156,7 @@ dependencies {
 tasks {
     register("releaseMod") {
         group = "publishing"
+        description = "Publish mod to Modrinth, CurseForge, GitHub and Maven"
         dependsOn("publishMods")
         dependsOn("publish")
     }
@@ -195,6 +194,8 @@ publishMods {
             requires { slug = "fabric-api" }
             requires { slug = "fabric-language-kotlin" }
             optional { slug = "modmenu" }
+            if (stonecutter.eval(mcVersion, "<1.21.11"))
+                optional { slug = "fabric-permissions-api" }
         } else {
             requires { slug = "kotlin-lang-forge" }
         }

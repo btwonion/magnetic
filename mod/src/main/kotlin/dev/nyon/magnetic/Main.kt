@@ -5,9 +5,9 @@ package dev.nyon.magnetic
 import dev.nyon.konfig.config.config
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.ConfigCommand
+import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.config.migrate
 import java.nio.file.Path
-import java.util.concurrent.atomic.AtomicBoolean
 
 /*? if fabric {*/
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -17,23 +17,22 @@ import net.minecraft.commands.Commands
 
 fun init() {
     initialize(FabricLoader.getInstance().configDir.resolve("magnetic.json"))
+    /*? if <1.21.11 {*/
+    /*if (config.conditionStatement.raw.contains("PERMISSION") && runCatching { Class.forName("me.lucko.fabric.api.permissions.v0.Permissions") }.isFailure)
+        error("[magnetic] Your condition chain includes a PERMISSION condition, but fabric-permissions-api is not present. Please install it or remove the PERMISSION condition.")
+    *//*?}*/
     CommandRegistrationCallback.EVENT.register { dispatcher, _, environment ->
         if (environment != Commands.CommandSelection.DEDICATED) return@register
         ConfigCommand.registerCommand(dispatcher)
     }
-}
 
-private val animationTickRegistered = AtomicBoolean()
-
-internal fun registerAnimationTick() {
-    if (!animationTickRegistered.compareAndSet(false, true)) return
     /*? if >=1.21.11 {*/ ServerTickEvents.END_LEVEL_TICK /*?} else {*/ /*ServerTickEvents.END_WORLD_TICK *//*?}*/.register { Animation.tick() }
 }
+
 /*?} else if neoforge {*/
 /*import dev.nyon.magnetic.config.screen.generateConfigScreen
-/*? if <1.21.11 {*/
 import dev.nyon.magnetic.extensions.MAGNETIC_PERMISSION
-/*?}*/
+import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent
 import net.minecraft.commands.Commands
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.fml.ModLoadingContext
@@ -42,9 +41,6 @@ import net.neoforged.fml.loading.FMLLoader
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.RegisterCommandsEvent
-/*? if <1.21.11 {*/
-import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent
-/*?}*/
 import net.neoforged.neoforge.event.tick.ServerTickEvent
 
 @Mod("magnetic")
@@ -58,29 +54,20 @@ object MagneticEntrypoint {
             if (event.commandSelection != Commands.CommandSelection.DEDICATED) return@addListener
             ConfigCommand.registerCommand(event.dispatcher)
         }
-        /*? if <1.21.11 {*/
+
         NeoForge.EVENT_BUS.addListener<PermissionGatherEvent.Nodes> { event ->
             event.addNodes(MAGNETIC_PERMISSION)
         }
-        /*?}*/
-        when (dist) {
-            Dist.CLIENT -> {
-                ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory::class.java) {
-                    IConfigScreenFactory { _, parent -> generateConfigScreen(parent) }
-                }
+
+        if (dist == Dist.CLIENT) {
+            ModLoadingContext.get().registerExtensionPoint(IConfigScreenFactory::class.java) {
+                IConfigScreenFactory { _, parent -> generateConfigScreen(parent) }
             }
-
-            Dist.DEDICATED_SERVER -> Unit
         }
-    }
-}
 
-private val animationTickRegistered = AtomicBoolean()
-
-internal fun registerAnimationTick() {
-    if (!animationTickRegistered.compareAndSet(false, true)) return
-    NeoForge.EVENT_BUS.addListener<ServerTickEvent.Post> {
-        Animation.tick()
+        NeoForge.EVENT_BUS.addListener<ServerTickEvent.Post> {
+            Animation.tick()
+        }
     }
 }
 *//*?}*/

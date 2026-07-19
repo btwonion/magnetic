@@ -4,6 +4,8 @@ import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.datagen.magneticEffectId
 /*? if >=1.21.11 {*/
 import dev.nyon.magnetic.extensions.PlayerPermissionSupplier
+//? if neoforge
+//import dev.nyon.magnetic.extensions.hasNeoForgePermission
 /*?} else {*/
 /*import dev.nyon.magnetic.extensions.hasMagneticPermission
 *//*?}*/
@@ -45,12 +47,18 @@ object SneakCondition : Condition {
 
 object PermissionCondition : Condition {
     override val identifiers: Set<String> = setOf("PERMISSION")
-    /*? if >=1.21.11 {*/
+    //? if >=1.21.11
     private val permission = Permission.Atom.create("magnetic.ability.use")
-    /*?}*/
 
     override fun check(player: ServerPlayer): Boolean {
-        return /*? if >=1.21.11 {*/ Commands.hasPermission<PlayerPermissionSupplier>(PermissionCheck.Require(permission))
-            .test(PlayerPermissionSupplier(player)) /*?} else {*/ /*player.hasMagneticPermission() *//*?}*/
+        var result: Boolean
+        //? if >=1.21.11
+        result = Commands.hasPermission<PlayerPermissionSupplier>(PermissionCheck.Require(permission)).test(PlayerPermissionSupplier(player))
+        //? if >=1.21.11 && neoforge
+        //result = result || hasNeoForgePermission(player)
+        //? if <1.21.11
+        //result = player.hasMagneticPermission()
+
+        return result
     }
 }
