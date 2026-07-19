@@ -30,7 +30,7 @@ class EnchantmentTagProvider(
         ).forEach { it.addOptional(enchantmentResourceKey) }
     }
 
-    private fun tagBuilder(key: TagKey<Enchantment>): /*? if >= 26.2 {*/ /*TagAppender<Enchantment> *//*?} else if >=26.1.2 {*/ TagAppender<ResourceKey<Enchantment>, Enchantment> /*?} else {*/ /*FabricTagBuilder *//*?}*/ {
+    private fun tagBuilder(key: TagKey<Enchantment>): /*? if >= 26.2 {*/ TagAppender<Enchantment> /*?} else if >=26.1.2 {*/ /*TagAppender<ResourceKey<Enchantment>, Enchantment> *//*?} else {*/ /*FabricTagBuilder *//*?}*/ {
         return /*? if >=1.21.11 {*/ builder(key) /*?} else {*/ /*getOrCreateTagBuilder(key) *//*?}*/
     }
 }
