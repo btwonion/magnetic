@@ -13,10 +13,11 @@ public final class BlockDropScope {
     }
 
     public static <T> T call(BlockState state, Supplier<T> action) {
-        if (!MagneticCheckKt.isIgnored(state)) {
-            return action.get();
-        }
-        return ThreadLocalScope.call(ignoreBlockDrops, true, action);
+        return ThreadLocalScope.call(
+            ignoreBlockDrops,
+            MagneticCheckKt.isIgnored(state),
+            action
+        );
     }
 
     public static void run(BlockState state, Runnable action) {

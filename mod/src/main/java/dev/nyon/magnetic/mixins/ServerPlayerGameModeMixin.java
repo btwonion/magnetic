@@ -2,8 +2,8 @@ package dev.nyon.magnetic.mixins;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(ServerPlayerGameMode.class)
@@ -39,13 +38,13 @@ public class ServerPlayerGameModeMixin {
         Operation<Boolean> original
     ) {
         BlockState state = level.getBlockState(pos);
-        if (MagneticCheckKt.isIgnored(state)) {
-            return ThreadLocalScope.call(ignoreBlockDrops, true, () -> original.call(pos));
-        }
-
         PositionTracker tracker = ((ServerLevelHolder) level).getPositionTracker();
         tracker.recordNeighbors(pos, player, level);
-        return ThreadLocalScope.call(threadLocal, player, () -> original.call(pos));
+        return ThreadLocalScope.call(
+            threadLocal,
+            player,
+            () -> BlockDropScope.call(state, () -> original.call(pos))
+        );
     }
 
     @WrapMethod(method = "useItemOn")
@@ -58,17 +57,13 @@ public class ServerPlayerGameModeMixin {
         Operation<InteractionResult> original
     ) {
         BlockState state = world.getBlockState(hitResult.getBlockPos());
-        if (MagneticCheckKt.isIgnored(state)) {
-            return ThreadLocalScope.call(
-                ignoreBlockDrops,
-                true,
-                () -> original.call(interactingPlayer, world, stack, hand, hitResult)
-            );
-        }
         return ThreadLocalScope.call(
             threadLocal,
             interactingPlayer,
-            () -> original.call(interactingPlayer, world, stack, hand, hitResult)
+            () -> BlockDropScope.call(
+                state,
+                () -> original.call(interactingPlayer, world, stack, hand, hitResult)
+            )
         );
     }
 }
