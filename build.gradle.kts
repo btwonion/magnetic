@@ -62,6 +62,9 @@ tasks {
                         Field(
                             "Supported versions", supportedMcVersions.joinToString(), false
                         ),
+                        Field(
+                            "Supported loaders", "Fabric, Quilt, NeoForge, Paper, Folia, PurPur", false
+                        ),
                         Field("Modrinth", "https://modrinth.com/mod/magnetic", true),
                         Field("CurseForge", "https://www.curseforge.com/minecraft/mc-mods/magnetic-telekinesis", true),
                         Field("GitHub", "https://github.com/btwonion/magnetic", true)
