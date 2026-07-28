@@ -1,0 +1,22 @@
+[versions]
+kotlin = "2.3.10"
+mod-publish = "2.1+"
+fabric-loader = "0.19.3"
+fabric-language-kotlin = "1.13.9+kotlin."
+konfig = "3.0.1"
+modstitch = "0.8.4"
+paper-userdev = "2.0.0-beta.21"
+run-paper = "3.0.2"
+rfpc = "1.3.1"
+
+[libraries]
+konfig = { module = "dev.nyon:konfig", version.ref = "konfig" }
+
+[plugins]
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+mod-publish = { id = "me.modmuss50.mod-publish-plugin", version.ref = "mod-publish" }
+modstitch = { id = "dev.isxander.modstitch.base", version.ref = "modstitch" }
+paper-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paper-userdev" }
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-paper" }
+rfpc = { id = "xyz.jpenilla.resource-factory-paper-convention", version.ref = "rfpc" }

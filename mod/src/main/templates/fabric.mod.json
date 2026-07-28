@@ -1,0 +1,43 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "name": "${mod_name}",
+    "description": "${mod_description}",
+    "contact": {
+        "issues": "https://github.com/${github}/issues",
+        "sources": "https://github.com/${github}"
+    },
+    "authors": ["${mod_author}"],
+    "icon": "${icon}",
+    "license": ["${mod_license}"],
+    "environment": "*",
+    "depends": {
+        "fabricloader": ">=${fabric_loader}",
+        "fabric-language-kotlin": ">=${flk}",
+        "fabric-api": ">=${fapi}",
+        "yet_another_config_lib_v3": ">=${yacl}",
+        "minecraft": "${mc}"
+    },
+    "suggests": {
+        "modmenu": "${modmenu}"
+    },
+    "entrypoints": {
+        "fabric-datagen": ["dev.nyon.magnetic.datagen.DataGenerator"],
+        "main": [{
+            "adapter": "kotlin",
+            "value": "dev.nyon.magnetic.MainKt::init"
+        }],
+        "modmenu": [{
+            "adapter": "kotlin",
+            "value": "dev.nyon.magnetic.config.screen.ModMenuImpl"
+        }]
+    },
+    "custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.discord": "https://discord.gg/pmHTtZnMd3"
+            }
+        }
+    }
+}

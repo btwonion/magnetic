@@ -5,13 +5,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
-    id("io.papermc.paperweight.userdev")
-    id("xyz.jpenilla.run-paper")
-    id("xyz.jpenilla.resource-factory-paper-convention")
-
-    id("me.modmuss50.mod-publish-plugin")
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.mod.publish)
+    alias(libs.plugins.paper.userdev)
+    alias(libs.plugins.run.paper)
+    alias(libs.plugins.rfpc)
 
     `maven-publish`
 }

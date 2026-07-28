@@ -10,7 +10,7 @@ jobs:
     permissions: write-all
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -33,7 +33,7 @@ jobs:
           NYON_USERNAME: ${{ secrets.NYON_USERNAME }}
           NYON_PASSWORD: ${{ secrets.NYON_PASSWORD }}
       - name: Sync Modrinth description
-        uses: funnyboy-roks/modrinth-auto-desc@v1.6
+        uses: funnyboy-roks/modrinth-auto-desc@v1.7
         with:
           auth-token: ${{ secrets.MODRINTH_API_KEY }}
           slug: 'magnetic'

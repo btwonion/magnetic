@@ -1,7 +1,9 @@
 .idea/
-**/.gradle/
-**/run/
-!run/mods/
-**/build/
+.gradle/
+run/
+build/
 .kotlin
-**/.cache
+.cache
+docs/superpowers/
+.superpowers/
+.worktrees/

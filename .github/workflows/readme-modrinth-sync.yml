@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Sync Modrinth description
     steps:
-      - uses: actions/checkout@v4
-      - uses: funnyboy-roks/modrinth-auto-desc@v1.6
+      - uses: actions/checkout@v7
+      - uses: funnyboy-roks/modrinth-auto-desc@v1.7
         with:
           auth-token: ${{ secrets.MODRINTH_API_KEY }}
           slug: 'magnetic'
