@@ -1,7 +1,11 @@
 package dev.nyon.magnetic.mixins;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.PositionTracker;
+import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,13 +14,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
@@ -30,59 +32,38 @@ public class ServerPlayerGameModeMixin {
     @Shadow
     protected ServerLevel level;
 
-    // destroyBlock: set ThreadLocal + record neighbors for chain propagation
-    @Inject(
-        method = "destroyBlock",
-        at = @At("HEAD")
-    )
-    private void setPlayerOnDestroyBlock(
+    @WrapMethod(method = "destroyBlock")
+    private boolean scopeDestroyBlock(
         BlockPos pos,
-        CallbackInfoReturnable<Boolean> cir
+        Operation<Boolean> original
     ) {
-        threadLocal.set(player);
+        BlockState state = level.getBlockState(pos);
         PositionTracker tracker = ((ServerLevelHolder) level).getPositionTracker();
         tracker.recordNeighbors(pos, player, level);
+        return ThreadLocalScope.call(
+            threadLocal,
+            player,
+            () -> BlockDropScope.call(state, () -> original.call(pos))
+        );
     }
 
-    @Inject(
-        method = "destroyBlock",
-        at = @At("RETURN")
-    )
-    private void clearPlayerOnDestroyBlock(
-        BlockPos pos,
-        CallbackInfoReturnable<Boolean> cir
-    ) {
-        threadLocal.remove();
-    }
-
-    // useItemOn: covers berry bushes, beehive, pumpkin, cave vines, candle cake, brushable blocks, hoe tilling
-    @Inject(
-        method = "useItemOn",
-        at = @At("HEAD")
-    )
-    private void setPlayerOnUseItemOn(
-        ServerPlayer player,
+    @WrapMethod(method = "useItemOn")
+    private InteractionResult scopeUseItemOn(
+        ServerPlayer interactingPlayer,
         Level world,
         ItemStack stack,
         InteractionHand hand,
         BlockHitResult hitResult,
-        CallbackInfoReturnable<InteractionResult> cir
+        Operation<InteractionResult> original
     ) {
-        threadLocal.set(player);
-    }
-
-    @Inject(
-        method = "useItemOn",
-        at = @At("RETURN")
-    )
-    private void clearPlayerOnUseItemOn(
-        ServerPlayer player,
-        Level world,
-        ItemStack stack,
-        InteractionHand hand,
-        BlockHitResult hitResult,
-        CallbackInfoReturnable<InteractionResult> cir
-    ) {
-        threadLocal.remove();
+        BlockState state = world.getBlockState(hitResult.getBlockPos());
+        return ThreadLocalScope.call(
+            threadLocal,
+            interactingPlayer,
+            () -> BlockDropScope.call(
+                state,
+                () -> original.call(interactingPlayer, world, stack, hand, hitResult)
+            )
+        );
     }
 }

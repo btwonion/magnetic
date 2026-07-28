@@ -16,6 +16,7 @@ object ConfigCommand {
                     .executes { ctx ->
                         config = loadConfig<Config>()
                         reloadIgnoredEntities()
+                        reloadIgnoredBlocks()
                         ctx.source.sendSystemMessage(Component.literal("Successfully reloaded config."))
                         return@executes Command.SINGLE_SUCCESS
                     }))

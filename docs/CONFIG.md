@@ -19,6 +19,7 @@ Config file structure:
     },
     "ignoredEntitiesRangeMin": 50.0,
     "ignoreEntities": [],
+    "ignoreBlocks": [],
     "fullInventoryAlert": {
       "soundAlert": {
         "enabled": true,
@@ -89,6 +90,15 @@ List of entities to ignore entirely.
 Examples:
 - `minecraft:creeper`
 - `#minecraft:skeletons`
+
+## ignoreBlocks
+List of source blocks whose item and experience drops Magnetic should ignore entirely.
+- Matching is based on the block that produced the drop, not the type of block item that was dropped.
+- Accepts block ids (resource locations) and tags.
+Examples:
+- `minecraft:scaffolding`
+- `minecraft:chorus_plant`
+- `#minecraft:logs`
 
 ## fullInventoryAlert
 Alerts when Magnetic tries to insert items but the inventory is full.

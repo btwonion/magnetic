@@ -14,6 +14,8 @@
     "yacl3.config.magnetic.category.general.group.buckets.option.abilityTimeout.description": "Defines after how long the ability will be disabled again. If set to -1, the ability will not time out.",
     "yacl3.config.magnetic.category.general.root.option.ignoreEntities": "Ignore entity drops",
     "yacl3.config.magnetic.category.general.root.option.ignoreEntities.description": "Magnetic will not affect the specified entities when killed. You can use both tags and entity ids (resource locations) to define which entities to ignore.",
+    "yacl3.config.magnetic.category.general.root.option.ignoreBlocks": "Ignore block drops",
+    "yacl3.config.magnetic.category.general.root.option.ignoreBlocks.description": "Magnetic will not affect item or experience drops produced by the specified source blocks. This matches the block that produced the drop, not the type of block item that was dropped. You can use both tags and block ids (resource locations).",
     "yacl3.config.magnetic.category.general.root.option.ignoredEntitiesRangeMin": "Ignored Entities Range min",
     "yacl3.config.magnetic.category.general.root.option.ignoredEntitiesRangeMin.description": "Ignores drops that were produced by a player that was further away from the entity than this value. If this value is set to -1, no check will be performed.",
     "yacl3.config.magnetic.category.general.group.fullInventoryAlert": "Full inventory alert",

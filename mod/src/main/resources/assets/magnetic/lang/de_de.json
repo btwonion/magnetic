@@ -14,6 +14,8 @@
     "yacl3.config.magnetic.category.general.group.buckets.option.abilityTimeout.description": "Setzt die Zeit nach der die Magnetic Fähigkeit pro Eimer nicht mehr funktioniert. Wenn dieser Wert auf -1 gesetzt ist, funktioniert Magnetic ohne ein Zeitlimit.",
     "yacl3.config.magnetic.category.general.root.option.ignoreEntities": "Ignoriere Beute von Wesen",
     "yacl3.config.magnetic.category.general.root.option.ignoreEntities.description": "Angegebene Wesen werden von Magnetic ignoriert und lassen ihre Beute wie gewöhnlich fallen. Es werden sowohl Tags, wie auch IDs von den Entities akzeptiert (Resource Locations).",
+    "yacl3.config.magnetic.category.general.root.option.ignoreBlocks": "Ignoriere Beute von Blöcken",
+    "yacl3.config.magnetic.category.general.root.option.ignoreBlocks.description": "Magnetic ignoriert Gegenstands- und Erfahrungsbeute, die von den angegebenen Ausgangsblöcken erzeugt wird. Abgeglichen wird der Block, der die Beute erzeugt hat, nicht der Typ des fallengelassenen Blockgegenstands. Es werden sowohl Tags als auch Block-IDs akzeptiert (Resource Locations).",
     "yacl3.config.magnetic.category.general.root.option.ignoredEntitiesRangeMin": "Mobs, die weiter als die angegebene Entfernung vom Spieler entfernt sind, sind nicht von der Magnetic-Fähigkeit betroffen. Wenn der Wert auf -1 gesetzt ist wird keine Überprüfung vorgenommen.",
     "yacl3.config.magnetic.category.general.root.option.ignoredEntitiesRangeMin.description": "Beute, die vom Töten mit Fernkampfwaffen verursacht wird, wird von der Magnetic-Fähigkeit ignoriert.",
     "yacl3.config.magnetic.category.general.group.fullInventoryAlert": "Hinweis: Inventar voll",

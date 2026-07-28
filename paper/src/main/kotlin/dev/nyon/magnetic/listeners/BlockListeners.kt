@@ -4,6 +4,7 @@ import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.BreakChainedBlocks
+import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import io.papermc.paper.event.block.PlayerShearBlockEvent
 import net.minecraft.world.level.material.WaterFluid
@@ -26,6 +27,7 @@ object BlockListeners {
 
     private val blockDropItemEvent =
         listen<BlockDropItemEvent> { // Return before calling the DropEvent to prevent executing expensive logic
+            if (blockState.type.isIgnored) return@listen
             if (!config.conditionStatement.checkAndReport(player)) return@listen
 
             val itemStacks = items.map { it.itemStack }.toMutableList()
@@ -37,7 +39,7 @@ object BlockListeners {
             else listOf(BlockFace.UP, BlockFace.DOWN).forEach { direction ->
                 val other = block.getRelative(direction)
                 val otherType = other.state.type
-                if (BreakChainedBlocks.breakChainedBlocks.contains(otherType) && otherType.breakDirections()
+                if (!otherType.isIgnored && BreakChainedBlocks.breakChainedBlocks.contains(otherType) && otherType.breakDirections()
                         .contains(direction) && !BreakChainedBlocks.ignoredIndirectChainedBlocks.contains(otherType)
                 ) handleBreakChainedBlocks(
                     other, other.state, player, itemStacks, dontIgnoreRoot = true
@@ -54,6 +56,7 @@ object BlockListeners {
         }
 
     private val harvestBlockEvent = listen<PlayerHarvestBlockEvent> {
+        if (harvestedBlock.type.isIgnored) return@listen
         val itemStacks = itemsHarvested.toMutableList()
         DropEvent(itemStacks, MutableInt(), player, harvestedBlock.location).also(Event::callEvent)
 
@@ -64,6 +67,7 @@ object BlockListeners {
     }
 
     private val playerShearBlockEvent = listen<PlayerShearBlockEvent> {
+        if (block.type.isIgnored) return@listen
         val itemStacks = drops.toMutableList()
         DropEvent(itemStacks, MutableInt(), player, block.location).also(Event::callEvent)
 
@@ -74,6 +78,7 @@ object BlockListeners {
     }
 
     private val blockBreakEvent = listen<BlockBreakEvent> {
+        if (block.type.isIgnored) return@listen
         val mutableInt = MutableInt(expToDrop)
         DropEvent(mutableListOf(), mutableInt, player, block.location).also(Event::callEvent)
         expToDrop = mutableInt.toInt()
@@ -94,6 +99,7 @@ object BlockListeners {
             blockFaces.forEach { face ->
                 val otherBlock = block.getRelative(face)
                 if (otherBlock == block) return@forEach
+                if (otherBlock.type.isIgnored) return@forEach
                 if (!blockState.type.alsoBreakType(otherBlock.state.type)) return@forEach
                 if (affectedBlocks.add(otherBlock) && otherBlock.state.type == blockState.type) scanSurroundingBlocks(
                     otherBlock

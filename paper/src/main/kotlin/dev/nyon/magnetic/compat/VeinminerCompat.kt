@@ -2,6 +2,7 @@ package dev.nyon.magnetic.compat
 
 import de.miraculixx.veinminer.VeinMinerEvent
 import dev.nyon.magnetic.DropEvent
+import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.event.Event
@@ -9,6 +10,8 @@ import org.bukkit.event.Event
 object VeinminerCompat {
     fun listenForEvents() {
         listen<VeinMinerEvent.VeinminerDropEvent> {
+            if (block.type.isIgnored) return@listen
+
             val mutableInt = MutableInt(exp)
             val itemStacks = items.toMutableList()
             DropEvent(itemStacks, mutableInt, player, block.location).also(Event::callEvent)

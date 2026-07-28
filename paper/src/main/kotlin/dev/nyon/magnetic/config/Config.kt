@@ -22,6 +22,7 @@ data class Config(
     var buckets: Buckets = Buckets(),
     var ignoredEntitiesRangeMin: Double = 50.0,
     var ignoreEntities: List<Identifier> = listOf(),
+    var ignoreBlocks: List<Identifier> = listOf(),
     var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert(),
     var animation: Animation = Animation()
 ) {

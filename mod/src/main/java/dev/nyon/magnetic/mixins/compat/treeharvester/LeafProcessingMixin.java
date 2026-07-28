@@ -3,6 +3,7 @@ package dev.nyon.magnetic.mixins.compat.treeharvester;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.compat.treeharvester.TreeHarvesterLeafTracker;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
+import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
 
 @Pseudo
 @Mixin(
@@ -47,7 +49,9 @@ public class LeafProcessingMixin {
         if (added
             && level instanceof ServerLevel serverLevel
             && element instanceof BlockPos leafPos
-            && player != null) {
+            && player != null
+            && !Boolean.TRUE.equals(ignoreBlockDrops.get())
+            && !MagneticCheckKt.isIgnored(serverLevel.getBlockState(leafPos))) {
             TreeHarvesterLeafTracker.record(serverLevel, leafPos, player);
         }
         return added;

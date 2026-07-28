@@ -2,6 +2,7 @@ package dev.nyon.magnetic.mixins.compat.kleeslabs;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 /*? if <1.21.11 {*/
 /*import net.blay09.mods.balm.api.event.BreakBlockEvent;
@@ -33,7 +34,10 @@ public class BlockBreakHandlerMixin {
             return;
         }
 
-        ThreadLocalScope.run(threadLocal, player, () -> original.call(event));
+        BlockDropScope.run(
+            ((BreakBlockEventAccessor) (Object) event).magnetic$getState(),
+            () -> ThreadLocalScope.run(threadLocal, player, () -> original.call(event))
+        );
     }
     *//*?} else {*/
     @WrapMethod(method = "onBreakBlock")
@@ -49,10 +53,13 @@ public class BlockBreakHandlerMixin {
             return original.call(level, pos, state, blockEntity, player);
         }
 
-        return ThreadLocalScope.call(
-            threadLocal,
-            serverPlayer,
-            () -> original.call(level, pos, state, blockEntity, player)
+        return BlockDropScope.call(
+            state,
+            () -> ThreadLocalScope.call(
+                threadLocal,
+                serverPlayer,
+                () -> original.call(level, pos, state, blockEntity, player)
+            )
         );
     }
     /*?}*/

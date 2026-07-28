@@ -7,6 +7,7 @@ import dev.nyon.konfig.config.saveConfig
 import dev.nyon.magnetic.config.Identifier
 import dev.nyon.magnetic.config.conditions.ConditionChain
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.config.invalidateIgnoredCaches
 import dev.nyon.magnetic.extensions.IdentifierSerializer
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
@@ -66,6 +67,25 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
                     { config.ignoreEntities.map(Identifier::toString) },
                     { list->
                         config.ignoreEntities = list.mapNotNull { entry ->
+                            runCatching { IdentifierSerializer.decodeFromString(entry) }.getOrNull()
+                        }
+                    }
+                )
+                .initial("")
+                .build()
+        )
+
+        val ignoreBlocks = rootOptions.register(
+            "ignoreBlocks",
+            ListOption.createBuilder<String>()
+                .name(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreBlocks"))
+                .description(OptionDescription.createBuilder().text(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreBlocks.description")).build())
+                .controller(stringField())
+                .binding(
+                    emptyList(),
+                    { config.ignoreBlocks.map(Identifier::toString) },
+                    { list ->
+                        config.ignoreBlocks = list.mapNotNull { entry ->
                             runCatching { IdentifierSerializer.decodeFromString(entry) }.getOrNull()
                         }
                     }
@@ -159,5 +179,8 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
         }
     }
 
-    save { saveConfig(config) }
+    save {
+        saveConfig(config)
+        invalidateIgnoredCaches()
+    }
 }.generateScreen(parent)
