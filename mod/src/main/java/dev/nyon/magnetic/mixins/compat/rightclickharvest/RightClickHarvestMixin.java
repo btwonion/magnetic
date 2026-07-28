@@ -3,8 +3,10 @@ package dev.nyon.magnetic.mixins.compat.rightclickharvest;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.MixinHelper;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import io.github.jamalam360.rightclickharvest.RightClickHarvest;
@@ -40,12 +42,17 @@ public class RightClickHarvestMixin {
             return;
         }
 
-        PositionTracker tracker = ((ServerLevelHolder) level).getPositionTracker();
-        tracker.recordNeighbors(pos, player, level);
-        ThreadLocalScope.run(
-            threadLocal,
-            player,
-            () -> original.call(state, level, pos, entity, tool, removeReplant)
+        if (!MagneticCheckKt.isIgnored(state)) {
+            PositionTracker tracker = ((ServerLevelHolder) level).getPositionTracker();
+            tracker.recordNeighbors(pos, player, level);
+        }
+        BlockDropScope.run(
+            state,
+            () -> ThreadLocalScope.run(
+                threadLocal,
+                player,
+                () -> original.call(state, level, pos, entity, tool, removeReplant)
+            )
         );
     }
 
@@ -71,7 +78,9 @@ public class RightClickHarvestMixin {
         Runnable setBlockAction
     ) {
         int remaining = experience;
-        if (experience > 0 && experiencePlayer instanceof ServerPlayer serverPlayer) {
+        if (experience > 0
+            && !MagneticCheckKt.isIgnored(state)
+            && experiencePlayer instanceof ServerPlayer serverPlayer) {
             remaining = MixinHelper.modifyExpressionValuePlayerExp(serverPlayer, experience, pos);
         }
         original.call(experiencePlayer, remaining);

@@ -1,7 +1,9 @@
 package dev.nyon.magnetic.extensions
 
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.config.ignoredBlocks
 import dev.nyon.magnetic.config.ignoredEntities
+import org.bukkit.Material
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Entity
@@ -13,6 +15,9 @@ val EntityType.isIgnored: Boolean
     get() {
         return ignoredEntities.contains(key)
     }
+
+val Material.isIgnored: Boolean
+    get() = ignoredBlocks.contains(key)
 
 fun Entity.failsLongRangeCheck(player: Player): Boolean {
     if (config.ignoredEntitiesRangeMin == -1.0) return false

@@ -2,7 +2,9 @@ package dev.nyon.magnetic.mixins.compat.treeharvester;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
@@ -57,12 +59,18 @@ public class TreeCutEventsMixin {
             return;
         }
 
-        PositionTracker tracker = ((ServerLevelHolder) serverLevel).getPositionTracker();
-        tracker.recordNeighbors(dropPos, serverPlayer, serverLevel);
-        ThreadLocalScope.run(
-            threadLocal,
-            serverPlayer,
-            () -> original.call(dropLevel, dropPos)
+        BlockState droppedState = serverLevel.getBlockState(dropPos);
+        if (!MagneticCheckKt.isIgnored(droppedState)) {
+            PositionTracker tracker = ((ServerLevelHolder) serverLevel).getPositionTracker();
+            tracker.recordNeighbors(dropPos, serverPlayer, serverLevel);
+        }
+        BlockDropScope.run(
+            droppedState,
+            () -> ThreadLocalScope.run(
+                threadLocal,
+                serverPlayer,
+                () -> original.call(dropLevel, dropPos)
+            )
         );
     }
 
@@ -94,10 +102,14 @@ public class TreeCutEventsMixin {
             return;
         }
 
-        ThreadLocalScope.run(
-            threadLocal,
-            serverPlayer,
-            () -> original.call(leafLevel, logs, bottomLog, topLog)
-        );
+        if (MagneticCheckKt.isIgnored(state)) {
+            original.call(leafLevel, logs, bottomLog, topLog);
+        } else {
+            ThreadLocalScope.run(
+                threadLocal,
+                serverPlayer,
+                () -> original.call(leafLevel, logs, bottomLog, topLog)
+            );
+        }
     }
 }

@@ -2,6 +2,7 @@ package dev.nyon.magnetic.mixins.compat.veinminer;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,10 +36,13 @@ public class VeinMinerEventMixin {
             return;
         }
 
-        ThreadLocalScope.run(
-            threadLocal,
-            player,
-            () -> original.call(state, level, pos, blockEntity, breaker, tool, initialSource)
+        BlockDropScope.run(
+            state,
+            () -> ThreadLocalScope.run(
+                threadLocal,
+                player,
+                () -> original.call(state, level, pos, blockEntity, breaker, tool, initialSource)
+            )
         );
     }
 }

@@ -36,6 +36,7 @@ class Main : JavaPlugin() {
             migrate(element, version)
         }
         reloadIgnoredEntities()
+        reloadIgnoredBlocks()
         registerTranslations()
         registerCommand()
     }

@@ -3,7 +3,9 @@ package dev.nyon.magnetic.mixins.compat.treeharvester;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.compat.treeharvester.TreeHarvesterLeafTracker;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
@@ -23,6 +25,7 @@ import java.util.EnumSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
+import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
 
 @Pseudo
 @Mixin(
@@ -64,12 +67,19 @@ public class LeafEventsMixin {
             original.call(dropLevel, dropPos);
             return;
         }
+        ServerPlayer scopedPlayer = player;
 
-        tracker.recordNeighbors(dropPos, player, serverLevel);
-        ThreadLocalScope.run(
-            threadLocal,
-            player,
-            () -> original.call(dropLevel, dropPos)
+        BlockState state = serverLevel.getBlockState(dropPos);
+        if (!MagneticCheckKt.isIgnored(state)) {
+            tracker.recordNeighbors(dropPos, scopedPlayer, serverLevel);
+        }
+        BlockDropScope.run(
+            state,
+            () -> ThreadLocalScope.run(
+                threadLocal,
+                scopedPlayer,
+                () -> original.call(dropLevel, dropPos)
+            )
         );
     }
 
@@ -95,7 +105,9 @@ public class LeafEventsMixin {
         if (added
             && level instanceof ServerLevel serverLevel
             && element instanceof BlockPos leafPos
-            && player != null) {
+            && player != null
+            && !Boolean.TRUE.equals(ignoreBlockDrops.get())
+            && !MagneticCheckKt.isIgnored(state)) {
             TreeHarvesterLeafTracker.record(serverLevel, leafPos, player);
         }
         return added;
@@ -121,10 +133,13 @@ public class LeafEventsMixin {
             return;
         }
 
-        ThreadLocalScope.run(
-            threadLocal,
-            player,
-            () -> original.call(state, level, pos, random)
+        BlockDropScope.run(
+            state,
+            () -> ThreadLocalScope.run(
+                threadLocal,
+                player,
+                () -> original.call(state, level, pos, random)
+            )
         );
     }
 
@@ -148,10 +163,13 @@ public class LeafEventsMixin {
             return;
         }
 
-        ThreadLocalScope.run(
-            threadLocal,
-            player,
-            () -> original.call(state, level, pos, random)
+        BlockDropScope.run(
+            state,
+            () -> ThreadLocalScope.run(
+                threadLocal,
+                player,
+                () -> original.call(state, level, pos, random)
+            )
         );
     }
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static dev.nyon.magnetic.utils.MixinHelper.animationSkip;
+import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(ServerLevel.class)
@@ -58,6 +59,7 @@ public class ServerLevelMixin implements ServerLevelHolder {
         CallbackInfoReturnable<Boolean> cir
     ) {
         if (Boolean.TRUE.equals(animationSkip.get())) return;
+        if (Boolean.TRUE.equals(ignoreBlockDrops.get())) return;
 
         ServerPlayer player = threadLocal.get();
         if (player == null) {

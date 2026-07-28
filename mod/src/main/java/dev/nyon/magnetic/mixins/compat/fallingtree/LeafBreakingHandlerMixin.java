@@ -2,7 +2,9 @@ package dev.nyon.magnetic.mixins.compat.fallingtree;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import fr.rakambda.fallingtree.common.leaf.LeafBreakingHandler;
@@ -14,10 +16,12 @@ import fr.rakambda.fallingtree.common.wrapper.IServerLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
+import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
 
 @Mixin(LeafBreakingHandler.class)
 public class LeafBreakingHandlerMixin {
@@ -40,6 +44,7 @@ public class LeafBreakingHandlerMixin {
 
         ServerPlayer player = threadLocal.get();
         if (player == null
+            || Boolean.TRUE.equals(ignoreBlockDrops.get())
             || !(schedule.getLevel().getRaw() instanceof ServerLevel level)
             || !(schedule.getBlockPos().getRaw() instanceof BlockPos pos)) {
             return;
@@ -64,6 +69,7 @@ public class LeafBreakingHandlerMixin {
         Operation<Void> original
     ) {
         runWithScheduledPlayer(
+            state,
             level,
             pos,
             () -> original.call(state, level, pos, random)
@@ -85,6 +91,7 @@ public class LeafBreakingHandlerMixin {
         Operation<Void> original
     ) {
         runWithScheduledPlayer(
+            state,
             level,
             pos,
             () -> original.call(state, level, pos, random)
@@ -92,6 +99,7 @@ public class LeafBreakingHandlerMixin {
     }
 
     private static void runWithScheduledPlayer(
+        IBlockState wrappedState,
         IServerLevel wrappedLevel,
         IBlockPos wrappedPos,
         Runnable action
@@ -109,7 +117,17 @@ public class LeafBreakingHandlerMixin {
             return;
         }
 
-        tracker.recordNeighbors(pos, player, level);
-        ThreadLocalScope.run(threadLocal, player, action);
+        if (wrappedState.getRaw() instanceof BlockState state) {
+            if (!MagneticCheckKt.isIgnored(state)) {
+                tracker.recordNeighbors(pos, player, level);
+            }
+            BlockDropScope.run(
+                state,
+                () -> ThreadLocalScope.run(threadLocal, player, action)
+            );
+        } else {
+            tracker.recordNeighbors(pos, player, level);
+            ThreadLocalScope.run(threadLocal, player, action);
+        }
     }
 }

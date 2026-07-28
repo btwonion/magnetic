@@ -6,6 +6,7 @@ import dev.nyon.magnetic.Animation
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -51,10 +52,11 @@ object FluidListeners {
         val sourcePos = block.location.toVector()
         if (!storedFluidHolders.containsKey(sourcePos)) return@listen
         val toPos = toBlock.location.toVector()
+        val ignoreDrops = toBlock.type.isIgnored
 
         fluidTrackingScope.launch {
             fluidHolderMutex.withLock {
-                storedFluidHolders[toPos] = storedFluidHolders[sourcePos]!!
+                storedFluidHolders[toPos] = storedFluidHolders[sourcePos]!!.copy(ignoreDrops = ignoreDrops)
             }
         }
     }
@@ -68,6 +70,7 @@ object FluidListeners {
 
             val holder =
                 runBlocking { fluidHolderMutex.withLock { storedFluidHolders[itemPos.toBlockLocation().toVector()] } } ?: return@execute
+            if (holder.ignoreDrops) return@execute
 
             val itemStacks = mutableListOf(entity.itemStack)
             DropEvent(itemStacks, MutableInt(), holder.player, itemPos).also(Event::callEvent)
@@ -109,4 +112,9 @@ object FluidListeners {
     }
 }
 
-data class FluidHolder(val player: Player, val placedAt: Instant, val world: World)
+data class FluidHolder(
+    val player: Player,
+    val placedAt: Instant,
+    val world: World,
+    val ignoreDrops: Boolean = false
+)
