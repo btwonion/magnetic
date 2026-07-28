@@ -26,7 +26,7 @@ fun init() {
         ConfigCommand.registerCommand(dispatcher)
     }
 
-    /*? if >=1.21.11 {*/ ServerTickEvents.END_LEVEL_TICK /*?} else {*/ /*ServerTickEvents.END_WORLD_TICK *//*?}*/.register { Animation.tick() }
+    /*? if >=26.1.2 {*/ ServerTickEvents.END_LEVEL_TICK /*?} else {*/ /*ServerTickEvents.END_WORLD_TICK *//*?}*/.register { Animation.tick() }
 }
 
 /*?} else if neoforge {*/

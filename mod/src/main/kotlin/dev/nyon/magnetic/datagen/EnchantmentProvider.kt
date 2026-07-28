@@ -3,7 +3,7 @@ package dev.nyon.magnetic.datagen
 /*? if fabric {*/
 import dev.nyon.magnetic.extensions.MinecraftIdentifier
 import dev.nyon.magnetic.extensions.minecraftIdentifier
-/*? if >=1.21.11 {*/
+/*? if >=26.1.2 {*/
 import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput
 /*?} else {*/
 /*import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput*//*?}*/
@@ -19,7 +19,7 @@ import net.minecraft.world.item.enchantment.Enchantment.dynamicCost
 import java.util.concurrent.CompletableFuture
 
 class EnchantmentProvider(
-    output: /*? if >=1.21.11 {*/ FabricPackOutput /*?} else {*/ /*FabricDataOutput *//*?}*/,
+    output: /*? if >=26.1.2 {*/ FabricPackOutput /*?} else {*/ /*FabricDataOutput *//*?}*/,
     registriesFuture: CompletableFuture<HolderLookup.Provider>
 ) : FabricDynamicRegistryProvider(output, registriesFuture) {
     override fun getName(): String = "Magnetic Enchantment Generation"

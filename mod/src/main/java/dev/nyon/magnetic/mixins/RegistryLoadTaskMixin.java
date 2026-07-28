@@ -1,12 +1,12 @@
 package dev.nyon.magnetic.mixins;
 
-/*? if <1.21.11 {*/
+/*? if <26.1.2 {*/
 /*import com.google.gson.JsonElement;
 import com.mojang.serialization.Decoder;
 *//*?}*/
 import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.datagen.MagneticIdsKt;
-/*? if >=1.21.11 {*/
+/*? if >=26.1.2 {*/
 import net.minecraft.resources.RegistryLoadTask;
 /*?} else {*/
 /*import net.minecraft.core.RegistrationInfo;
@@ -21,10 +21,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(/*? if >=1.21.11 {*/ RegistryLoadTask.class /*?} else {*/ /*RegistryDataLoader.class *//*?}*/)
+@Mixin(/*? if >=26.1.2 {*/ RegistryLoadTask.class /*?} else {*/ /*RegistryDataLoader.class *//*?}*/)
 public class RegistryLoadTaskMixin {
 
-    /*? if >=1.21.11 {*/
+    private static boolean isMagneticKey(ResourceKey key) {
+        return /*? if >=1.21.11 {*/ key.identifier() /*?} else {*/ /*key.location() *//*?}*/
+            .equals(MagneticIdsKt.getMagneticEnchantmentId());
+    }
+
+    /*? if >=26.1.2 {*/
     @Inject(
         method = "lambda$registerElements$0",
         at = @At("HEAD"),
@@ -38,8 +43,7 @@ public class RegistryLoadTaskMixin {
         if (!ConfigKt.getConfig()
             .getConditionStatement()
             .getRaw()
-            .contains("ENCHANTMENT") && key.identifier()
-            .equals(MagneticIdsKt.getMagneticEnchantmentId())) ci.cancel();
+            .contains("ENCHANTMENT") && isMagneticKey(key)) ci.cancel();
     }
     /*?} else {*/
     /*@Inject(method = "loadElementFromResource", at = @At("HEAD"), cancellable = true)
@@ -53,7 +57,7 @@ public class RegistryLoadTaskMixin {
         CallbackInfo ci
     ) {
         if (!ConfigKt.getConfig().getConditionStatement().getRaw().contains("ENCHANTMENT")
-            && registryKey.location().equals(MagneticIdsKt.getMagneticEnchantmentId())) {
+            && isMagneticKey(registryKey)) {
             ci.cancel();
         }
     }
