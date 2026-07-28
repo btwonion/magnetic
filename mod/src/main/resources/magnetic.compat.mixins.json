@@ -1,0 +1,23 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "dev.nyon.magnetic.mixins.compat",
+    "plugin": "dev.nyon.magnetic.mixins.compat.CompatMixinPlugin",
+    "compatibilityLevel": "JAVA_17",
+    "mixins": [
+        "fallingtree.BlockWrapperMixin",
+        "fallingtree.LeafBreakingHandlerMixin",
+        "fallingtree.LeafForceBreakerMixin",
+        "fallingtree.TreeBreakingHandlerMixin",
+        "kleeslabs.BlockBreakHandlerMixin",
+        "kleeslabs.BreakBlockEventAccessor",
+        "rightclickharvest.RightClickHarvestMixin",
+        "treeharvester.LeafEventsMixin",
+        "treeharvester.LeafProcessingMixin",
+        "treeharvester.TreeCutEventsMixin",
+        "veinminer.VeinMinerEventMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

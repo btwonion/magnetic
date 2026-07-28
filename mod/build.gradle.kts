@@ -1,4 +1,4 @@
-@file:Suppress("SpellCheckingInspection", "UnstableApiUsage", "RedundantNullableReturnType")
+@file:Suppress("SpellCheckingInspection", "UnstableApiUsage", "RedundantNullableReturnType", "AvoidDuplicateDependencies")
 
 import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
 import net.fabricmc.loom.api.fabricapi.FabricApiExtension
@@ -72,6 +72,7 @@ modstitch {
     mixin {
         addMixinsToModManifest = true
         configs.register("magnetic")
+        configs.register("magnetic.compat")
     }
 }
 
@@ -112,6 +113,11 @@ repositories {
     maven("https://repo.nyon.dev/releases")
     maven("https://maven.isxander.dev/releases")
     maven("https://maven.neoforged.net/releases/")
+    maven("https://api.modrinth.com/maven") {
+        content {
+            includeGroup("maven.modrinth")
+        }
+    }
 }
 
 dependencies {
@@ -134,12 +140,20 @@ dependencies {
         prop("vers.deps.$id") { modDependency(artifact(it), compileOnly, api) }
     }
 
+    fun propCompileOnlyDependency(id: String, artifact: (String) -> String) {
+        prop("vers.deps.$id") {
+            add("compileOnly", artifact(it)) {
+                isTransitive = false
+            }
+        }
+    }
+
     if (isFabric) {
         propModDependency("fapi", { "net.fabricmc.fabric-api:fabric-api:$it" }, api = true)
         modDependency("net.fabricmc:fabric-language-kotlin:$fabricLanguageKotlin")
         propModDependency("modMenu", { "com.terraformersmc:modmenu:$it" })
         if (stonecutter.eval(mcVersion, "<1.21.11"))
-            modDependency("me.lucko:fabric-permissions-api:0.5.0", api = true)
+            modDependency("me.lucko:fabric-permissions-api:${if (stonecutter.eval(mcVersion, "<=1.21.1")) "0.3.1" else "0.5.0"}", api = true)
     } else {
         propModDependency(
             "klf",
@@ -149,6 +163,35 @@ dependencies {
     }
 
     propModDependency("yacl", { "dev.isxander:yet-another-config-lib:$it" })
+
+    // Compatibility implementations
+    // RightClickHarvest
+    propCompileOnlyDependency(
+        "compat.rightClickHarvest"
+    ) { "maven.modrinth:rightclickharvest:$it" }
+    // Veinminer
+    propCompileOnlyDependency(
+        "compat.veinminer"
+    ) { "maven.modrinth:veinminer:$it" }
+    // FallingTree
+    propCompileOnlyDependency(
+        "compat.fallingTree"
+    ) { "maven.modrinth:fallingtree:$it" }
+    // KleeSlabs
+    propCompileOnlyDependency(
+        "compat.kleeSlabs"
+    ) { "maven.modrinth:kleeslabs:$it" }
+    propCompileOnlyDependency(
+        "compat.balm"
+    ) { "maven.modrinth:balm:$it" }
+    // TreeHarvester
+    propCompileOnlyDependency(
+        "compat.treeHarvester"
+    ) { "maven.modrinth:tree-harvester:$it" }
+    propCompileOnlyDependency(
+        "compat.collective"
+    ) { "maven.modrinth:collective:$it" }
+
     modstitchApi(libs.konfig)
     modstitchJiJ(libs.konfig)
 }
