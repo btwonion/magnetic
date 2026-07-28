@@ -23,15 +23,18 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --stacktrace
       - name: Release with Gradle
-        run: ./gradlew releaseAllPlatforms postUpdate --stacktrace
+        run: ./gradlew releaseAllPlatforms --stacktrace
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MODRINTH_API_KEY: ${{ secrets.MODRINTH_API_KEY }}
           CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_ROLE_ID: ${{ secrets.DISCORD_ROLE_ID }}
           NYON_USERNAME: ${{ secrets.NYON_USERNAME }}
           NYON_PASSWORD: ${{ secrets.NYON_PASSWORD }}
+      - name: Post Discord Webhook
+        run: ./gradlew postUpdate --stacktrace
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_ROLE_ID: ${{ secrets.DISCORD_ROLE_ID }}
       - name: Sync Modrinth description
         uses: funnyboy-roks/modrinth-auto-desc@v1.7
         with:

@@ -39,7 +39,7 @@ tasks {
     register("releaseAllPlatforms") {
         group = "publishing"
 
-        dependsOn(":mod:releaseMod")
+        dependsOn(project(":mod").subprojects.map { "${it.path}:releaseMod" })
         dependsOn(":paper:releasePlugin")
     }
 
