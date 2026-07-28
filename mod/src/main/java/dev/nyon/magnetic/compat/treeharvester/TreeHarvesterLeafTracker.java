@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.WeakHashMap;
 
 public final class TreeHarvesterLeafTracker {
@@ -25,7 +26,7 @@ public final class TreeHarvesterLeafTracker {
         long now = System.currentTimeMillis();
         Map<BlockPos, Entry> levelEntries = ENTRIES.computeIfAbsent(level, ignored -> new HashMap<>());
         levelEntries.values().removeIf(entry -> now - entry.timestamp() > TIMEOUT_MILLIS);
-        levelEntries.put(pos.immutable(), new Entry(player, now));
+        levelEntries.put(pos.immutable(), new Entry(player.getUUID(), now));
     }
 
     @Nullable
@@ -37,7 +38,9 @@ public final class TreeHarvesterLeafTracker {
         levelEntries.values().removeIf(entry -> now - entry.timestamp() > TIMEOUT_MILLIS);
         Entry entry = levelEntries.get(pos);
         if (levelEntries.isEmpty()) ENTRIES.remove(level);
-        return entry == null ? null : entry.player();
+        return entry == null
+            ? null
+            : level.getServer().getPlayerList().getPlayer(entry.playerId());
     }
 
     @Nullable
@@ -60,6 +63,6 @@ public final class TreeHarvesterLeafTracker {
         if (levelEntries.isEmpty()) ENTRIES.remove(level);
     }
 
-    private record Entry(ServerPlayer player, long timestamp) {
+    private record Entry(UUID playerId, long timestamp) {
     }
 }

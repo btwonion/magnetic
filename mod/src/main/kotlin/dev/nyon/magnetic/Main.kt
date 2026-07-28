@@ -14,12 +14,15 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.commands.Commands
+/*? if <1.21.11 {*/
+/*import dev.nyon.magnetic.extensions.getFabricPermissionCheck
+*//*?}*/
 
 fun init() {
     initialize(FabricLoader.getInstance().configDir.resolve("magnetic.json"))
     /*? if <1.21.11 {*/
-    /*if (config.conditionStatement.raw.contains("PERMISSION") && runCatching { Class.forName("me.lucko.fabric.api.permissions.v0.Permissions") }.isFailure)
-        error("[magnetic] Your condition chain includes a PERMISSION condition, but fabric-permissions-api is not present. Please install it or remove the PERMISSION condition.")
+    /*if (config.conditionStatement.raw.contains("PERMISSION"))
+        getFabricPermissionCheck()
     *//*?}*/
     CommandRegistrationCallback.EVENT.register { dispatcher, _, environment ->
         if (environment != Commands.CommandSelection.DEDICATED) return@register

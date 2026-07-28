@@ -31,8 +31,30 @@ class PlayerPermissionSupplier(val player: ServerPlayer) : PermissionSetSupplier
 }
 /*?} else {*/
 /*/*? if fabric {*/
+private const val MISSING_PERMISSION_API_MESSAGE =
+    "[magnetic] Your condition chain includes a PERMISSION condition, but fabric-permissions-api is not present. Please install it or remove the PERMISSION condition."
+
+private val fabricPermissionCheckResult by lazy {
+    runCatching {
+        Class.forName("me.lucko.fabric.api.permissions.v0.Permissions").getMethod(
+            "check",
+            net.minecraft.world.entity.Entity::class.java,
+            String::class.java,
+            Boolean::class.javaPrimitiveType!!
+        )
+    }
+}
+
+internal fun getFabricPermissionCheck() = fabricPermissionCheckResult.getOrElse { exception ->
+    throw IllegalStateException(MISSING_PERMISSION_API_MESSAGE, exception)
+}
+
 fun ServerPlayer.hasMagneticPermission(): Boolean {
-    return me.lucko.fabric.api.permissions.v0.Permissions.check(this, "magnetic.ability.use", false)
+    return try {
+        getFabricPermissionCheck().invoke(null, this, "magnetic.ability.use", false) as Boolean
+    } catch (exception: ReflectiveOperationException) {
+        throw IllegalStateException("[magnetic] Failed to check the magnetic permission.", exception)
+    }
 }
 /*?} else {*/
 /*fun ServerPlayer.hasMagneticPermission(): Boolean {

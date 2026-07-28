@@ -28,11 +28,7 @@ repositories {
 
 val beta: Int? = property("beta").toString().toIntOrNull() // Pattern is '1.0.0-beta1-1.20.6-pre.2'
 val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
-val modVersionProjects = listOf(
-    project(":mod:26.2-fabric"),
-    project(":mod:26.2-neoforge")
-)
-val supportedMcVersions: List<String> = modVersionProjects
+val supportedMcVersions: List<String> = project(":mod").subprojects
     .flatMap { modProject ->
         modProject.property("vers.supportedMcVersions").toString()
             .split(',').map(String::trim).filter(String::isNotEmpty)
