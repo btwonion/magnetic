@@ -1,5 +1,11 @@
-## Fabric
+## Fabric, NeoForge & Paper
 
-- add support for 26.2
-    - server translations are not yet working, so playing on a server without the mod being installed on the client may
-      break the translations
+- add the `ignoreBlocks` config option ([**#95**](https://github.com/btwonion/magnetic/pull/95))
+    - ignore item and experience drops from selected source blocks
+    - accepts block IDs and tags
+
+## Fabric & NeoForge
+
+- add support for NeoForge ([**#94**](https://github.com/btwonion/magnetic/pull/94))
+- add support for Minecraft 1.21.1, 1.21.11, 26.1.1–26.1.2, and 26.2
+- support FallingTree, KleeSlabs, RightClickHarvest, TreeHarvester, and Veinminer on both mod loaders
