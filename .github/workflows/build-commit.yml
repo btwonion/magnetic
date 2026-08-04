@@ -22,7 +22,47 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build with Gradle
+    name: Build ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Fabric 1.21.1
+            id: fabric-1.21.1
+            gradle_tasks: ":mod:1.21.1-fabric:build"
+            artifact_path: "mod/versions/1.21.1-fabric/build/libs/*.jar"
+          - name: NeoForge 1.21.1
+            id: neoforge-1.21.1
+            gradle_tasks: ":mod:1.21.1-neoforge:build"
+            artifact_path: "mod/versions/1.21.1-neoforge/build/libs/*.jar"
+          - name: Fabric 1.21.11
+            id: fabric-1.21.11
+            gradle_tasks: ":mod:1.21.11-fabric:build"
+            artifact_path: "mod/versions/1.21.11-fabric/build/libs/*.jar"
+          - name: NeoForge 1.21.11
+            id: neoforge-1.21.11
+            gradle_tasks: ":mod:1.21.11-neoforge:build"
+            artifact_path: "mod/versions/1.21.11-neoforge/build/libs/*.jar"
+          - name: Fabric 26.1.2
+            id: fabric-26.1.2
+            gradle_tasks: ":mod:26.1.2-fabric:build"
+            artifact_path: "mod/versions/26.1.2-fabric/build/libs/*.jar"
+          - name: NeoForge 26.1.2
+            id: neoforge-26.1.2
+            gradle_tasks: ":mod:26.1.2-neoforge:build"
+            artifact_path: "mod/versions/26.1.2-neoforge/build/libs/*.jar"
+          - name: Fabric 26.2
+            id: fabric-26.2
+            gradle_tasks: ":mod:26.2-fabric:build :mod:26.2-fabric:runGameTest"
+            artifact_path: "mod/versions/26.2-fabric/build/libs/*.jar"
+          - name: NeoForge 26.2
+            id: neoforge-26.2
+            gradle_tasks: ":mod:26.2-neoforge:build :mod:26.2-neoforge:runGameTest"
+            artifact_path: "mod/versions/26.2-neoforge/build/libs/*.jar"
+          - name: Paper
+            id: paper
+            gradle_tasks: ":paper:build"
+            artifact_path: "paper/build/libs/*.jar"
 
     steps:
       - uses: actions/checkout@v7
@@ -35,19 +75,21 @@ jobs:
         run: chmod +x gradlew
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Build with Gradle
-        run: ./gradlew build testGameLatest --stacktrace
+      - name: Build and test ${{ matrix.name }}
+        run: ./gradlew ${{ matrix.gradle_tasks }} --stacktrace
       - name: Store test reports and logs
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports
+          name: test-reports-${{ matrix.id }}
           if-no-files-found: warn
           path: |
             **/build/reports/
             **/build/test-results/
             **/build/run/**/logs/
             **/build/run/**/crash-reports/
-      - uses: actions/upload-artifact@v7
+      - name: Store ${{ matrix.name }} artifacts
+        uses: actions/upload-artifact@v7
         with:
-          path: ./**/build/libs/*.jar
+          name: magnetic-${{ matrix.id }}
+          path: ${{ matrix.artifact_path }}

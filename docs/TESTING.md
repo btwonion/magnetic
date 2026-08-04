@@ -99,9 +99,11 @@ new latest Minecraft version is added:
 
 ## CI and manual checks
 
-Pushes and pull requests run `build testGameLatest`. Releases run `testAll`.
-When an automated test fails, fix the behavior or the deterministic assertion;
-do not make required tests optional to get a green build.
+Pushes and pull requests use a target matrix: every Fabric and NeoForge target
+and Paper build independently, while the latest Fabric and NeoForge entries
+also run their GameTests. Releases run `testAll`. When an automated test fails,
+fix the behavior or the deterministic assertion; do not make required tests
+optional to get a green build.
 
 Manual release checks remain appropriate for animation feel, configuration
 screen usability, and third-party compatibility profiles that are not present
