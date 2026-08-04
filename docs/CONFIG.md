@@ -6,7 +6,7 @@ Config file structure:
 
 ```json5
 {
-  "version": 5,
+  "version": 6,
   "config": {
     "conditionStatement": {
       "raw": "ENCHANTMENT"
@@ -15,7 +15,11 @@ Config file structure:
     "expAllowed": true,
     "buckets": {
       "enabled": true,
-      "abilityTimeout": 10000
+      "abilityTimeout": 30000
+    },
+    "leafDecay": {
+      "enabled": false,
+      "abilityTimeout": 300000
     },
     "ignoredEntitiesRangeMin": 50.0,
     "ignoreEntities": [],
@@ -79,6 +83,14 @@ If `true`, drops that are caused by a placed bucket are pulled into the inventor
 ### buckets.abilityTimeout
 The amount of time (in milliseconds) that the Magnetic ability will work for for a newly placed bucket.
 
+## leafDecay
+Controls collection of drops produced when leaves decay naturally after an eligible log break.
+
+### leafDecay.enabled
+If `true`, natural leaf-decay drops are handled by Magnetic. The condition must be met when the player breaks the source log. This is disabled by default.
+
+### leafDecay.abilityTimeout
+The maximum time, in milliseconds, between an eligible log break and a leaf decaying. After this timeout, the leaf drops normally. This prevents drops from being delivered indefinitely after the player leaves the tree.
 
 ## ignoredEntitiesRangeMin
 Ignores drops if the player was farther than this distance from the entity.

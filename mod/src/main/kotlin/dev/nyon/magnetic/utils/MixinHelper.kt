@@ -15,6 +15,9 @@ object MixinHelper {
     @JvmField
     val ignoreBlockDrops: ThreadLocal<Boolean> = ThreadLocal()
 
+    @JvmField
+    val conditionAlreadyChecked: ThreadLocal<Boolean> = ThreadLocal()
+
     @JvmStatic
     fun modifyExpressionValuePlayerExp(player: ServerPlayer, exp: Int, pos: BlockPos): Int {
         val mutableInt = MutableInt(exp)

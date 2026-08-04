@@ -2,6 +2,7 @@ package dev.nyon.magnetic.mixins;
 
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.LeafDecayTracker;
 import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.PositionTracker;
 import net.minecraft.server.level.ServerLevel;
@@ -34,9 +35,17 @@ public class ServerLevelMixin implements ServerLevelHolder {
     @Unique
     private final PositionTracker magnetic$positionTracker = new PositionTracker();
 
+    @Unique
+    private final LeafDecayTracker magnetic$leafDecayTracker = new LeafDecayTracker();
+
     @Override
     public /*? if >=1.21.11 {*/ @NonNull /*?}*/ PositionTracker getPositionTracker() {
         return magnetic$positionTracker;
+    }
+
+    @Override
+    public /*? if >=1.21.11 {*/ @NonNull /*?}*/ LeafDecayTracker getLeafDecayTracker() {
+        return magnetic$leafDecayTracker;
     }
 
     // Tick cleanup for position tracker
@@ -46,6 +55,7 @@ public class ServerLevelMixin implements ServerLevelHolder {
     )
     private void cleanupPositionTracker(CallbackInfo ci) {
         magnetic$positionTracker.cleanup();
+        magnetic$leafDecayTracker.cleanup();
     }
 
     // Central interception: addFreshEntity

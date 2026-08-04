@@ -76,7 +76,7 @@ object MagneticEntrypoint {
 *//*?}*/
 
 private fun initialize(configPath: Path) {
-    config(configPath, 5, Config()) { _, element, version ->
+    config(configPath, 6, Config()) { _, element, version ->
         migrate(element, version)
     }
 }
