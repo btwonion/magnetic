@@ -22,47 +22,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build ${{ matrix.name }}
+    name: ${{ matrix.version }} / ${{ matrix.loader }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: Fabric 1.21.1
-            id: fabric-1.21.1
-            gradle_tasks: ":mod:1.21.1-fabric:build"
-            artifact_path: "mod/versions/1.21.1-fabric/build/libs/*.jar"
-          - name: NeoForge 1.21.1
-            id: neoforge-1.21.1
-            gradle_tasks: ":mod:1.21.1-neoforge:build"
-            artifact_path: "mod/versions/1.21.1-neoforge/build/libs/*.jar"
-          - name: Fabric 1.21.11
-            id: fabric-1.21.11
-            gradle_tasks: ":mod:1.21.11-fabric:build"
-            artifact_path: "mod/versions/1.21.11-fabric/build/libs/*.jar"
-          - name: NeoForge 1.21.11
-            id: neoforge-1.21.11
-            gradle_tasks: ":mod:1.21.11-neoforge:build"
-            artifact_path: "mod/versions/1.21.11-neoforge/build/libs/*.jar"
-          - name: Fabric 26.1.2
-            id: fabric-26.1.2
-            gradle_tasks: ":mod:26.1.2-fabric:build"
-            artifact_path: "mod/versions/26.1.2-fabric/build/libs/*.jar"
-          - name: NeoForge 26.1.2
-            id: neoforge-26.1.2
-            gradle_tasks: ":mod:26.1.2-neoforge:build"
-            artifact_path: "mod/versions/26.1.2-neoforge/build/libs/*.jar"
-          - name: Fabric 26.2
-            id: fabric-26.2
-            gradle_tasks: ":mod:26.2-fabric:build :mod:26.2-fabric:runGameTest"
-            artifact_path: "mod/versions/26.2-fabric/build/libs/*.jar"
-          - name: NeoForge 26.2
-            id: neoforge-26.2
-            gradle_tasks: ":mod:26.2-neoforge:build :mod:26.2-neoforge:runGameTest"
-            artifact_path: "mod/versions/26.2-neoforge/build/libs/*.jar"
-          - name: Paper
-            id: paper
-            gradle_tasks: ":paper:build"
-            artifact_path: "paper/build/libs/*.jar"
+        version: ["1.21.1", "1.21.11", "26.1.2", "26.2"]
+        loader: [fabric, neoforge]
 
     steps:
       - uses: actions/checkout@v7
@@ -75,21 +40,56 @@ jobs:
         run: chmod +x gradlew
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Build and test ${{ matrix.name }}
-        run: ./gradlew ${{ matrix.gradle_tasks }} --stacktrace
+      - name: Build and test
+        run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:build --stacktrace
+      - name: Run headless GameTests
+        if: matrix.version == '26.2'
+        run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:runGameTest --stacktrace
       - name: Store test reports and logs
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-${{ matrix.id }}
+          name: test-reports-${{ matrix.version }}-${{ matrix.loader }}
           if-no-files-found: warn
           path: |
             **/build/reports/
             **/build/test-results/
             **/build/run/**/logs/
             **/build/run/**/crash-reports/
-      - name: Store ${{ matrix.name }} artifacts
+      - name: Store build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: magnetic-${{ matrix.id }}
-          path: ${{ matrix.artifact_path }}
+          name: magnetic-${{ matrix.version }}-${{ matrix.loader }}
+          path: mod/versions/${{ matrix.version }}-${{ matrix.loader }}/build/libs/*.jar
+
+  build-paper:
+    runs-on: ubuntu-latest
+    name: Paper
+
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: 25
+          distribution: temurin
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Build and test
+        run: ./gradlew :paper:build --stacktrace
+      - name: Store test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-paper
+          if-no-files-found: warn
+          path: |
+            paper/build/reports/
+            paper/build/test-results/
+      - name: Store build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: magnetic-paper
+          path: paper/build/libs/*.jar
