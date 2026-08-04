@@ -36,7 +36,18 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Build with Gradle
-        run: ./gradlew build --stacktrace
+        run: ./gradlew build testGameLatest --stacktrace
+      - name: Store test reports and logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          if-no-files-found: warn
+          path: |
+            **/build/reports/
+            **/build/test-results/
+            **/build/run/**/logs/
+            **/build/run/**/crash-reports/
       - uses: actions/upload-artifact@v7
         with:
           path: ./**/build/libs/*.jar

@@ -59,6 +59,36 @@ Both publish the artifact produced by `modstitch.finalJarTask`.
 
 Artifacts are written below each target's `build/libs` directory.
 
+## Automated testing
+
+Unit tests live in `mod/src/test` and are Stonecutter-generated for every
+loader/version target. Keep parsing, timing, migration, and policy tests here;
+use injected clocks rather than sleeps. Run all of them with:
+
+```bash
+./gradlew testFast
+```
+
+Headless gameplay tests are enabled for the latest Fabric and NeoForge targets.
+Shared scenarios live in `mod/src/gametestCommon`; loader adapters and test-mod
+metadata live in `mod/src/gametestFabric` and `mod/src/gametestNeoForge`.
+They must exercise normal Minecraft actions so the production mixins are part
+of the assertion path:
+
+```bash
+./gradlew testGameLatest
+```
+
+Magnetic's configuration is process-global and Minecraft may run GameTests in
+parallel. Keep config-mutating assertions in the existing shared scenario, or
+provide explicit isolation before introducing another scenario.
+
+When the latest supported Minecraft version changes, move both GameTest source
+sets in `mod/build.gradle.kts`, update the two target dependencies of the root
+`testGameLatest` task, and adapt loader registration code if the GameTest API
+changed. Test classes and metadata must remain outside `src/main` so they are
+never packaged in release jars. Full details are in `docs/TESTING.md`.
+
 ## Data generation
 
 Fabric is the canonical data generator for each Minecraft version. Matching

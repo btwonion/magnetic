@@ -36,6 +36,28 @@ val supportedMcVersions: List<String> = project(":mod").subprojects
     .distinct()
 
 tasks {
+    register("testFast") {
+        group = "verification"
+        description = "Run JVM tests for every mod target and the Paper plugin"
+        dependsOn(project(":mod").subprojects.map { "${it.path}:test" })
+        dependsOn(":paper:test")
+    }
+
+    register("testGameLatest") {
+        group = "verification"
+        description = "Run headless gameplay tests on the latest Fabric and NeoForge targets"
+        dependsOn(":mod:26.2-fabric:runGameTest")
+        dependsOn(":mod:26.2-neoforge:runGameTest")
+    }
+
+    register("testAll") {
+        group = "verification"
+        description = "Build every platform and run all automated test layers"
+        dependsOn(project(":mod").subprojects.map { "${it.path}:build" })
+        dependsOn(":paper:build")
+        dependsOn("testGameLatest")
+    }
+
     register("releaseAllPlatforms") {
         group = "publishing"
 
