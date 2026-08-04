@@ -1,0 +1,15 @@
+modLoader = "javafml"
+loaderVersion = "[3,)"
+license = "GPL-3.0-only"
+
+[[mods]]
+modId = "magnetic_test"
+version = "1.0.0"
+displayName = "Magnetic Game Tests"
+description = "Headless gameplay regression tests for Magnetic"
+
+[[dependencies.magnetic_test]]
+modId = "magnetic"
+versionRange = "[0,)"
+ordering = "AFTER"
+side = "BOTH"

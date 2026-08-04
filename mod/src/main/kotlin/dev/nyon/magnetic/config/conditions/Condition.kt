@@ -21,8 +21,8 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper
 
 internal val conditions: Set<Condition> = setOf(EnchantmentCondition, SneakCondition, PermissionCondition)
 
-sealed interface Condition : Statement {
-    override val identifiers: Set<String>
+sealed interface Condition {
+    val identifiers: Set<String>
     fun check(player: ServerPlayer): Boolean
 }
 

@@ -6,9 +6,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 
 class PositionTracker {
-    private data class Entry(val player: ServerPlayer, val timestamp: Long)
-
-    private val entries = HashMap<BlockPos, Entry>()
+    private val entries = ExpiringMap<BlockPos, ServerPlayer>()
 
     fun recordNeighbors(pos: BlockPos, player: ServerPlayer, level: ServerLevel) {
         record(snapshotNeighbors(pos, level), player)
@@ -19,36 +17,19 @@ class PositionTracker {
     }
 
     fun record(positions: Iterable<BlockPos>, player: ServerPlayer) {
-        val now = System.currentTimeMillis()
-        for (pos in positions) entries[pos.immutable()] = Entry(player, now)
+        for (pos in positions) entries.put(pos.immutable(), player, DEFAULT_TIMEOUT)
     }
 
-    fun lookup(pos: BlockPos): ServerPlayer? {
-        val entry = entries[pos] ?: return null
-        if (System.currentTimeMillis() - entry.timestamp > DEFAULT_TIMEOUT) {
-            entries.remove(pos)
-            return null
-        }
-        return entry.player
-    }
+    fun lookup(pos: BlockPos): ServerPlayer? = entries[pos]
 
-    fun cleanup() {
-        val now = System.currentTimeMillis()
-        entries.values.removeIf { now - it.timestamp > DEFAULT_TIMEOUT }
-    }
+    fun cleanup() = entries.cleanup()
 
     fun record(pos: BlockPos, player: ServerPlayer, timeout: Long) {
-        entries[pos.immutable()] = Entry(player, System.currentTimeMillis() + timeout - DEFAULT_TIMEOUT)
+        entries.put(pos.immutable(), player, timeout)
     }
 
-    fun lookupFluid(pos: BlockPos, timeout: Long): ServerPlayer? {
-        val entry = entries[pos] ?: return null
-        if (System.currentTimeMillis() - entry.timestamp > timeout) {
-            entries.remove(pos)
-            return null
-        }
-        return entry.player
-    }
+    @Suppress("UNUSED_PARAMETER")
+    fun lookupFluid(pos: BlockPos, timeout: Long): ServerPlayer? = entries[pos]
 
     companion object {
         private const val DEFAULT_TIMEOUT = 5000L
