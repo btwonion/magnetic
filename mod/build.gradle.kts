@@ -1,10 +1,16 @@
 @file:Suppress("SpellCheckingInspection", "UnstableApiUsage", "RedundantNullableReturnType", "AvoidDuplicateDependencies")
 
 import me.modmuss50.mpp.platforms.modrinth.ModrinthEnvironment
+import dev.isxander.modstitch.base.moddevgradle.BaseModDevGradleExtension
 import net.fabricmc.loom.api.fabricapi.FabricApiExtension
+import org.gradle.api.Task
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.testing.Test
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.slf4j.event.Level
 
 plugins {
     alias(libs.plugins.kotlin)
@@ -36,6 +42,7 @@ base {
 modstitch {
     minecraftVersion = mcVersion
     classTweaker.set(rootProject.layout.projectDirectory.file("mod/src/main/resources/magnetic.classtweaker"))
+    if (isFabric) unitTesting()
 
     metadata {
         modId = property("modId").toString()
@@ -87,10 +94,78 @@ if (isFabric) {
             client = true
             outputDirectory = generatedResources.asFile
         }
+        if (mcVersionName == "26.2") {
+            configureTests {
+                createSourceSet = true
+                modId = "magnetic_test"
+                enableGameTests = true
+                enableClientGameTests = false
+                eula = true
+            }
+        }
+    }
+
+    if (mcVersionName == "26.2") {
+        extensions.getByType<SourceSetContainer>().named("gametest") {
+            java.setSrcDirs(listOf(
+                rootProject.file("mod/src/gametestCommon/java"),
+                rootProject.file("mod/src/gametestFabric/java")
+            ))
+            resources.setSrcDirs(listOf(rootProject.file("mod/src/gametestFabric/resources")))
+        }
+
+        // Loom normally attaches runGameTest to test. Keep the fast JVM layer
+        // separate; the root testGameLatest/testAll tasks invoke it explicitly.
+        tasks.named<Test>("test") {
+            setDependsOn(dependsOn.filterNot {
+                it == "runGameTest" ||
+                    (it as? Task)?.name == "runGameTest" ||
+                    (it as? TaskProvider<*>)?.name == "runGameTest"
+            })
+        }
     }
 
     tasks.named<ProcessResources>("generateModMetadata") {
         dependsOn("stonecutterGenerate")
+    }
+}
+
+if (!isFabric && mcVersionName == "26.2") {
+    val sourceSets = extensions.getByType<SourceSetContainer>()
+    val gameTest = sourceSets.create("gameTest") {
+        java.setSrcDirs(listOf(
+            rootProject.file("mod/src/gametestCommon/java"),
+            rootProject.file("mod/src/gametestNeoForge/java")
+        ))
+        resources.setSrcDirs(listOf(rootProject.file("mod/src/gametestNeoForge/resources")))
+        compileClasspath += sourceSets.named("main").get().output
+        runtimeClasspath += output + compileClasspath
+    }
+
+    configurations.named(gameTest.implementationConfigurationName) {
+        extendsFrom(configurations.named("implementation").get())
+    }
+    configurations.named(gameTest.runtimeOnlyConfigurationName) {
+        extendsFrom(configurations.named("runtimeOnly").get())
+    }
+
+    extensions.getByType<BaseModDevGradleExtension>().configureNeoForge {
+        val testMod = mods.register("magnetic_test") {
+            sourceSet(gameTest)
+        }
+        runs.register("gameTest") {
+            type = "gameTestServer"
+            sourceSet = gameTest
+            loadedMods.addAll(mods.named("mod").get(), testMod.get())
+            gameDirectory = layout.buildDirectory.dir("run/gameTest")
+            logLevel = Level.INFO
+            systemProperty("neoforge.enableGameTest", "true")
+        }
+    }
+    afterEvaluate {
+        extensions.getByType<BaseModDevGradleExtension>().configureNeoForge {
+            addModdingDependenciesTo(gameTest)
+        }
     }
 }
 
@@ -194,6 +269,21 @@ dependencies {
 
     modstitchApi(libs.konfig)
     modstitchJiJ(libs.konfig)
+
+    // Keep NeoForge's pure JVM suite independent of a loader launch. The
+    // oldest supported NeoForge cannot load the current KotlinLangForge in
+    // ModStitch's JUnit environment; Minecraft-dependent checks are GameTests.
+    if (!isFabric) {
+        testImplementation(platform("org.junit:junit-bom:5.13.4"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    }
+}
+
+if (!isFabric) {
+    tasks.named<Test>("test") {
+        useJUnitPlatform()
+    }
 }
 
 tasks {

@@ -49,6 +49,9 @@ Notes:
 
 ## conditionStatement.raw
 Defines when Magnetic is active. The statement is evaluated left-to-right.
+Condition and operator names are case-sensitive and must be separated by
+whitespace. Unknown tokens or leading/trailing operators invalidate the
+expression; Magnetic stays inactive and reports the configuration error.
 
 Operators:
 - `AND` or `&&`

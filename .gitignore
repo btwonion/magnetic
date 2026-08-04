@@ -4,6 +4,7 @@ run/
 build/
 .kotlin
 .cache
+mod/versions/*/.fabric/
 docs/superpowers/
 .superpowers/
 .worktrees/
