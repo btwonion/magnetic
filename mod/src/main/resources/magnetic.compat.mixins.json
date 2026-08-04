@@ -11,6 +11,7 @@
         "fallingtree.TreeBreakingHandlerMixin",
         "kleeslabs.BlockBreakHandlerMixin",
         "kleeslabs.BreakBlockEventAccessor",
+        "puzzleslib.FabricEventImplHelperMixin",
         "rightclickharvest.RightClickHarvestMixin",
         "treeharvester.LeafEventsMixin",
         "treeharvester.LeafProcessingMixin",

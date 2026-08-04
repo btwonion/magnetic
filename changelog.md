@@ -1,11 +1,4 @@
-## Fabric, NeoForge & Paper
+## Fabric
 
-- add the `ignoreBlocks` config option ([**#95**](https://github.com/btwonion/magnetic/pull/95))
-    - ignore item and experience drops from selected source blocks
-    - accepts block IDs and tags
-
-## Fabric & NeoForge
-
-- add support for NeoForge ([**#94**](https://github.com/btwonion/magnetic/pull/94))
-- add support for Minecraft 1.21.1, 1.21.11, 26.1.1–26.1.2, and 26.2
-- support FallingTree, KleeSlabs, RightClickHarvest, TreeHarvester, and Veinminer on both mod loaders
+- fix mob drops not being collected when Puzzles Lib defers spawning them ([**#97**](https://github.com/btwonion/magnetic/issues/97))
+    - restores compatibility with Pick Up Notifier on Fabric

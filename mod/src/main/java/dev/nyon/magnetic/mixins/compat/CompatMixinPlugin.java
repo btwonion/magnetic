@@ -28,6 +28,7 @@ public class CompatMixinPlugin implements IMixinConfigPlugin {
             case "fallingtree" -> "fallingtree";
             case "kleeslabs" -> "kleeslabs";
             case "treeharvester" -> "treeharvester";
+            case "puzzleslib" -> /*? if fabric {*/ "puzzleslib" /*?} else {*/ /*null *//*?}*/;
             default -> null;
         };
     }
