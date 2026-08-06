@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.tags.BlockTags
+import net.minecraft.world.level.block.LeavesBlock
 import java.util.UUID
 
 class LeafDecayTracker {
@@ -30,6 +31,13 @@ class LeafDecayTracker {
             ++generation
         )
         for (pos in positions) entries[pos.immutable()] = entry
+    }
+
+    fun recordDecayCandidates(sourcePos: BlockPos, playerUuid: UUID, timeout: Long, level: ServerLevel) {
+        val candidates = Direction.entries
+            .map(sourcePos::relative)
+            .filter { distanceWillIncrease(it, level) }
+        if (candidates.isNotEmpty()) record(candidates, playerUuid, timeout)
     }
 
     fun propagate(pos: BlockPos, level: ServerLevel) {
@@ -61,5 +69,20 @@ class LeafDecayTracker {
             return null
         }
         return entry
+    }
+
+    private fun distanceWillIncrease(pos: BlockPos, level: ServerLevel): Boolean {
+        val state = level.getBlockState(pos)
+        if (!state.`is`(BlockTags.LEAVES) || !state.hasProperty(LeavesBlock.DISTANCE)) return false
+
+        val currentDistance = state.getValue(LeavesBlock.DISTANCE)
+        var updatedDistance = LeavesBlock.DECAY_DISTANCE
+        for (direction in Direction.entries) {
+            val neighborDistance = LeavesBlock.getOptionalDistanceAt(level.getBlockState(pos.relative(direction)))
+                .orElse(LeavesBlock.DECAY_DISTANCE)
+            updatedDistance = minOf(updatedDistance, neighborDistance + 1)
+            if (updatedDistance == 1) break
+        }
+        return updatedDistance > currentDistance
     }
 }

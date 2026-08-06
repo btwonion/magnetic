@@ -10,7 +10,6 @@ import dev.nyon.magnetic.utils.LeafDecayTracker;
 import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -25,7 +24,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
@@ -50,6 +48,9 @@ public class ServerPlayerGameModeMixin {
             && state.is(BlockTags.LOGS)
             && !MagneticCheckKt.isIgnored(state)
             && ConfigKt.getConfig().getConditionStatement().checkAndReport(player);
+        ServerLevelHolder holder = (ServerLevelHolder) level;
+        PositionTracker tracker = holder.getPositionTracker();
+        List<BlockPos> neighborSnapshot = tracker.snapshotNeighbors(pos, level);
 
         boolean destroyed = ThreadLocalScope.call(
             threadLocal,
@@ -58,23 +59,12 @@ public class ServerPlayerGameModeMixin {
         );
         if (!destroyed) return false;
 
-        ServerLevelHolder holder = (ServerLevelHolder) level;
-        PositionTracker tracker = holder.getPositionTracker();
-        tracker.recordNeighbors(pos, player, level);
+        tracker.record(neighborSnapshot, player);
 
         if (trackLeafDecay) {
             LeafDecayTracker leafDecayTracker = holder.getLeafDecayTracker();
             long timeout = ConfigKt.getConfig().getLeafDecay().getAbilityTimeout();
-            List<BlockPos> adjacentLeaves = new ArrayList<>();
-            for (Direction direction : Direction.values()) {
-                BlockPos neighbor = pos.relative(direction);
-                if (level.getBlockState(neighbor).is(BlockTags.LEAVES)) {
-                    adjacentLeaves.add(neighbor);
-                }
-            }
-            if (!adjacentLeaves.isEmpty()) {
-                leafDecayTracker.record(adjacentLeaves, player.getUUID(), timeout);
-            }
+            leafDecayTracker.recordDecayCandidates(pos, player.getUUID(), timeout, level);
         }
         return true;
     }
