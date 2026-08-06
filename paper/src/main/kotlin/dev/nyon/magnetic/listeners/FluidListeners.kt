@@ -4,6 +4,7 @@ package dev.nyon.magnetic.listeners
 
 import dev.nyon.magnetic.Animation
 import dev.nyon.magnetic.DropEvent
+import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.isIgnored
@@ -15,7 +16,6 @@ import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Fluid
 import org.bukkit.World
 import org.bukkit.entity.Player
-import org.bukkit.event.Event
 import org.bukkit.event.block.BlockFromToEvent
 import org.bukkit.event.entity.ItemSpawnEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
@@ -62,6 +62,7 @@ object FluidListeners {
     }
 
     private val itemSpawnEvent = listen<ItemSpawnEvent> {
+        if (isCancelled) return@listen
         val itemPos = entity.location
         if (Animation.tracksItem(entity)) return@listen
         regionScheduler.execute(Main.INSTANCE, itemPos) {
@@ -73,7 +74,7 @@ object FluidListeners {
             if (holder.ignoreDrops) return@execute
 
             val itemStacks = mutableListOf(entity.itemStack)
-            DropEvent(itemStacks, MutableInt(), holder.player, itemPos).also(Event::callEvent)
+            DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), holder.player, itemPos))
 
             if (itemStacks.isEmpty()) {
                 entity.scheduler.execute(Main.INSTANCE, { entity.remove() }, null, 1)

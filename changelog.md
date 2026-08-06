@@ -1,4 +1,4 @@
-## Fabric & NeoForge
+## Fabric, NeoForge & Paper
 
 - add optional collection of natural leaf-decay drops ([**#99**](https://github.com/btwonion/magnetic/pull/99))
     - disabled by default through the new `leafDecay` config section
