@@ -9,6 +9,8 @@ import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.NamespacedKey
 import org.bukkit.Tag
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
@@ -17,6 +19,8 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.LeavesDecayEvent
 import org.bukkit.event.entity.ItemSpawnEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import java.util.ArrayDeque
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -52,7 +56,7 @@ object LeafDecayListeners {
     private val trackedLeaves = ConcurrentHashMap<BlockKey, Entry>()
     private val pendingDecay = ConcurrentHashMap<BlockKey, Entry>()
     private val generation = AtomicLong()
-    private val handlingDrop = ThreadLocal.withInitial { false }
+    private val generatedDropKey = NamespacedKey("magnetic", "leaf_decay_generated")
 
     private val blockBreakEvent = listen<BlockBreakEvent>(EventPriority.MONITOR) {
         if (isCancelled || !config.leafDecay.enabled) return@listen
@@ -84,28 +88,30 @@ object LeafDecayListeners {
         }, 1L)
     }
 
-    private val itemSpawnEvent = listen<ItemSpawnEvent>(EventPriority.LOWEST) {
-        if (isCancelled || handlingDrop.get()) return@listen
+    private val itemSpawnEvent = listen<ItemSpawnEvent>(EventPriority.MONITOR) {
+        if (isCancelled) return@listen
+        if (entity.persistentDataContainer.has(generatedDropKey)) {
+            entity.persistentDataContainer.remove(generatedDropKey)
+            return@listen
+        }
 
-        val entry = pendingDecay[entity.location.key()] ?: return@listen
+        val dropLocation = entity.location.clone()
+        val entry = pendingDecay[dropLocation.key()] ?: return@listen
         val player = Bukkit.getPlayer(entry.authorization.playerId) ?: return@listen
-        val itemStacks = mutableListOf(entity.itemStack)
+        if (player.world.uid != dropLocation.world.uid) return@listen
 
-        handlingDrop.set(true)
-        try {
+        val originalItem = entity.itemStack.clone()
+        isCancelled = true
+        player.scheduler.execute(Main.INSTANCE, {
+            val itemStacks = mutableListOf(originalItem)
             DropEventDispatcher.callAuthorized(
-                DropEvent(itemStacks, MutableInt(), player, entity.location),
+                DropEvent(itemStacks, MutableInt(), player, dropLocation, generatedDropKey),
                 entry.authorization
             )
-        } finally {
-            handlingDrop.remove()
-        }
-
-        if (itemStacks.isEmpty()) {
-            isCancelled = true
-        } else {
-            entity.itemStack = itemStacks.single()
-        }
+            itemStacks.forEach { spawnGeneratedDrop(dropLocation, it) }
+        }, {
+            spawnGeneratedDrop(dropLocation, originalItem)
+        }, 0L)
     }
 
     private val cleanupTask = Main.INSTANCE.server.asyncScheduler.runAtFixedRate(
@@ -150,6 +156,18 @@ object LeafDecayListeners {
         if (entry.expiresAt > System.currentTimeMillis()) return entry
         trackedLeaves.remove(key, entry)
         return null
+    }
+
+    private fun spawnGeneratedDrop(location: Location, item: ItemStack) {
+        Main.INSTANCE.server.regionScheduler.execute(Main.INSTANCE, location) {
+            location.world.dropItem(location, item) { itemEntity ->
+                itemEntity.persistentDataContainer.set(
+                    generatedDropKey,
+                    PersistentDataType.BYTE,
+                    1.toByte()
+                )
+            }
+        }
     }
 
     private fun Block.key() = BlockKey(world.uid, x, y, z)

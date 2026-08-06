@@ -60,7 +60,7 @@ public class LeavesBlockMixin {
         }
 
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(playerUuid);
-        if (player == null) {
+        if (player == null || player.level() != level) {
             original.call(state, level, pos, random);
             return;
         }

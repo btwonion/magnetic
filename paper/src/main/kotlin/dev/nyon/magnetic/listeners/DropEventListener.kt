@@ -22,7 +22,7 @@ object DropEventListener {
         if (config.itemsAllowed) {
             items.removeIf { item ->
                 if (config.animation.enabled && player.canAddItem(item)) {
-                    Animation.pullItemToPlayer(item, pos.toCenterLocation(), player)
+                    Animation.pullItemToPlayer(item, pos.toCenterLocation(), player, itemSpawnMarker)
                     return@removeIf true
                 }
 
