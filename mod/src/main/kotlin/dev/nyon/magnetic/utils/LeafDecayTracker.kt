@@ -5,6 +5,7 @@ import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.level.block.LeavesBlock
+import java.util.ArrayDeque
 import java.util.UUID
 
 class LeafDecayTracker {
@@ -83,6 +84,29 @@ class LeafDecayTracker {
             updatedDistance = minOf(updatedDistance, neighborDistance + 1)
             if (updatedDistance == 1) break
         }
-        return updatedDistance > currentDistance
+        return updatedDistance > currentDistance && !hasLogSupport(pos, level)
+    }
+
+    private fun hasLogSupport(pos: BlockPos, level: ServerLevel): Boolean {
+        val visited = hashSetOf(pos.immutable())
+        val queue = ArrayDeque<Pair<BlockPos, Int>>()
+        queue.add(pos.immutable() to 0)
+
+        while (queue.isNotEmpty()) {
+            val (current, depth) = queue.removeFirst()
+            if (depth >= LeavesBlock.DECAY_DISTANCE - 1) continue
+
+            for (direction in Direction.entries) {
+                val neighbor = current.relative(direction)
+                if (!visited.add(neighbor.immutable())) continue
+
+                val state = level.getBlockState(neighbor)
+                if (state.`is`(BlockTags.LOGS)) return true
+                if (state.`is`(BlockTags.LEAVES)) {
+                    queue.add(neighbor.immutable() to depth + 1)
+                }
+            }
+        }
+        return false
     }
 }
