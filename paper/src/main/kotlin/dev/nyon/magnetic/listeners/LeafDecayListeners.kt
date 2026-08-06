@@ -30,6 +30,7 @@ import java.util.ArrayDeque
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.abs
@@ -99,13 +100,15 @@ object LeafDecayListeners {
         if (block.type.isIgnored) return@listen
 
         val key = block.key()
-        val entry = activeEntry(key)
+        val decayedAt = System.currentTimeMillis()
+        val entry = activeEntry(key, decayedAt)
         val leafData = block.blockData as? Leaves ?: return@listen
         val buffered = bufferEarlyDecay(
             key,
             LeafState(leafData.maximumDistance, leafData.isPersistent),
             block.location,
-            entry
+            entry,
+            decayedAt
         )
         if (buffered) {
             if (entry != null) trackedLeaves.remove(key, entry)
@@ -161,9 +164,9 @@ object LeafDecayListeners {
         TimeUnit.SECONDS
     )
 
-    private fun activeEntry(key: BlockKey): Entry? {
+    private fun activeEntry(key: BlockKey, at: Long = System.currentTimeMillis()): Entry? {
         val entry = trackedLeaves[key] ?: return null
-        if (entry.expiresAt > System.currentTimeMillis()) return entry
+        if (entry.expiresAt > at) return entry
         trackedLeaves.remove(key, entry)
         return null
     }
@@ -181,9 +184,10 @@ object LeafDecayListeners {
         key: BlockKey,
         leafState: LeafState,
         location: Location,
-        existingEntry: Entry?
+        existingEntry: Entry?,
+        decayedAt: Long
     ): Boolean {
-        val earlyDecay = EarlyDecay(existingEntry)
+        val earlyDecay = EarlyDecay(existingEntry, decayedAt)
         activeScans.values
             .filter { it.couldContain(key) }
             .forEach { it.registerEarlyDecay(key, leafState, earlyDecay) }
@@ -224,6 +228,12 @@ object LeafDecayListeners {
             return
         }
 
+        val restored = AtomicBoolean()
+        val restoreOnFailure = {
+            if (restored.compareAndSet(false, true)) {
+                restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
+            }
+        }
         val scheduled = player.scheduler.execute(Main.INSTANCE, {
             val itemStacks = mutableListOf(claimedDrop.itemStack.clone())
             DropEventDispatcher.callAuthorized(
@@ -237,10 +247,8 @@ object LeafDecayListeners {
                 entry.authorization
             )
             restoreResidualDrops(claimedDrop, itemStacks)
-        }, {
-            restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
-        }, 0L)
-        if (!scheduled) restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
+        }, restoreOnFailure, 0L)
+        if (!scheduled) restoreOnFailure()
     }
 
     private fun restoreResidualDrops(claimedDrop: ClaimedDrop, items: List<ItemStack>) {
@@ -272,7 +280,7 @@ object LeafDecayListeners {
         world.addEntityToWorld(handle, null)
     }
 
-    private class EarlyDecay(existingEntry: Entry?) {
+    private class EarlyDecay(existingEntry: Entry?, val decayedAt: Long) {
         private var registrationsOpen = true
         private var registeredScans = 0
         private var resolvedScans = 0
@@ -344,6 +352,7 @@ object LeafDecayListeners {
         private val earlyLeaves = ConcurrentHashMap<BlockKey, LeafState>()
         private val registeredEarlyDecays = ConcurrentHashMap<BlockKey, EarlyDecay>()
         private val pendingReads = AtomicInteger()
+        private var replacementLogChecked = false
         private var finished = false
 
         fun start() {
@@ -372,9 +381,26 @@ object LeafDecayListeners {
 
         private fun finishIfReady() = synchronized(this) {
             if (finished || pendingReads.get() != 0) return@synchronized
+            if (!replacementLogChecked) {
+                replacementLogChecked = true
+                scheduleReplacementLogCheck()
+                return@synchronized
+            }
             finish()
             finished = true
             activeScans.remove(entry.generation, this)
+        }
+
+        private fun scheduleReplacementLogCheck() {
+            pendingReads.incrementAndGet()
+            Main.INSTANCE.server.regionScheduler.execute(Main.INSTANCE, removedLog.location(world)) {
+                try {
+                    val block = world.getBlockAt(removedLog.x, removedLog.y, removedLog.z)
+                    if (Tag.LOGS.isTagged(block.type)) logs.add(removedLog)
+                } finally {
+                    if (pendingReads.decrementAndGet() == 0) finishIfReady()
+                }
+            }
         }
 
         private fun scheduleRead(key: BlockKey, depth: Int) {
@@ -432,7 +458,7 @@ object LeafDecayListeners {
 
         private fun finish() {
             val candidates = hashSetOf<BlockKey>()
-            if (config.leafDecay.enabled && entry.expiresAt > System.currentTimeMillis()) {
+            if (config.leafDecay.enabled) {
                 leaves.forEach { (key, leaf) ->
                     val depthFromRemovedLog = depths[key] ?: return@forEach
                     if (leaf.persistent || depthFromRemovedLog >= leaf.maximumDistance) return@forEach
@@ -440,16 +466,20 @@ object LeafDecayListeners {
                 }
             }
 
-            candidates
-                .filterNot(registeredEarlyDecays::containsKey)
-                .forEach { key ->
-                    trackedLeaves.compute(key) { _, current ->
-                        if (current == null || current.generation < entry.generation) entry else current
+            if (entry.expiresAt > System.currentTimeMillis()) {
+                candidates
+                    .filterNot(registeredEarlyDecays::containsKey)
+                    .forEach { key ->
+                        trackedLeaves.compute(key) { _, current ->
+                            if (current == null || current.generation < entry.generation) entry else current
+                        }
                     }
-                }
+            }
 
             registeredEarlyDecays.forEach { (key, earlyDecay) ->
-                earlyDecay.resolve(entry.takeIf { candidates.contains(key) })
+                earlyDecay.resolve(entry.takeIf {
+                    candidates.contains(key) && entry.expiresAt > earlyDecay.decayedAt
+                })
             }
         }
 
