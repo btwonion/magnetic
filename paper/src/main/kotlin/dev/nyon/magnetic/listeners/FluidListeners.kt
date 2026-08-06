@@ -19,6 +19,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockFromToEvent
 import org.bukkit.event.entity.ItemSpawnEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
@@ -64,8 +65,12 @@ object FluidListeners {
     private val itemSpawnEvent = listen<ItemSpawnEvent> {
         if (isCancelled) return@listen
         val itemPos = entity.location
+        if (entity.persistentDataContainer.has(leafDecayHandledDropKey, PersistentDataType.BYTE)) return@listen
         if (Animation.tracksItem(entity)) return@listen
         regionScheduler.execute(Main.INSTANCE, itemPos) {
+            if (!entity.isValid || entity.persistentDataContainer.has(leafDecayHandledDropKey, PersistentDataType.BYTE)) {
+                return@execute
+            }
             val itemFluidData = itemPos.world.getFluidData(itemPos)
             if (ignoredFluids.contains(itemFluidData.fluidType)) return@execute
 

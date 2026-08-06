@@ -31,10 +31,10 @@ public class LeavesBlockMixin {
         RandomSource random,
         Operation<Void> original
     ) {
+        original.call(state, level, pos, random);
         if (ConfigKt.getConfig().getLeafDecay().getEnabled()) {
             ((ServerLevelHolder) level).getLeafDecayTracker().propagate(pos, level);
         }
-        original.call(state, level, pos, random);
     }
 
     @WrapMethod(method = "randomTick")

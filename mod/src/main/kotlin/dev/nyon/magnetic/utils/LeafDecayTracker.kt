@@ -44,7 +44,7 @@ class LeafDecayTracker {
         val source = getActive(pos) ?: return
         for (direction in Direction.entries) {
             val neighbor = pos.relative(direction)
-            if (!level.getBlockState(neighbor).`is`(BlockTags.LEAVES)) continue
+            if (!distanceWillIncrease(neighbor, level)) continue
 
             val current = getActive(neighbor)
             if (current == null || current.generation < source.generation) {

@@ -15,6 +15,7 @@ import org.bukkit.Tag
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.type.Leaves
+import org.bukkit.entity.Item
 import org.bukkit.event.EventPriority
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.LeavesDecayEvent
@@ -26,6 +27,8 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
+
+internal val leafDecayHandledDropKey = NamespacedKey("magnetic", "leaf_decay_handled")
 
 @Suppress("unused")
 object LeafDecayListeners {
@@ -56,7 +59,6 @@ object LeafDecayListeners {
     private val trackedLeaves = ConcurrentHashMap<BlockKey, Entry>()
     private val pendingDecay = ConcurrentHashMap<BlockKey, Entry>()
     private val generation = AtomicLong()
-    private val generatedDropKey = NamespacedKey("magnetic", "leaf_decay_generated")
 
     private val blockBreakEvent = listen<BlockBreakEvent>(EventPriority.MONITOR) {
         if (isCancelled || !config.leafDecay.enabled) return@listen
@@ -90,28 +92,27 @@ object LeafDecayListeners {
 
     private val itemSpawnEvent = listen<ItemSpawnEvent>(EventPriority.MONITOR) {
         if (isCancelled) return@listen
-        if (entity.persistentDataContainer.has(generatedDropKey)) {
-            entity.persistentDataContainer.remove(generatedDropKey)
-            return@listen
-        }
+        if (entity.persistentDataContainer.has(leafDecayHandledDropKey)) return@listen
 
         val dropLocation = entity.location.clone()
         val entry = pendingDecay[dropLocation.key()] ?: return@listen
         val player = Bukkit.getPlayer(entry.authorization.playerId) ?: return@listen
         if (player.world.uid != dropLocation.world.uid) return@listen
 
+        entity.persistentDataContainer.set(
+            leafDecayHandledDropKey,
+            PersistentDataType.BYTE,
+            1.toByte()
+        )
         val originalItem = entity.itemStack.clone()
-        isCancelled = true
         player.scheduler.execute(Main.INSTANCE, {
             val itemStacks = mutableListOf(originalItem)
             DropEventDispatcher.callAuthorized(
-                DropEvent(itemStacks, MutableInt(), player, dropLocation, generatedDropKey),
+                DropEvent(itemStacks, MutableInt(), player, dropLocation, leafDecayHandledDropKey),
                 entry.authorization
             )
-            itemStacks.forEach { spawnGeneratedDrop(dropLocation, it) }
-        }, {
-            spawnGeneratedDrop(dropLocation, originalItem)
-        }, 0L)
+            updateOriginalDrop(entity, itemStacks)
+        }, null, 0L)
     }
 
     private val cleanupTask = Main.INSTANCE.server.asyncScheduler.runAtFixedRate(
@@ -126,7 +127,8 @@ object LeafDecayListeners {
     )
 
     private fun trackLeavesAround(log: Block, entry: Entry) {
-        val visited = hashSetOf(log.key())
+        val logKey = log.key()
+        val visited = hashSetOf(logKey)
         val queue = ArrayDeque<LeafNode>()
         directions.forEach { direction ->
             val leaf = log.getRelative(direction)
@@ -140,8 +142,10 @@ object LeafDecayListeners {
             val leaves = leaf.blockData as? Leaves ?: continue
             if (depth >= leaves.maximumDistance) continue
 
-            trackedLeaves.compute(leaf.key()) { _, current ->
-                if (current == null || current.generation < entry.generation) entry else current
+            if (leaves.distance < leaves.maximumDistance && distanceWillIncrease(leaf, leaves.distance, logKey)) {
+                trackedLeaves.compute(leaf.key()) { _, current ->
+                    if (current == null || current.generation < entry.generation) entry else current
+                }
             }
 
             directions.forEach { direction ->
@@ -151,6 +155,28 @@ object LeafDecayListeners {
         }
     }
 
+    private fun distanceWillIncrease(leaf: Block, currentDistance: Int, removedLog: BlockKey): Boolean {
+        val visited = hashSetOf(leaf.key())
+        val queue = ArrayDeque<LeafNode>()
+        queue.add(LeafNode(leaf, 0))
+
+        while (queue.isNotEmpty()) {
+            val (current, depth) = queue.removeFirst()
+            if (depth >= currentDistance) continue
+
+            for (direction in directions) {
+                val neighbor = current.getRelative(direction)
+                val key = neighbor.key()
+                if (key == removedLog || !visited.add(key)) continue
+                if (Tag.LOGS.isTagged(neighbor.type)) return false
+                if (Tag.LEAVES.isTagged(neighbor.type)) {
+                    queue.add(LeafNode(neighbor, depth + 1))
+                }
+            }
+        }
+        return true
+    }
+
     private fun activeEntry(key: BlockKey): Entry? {
         val entry = trackedLeaves[key] ?: return null
         if (entry.expiresAt > System.currentTimeMillis()) return entry
@@ -158,15 +184,29 @@ object LeafDecayListeners {
         return null
     }
 
-    private fun spawnGeneratedDrop(location: Location, item: ItemStack) {
-        Main.INSTANCE.server.regionScheduler.execute(Main.INSTANCE, location) {
-            location.world.dropItem(location, item) { itemEntity ->
-                itemEntity.persistentDataContainer.set(
-                    generatedDropKey,
-                    PersistentDataType.BYTE,
-                    1.toByte()
-                )
+    private fun updateOriginalDrop(entity: Item, items: List<ItemStack>) {
+        entity.scheduler.execute(Main.INSTANCE, {
+            if (!entity.isValid) return@execute
+
+            val residual = items.filter { !it.type.isAir && it.amount > 0 }
+            val first = residual.firstOrNull()
+            if (first == null) {
+                entity.remove()
+                return@execute
             }
+
+            entity.itemStack = first
+            residual.drop(1).forEach { spawnGeneratedDrop(entity.location, it) }
+        }, null, 0L)
+    }
+
+    private fun spawnGeneratedDrop(location: Location, item: ItemStack) {
+        location.world.dropItem(location, item) { itemEntity ->
+            itemEntity.persistentDataContainer.set(
+                leafDecayHandledDropKey,
+                PersistentDataType.BYTE,
+                1.toByte()
+            )
         }
     }
 
