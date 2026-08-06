@@ -20,6 +20,7 @@ data class Config(
     var itemsAllowed: Boolean = true,
     var expAllowed: Boolean = true,
     var buckets: Buckets = Buckets(),
+    var leafDecay: LeafDecay = LeafDecay(),
     var ignoredEntitiesRangeMin: Double = 50.0,
     var ignoreEntities: List<Identifier> = listOf(),
     var ignoreBlocks: List<Identifier> = listOf(),
@@ -29,6 +30,11 @@ data class Config(
     @Serializable
     data class Buckets(
         var enabled: Boolean = true, var abilityTimeout: Long = 30000
+    )
+
+    @Serializable
+    data class LeafDecay(
+        var enabled: Boolean = false, var abilityTimeout: Long = 300000
     )
 
     @Serializable
@@ -150,6 +156,7 @@ fun migrate(jsonElement: JsonElement, version: Int?): Config? {
                         ?: return null
                 ))
         }
+        5 -> Json.decodeFromJsonElement<Config>(jsonElement)
         else -> null
     }
 }

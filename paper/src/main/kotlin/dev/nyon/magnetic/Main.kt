@@ -7,6 +7,7 @@ import dev.nyon.magnetic.compat.VeinminerCompat
 import dev.nyon.magnetic.config.*
 import dev.nyon.magnetic.listeners.BlockListeners
 import dev.nyon.magnetic.listeners.DropEventListener
+import dev.nyon.magnetic.listeners.LeafDecayListeners
 import dev.nyon.magnetic.listeners.ItemListeners
 import dev.nyon.magnetic.listeners.FluidListeners
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
@@ -32,7 +33,7 @@ class Main : JavaPlugin() {
         INSTANCE = this
         val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
         moveConfigToNewPath(configPath)
-        config(dev.nyon.magnetic.configPath, 5, Config()) { _, element, version ->
+        config(dev.nyon.magnetic.configPath, 6, Config()) { _, element, version ->
             migrate(element, version)
         }
         reloadIgnoredEntities()
@@ -45,6 +46,7 @@ class Main : JavaPlugin() {
         DropEventListener
         ItemListeners
         BlockListeners
+        LeafDecayListeners
         FluidListeners
 
         if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) McMMOCompat.listenForEvents()

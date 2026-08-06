@@ -1,6 +1,7 @@
 package dev.nyon.magnetic.listeners
 
 import dev.nyon.magnetic.DropEvent
+import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.BreakChainedBlocks
@@ -15,7 +16,6 @@ import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import org.bukkit.craftbukkit.block.CraftBlock
 import org.bukkit.entity.Player
-import org.bukkit.event.Event
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.player.PlayerHarvestBlockEvent
@@ -28,7 +28,7 @@ object BlockListeners {
     private val blockDropItemEvent =
         listen<BlockDropItemEvent> { // Return before calling the DropEvent to prevent executing expensive logic
             if (blockState.type.isIgnored) return@listen
-            if (!config.conditionStatement.checkAndReport(player)) return@listen
+            val authorization = DropEventDispatcher.authorize(player) ?: return@listen
 
             val itemStacks = items.map { it.itemStack }.toMutableList()
 
@@ -46,7 +46,10 @@ object BlockListeners {
                 )
             }
 
-            DropEvent(itemStacks, MutableInt(), player, block.location).also(Event::callEvent)
+            DropEventDispatcher.callAuthorized(
+                DropEvent(itemStacks, MutableInt(), player, block.location),
+                authorization
+            )
 
             // Delete items that have been added to the inventory
             items.clear()
@@ -58,7 +61,7 @@ object BlockListeners {
     private val harvestBlockEvent = listen<PlayerHarvestBlockEvent> {
         if (harvestedBlock.type.isIgnored) return@listen
         val itemStacks = itemsHarvested.toMutableList()
-        DropEvent(itemStacks, MutableInt(), player, harvestedBlock.location).also(Event::callEvent)
+        DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, harvestedBlock.location))
 
         // Delete items that have been added to the inventory
         itemsHarvested.removeIf { item ->
@@ -69,7 +72,7 @@ object BlockListeners {
     private val playerShearBlockEvent = listen<PlayerShearBlockEvent> {
         if (block.type.isIgnored) return@listen
         val itemStacks = drops.toMutableList()
-        DropEvent(itemStacks, MutableInt(), player, block.location).also(Event::callEvent)
+        DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, block.location))
 
         // Delete items that have been added to the inventory
         drops.removeIf { item ->
@@ -80,7 +83,7 @@ object BlockListeners {
     private val blockBreakEvent = listen<BlockBreakEvent> {
         if (block.type.isIgnored) return@listen
         val mutableInt = MutableInt(expToDrop)
-        DropEvent(mutableListOf(), mutableInt, player, block.location).also(Event::callEvent)
+        DropEventDispatcher.call(DropEvent(mutableListOf(), mutableInt, player, block.location))
         expToDrop = mutableInt.toInt()
     }
 

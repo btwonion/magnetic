@@ -4,6 +4,7 @@ import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.centerVec
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
+import dev.nyon.magnetic.utils.MixinHelper.conditionAlreadyChecked
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.stats.Stats
@@ -26,7 +27,7 @@ object DropEvent {
         player: ServerPlayer,
         pos: BlockPos
     ) {
-        if (!config.conditionStatement.checkAndReport(player)) return
+        if (conditionAlreadyChecked.get() != true && !config.conditionStatement.checkAndReport(player)) return
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
