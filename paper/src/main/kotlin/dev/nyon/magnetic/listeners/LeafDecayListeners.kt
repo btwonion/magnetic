@@ -134,10 +134,7 @@ object LeafDecayListeners {
         val earlyDecay = earlyDecays[key]
         if (entry == null && earlyDecay == null) return@listen
 
-        if (entry != null) {
-            val player = Bukkit.getPlayer(entry.authorization.playerId) ?: return@listen
-            if (player.world.uid != dropLocation.world.uid) return@listen
-        }
+        if (entry != null && Bukkit.getPlayer(entry.authorization.playerId) == null) return@listen
 
         entity.persistentDataContainer.set(
             leafDecayHandledDropKey,
@@ -223,7 +220,7 @@ object LeafDecayListeners {
         }
 
         val player = Bukkit.getPlayer(entry.authorization.playerId)
-        if (player == null || player.world.uid != claimedDrop.location.world.uid) {
+        if (player == null) {
             restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
             return
         }
@@ -235,6 +232,11 @@ object LeafDecayListeners {
             }
         }
         val scheduled = player.scheduler.execute(Main.INSTANCE, {
+            if (player.world.uid != claimedDrop.location.world.uid) {
+                restoreOnFailure()
+                return@execute
+            }
+
             val itemStacks = mutableListOf(claimedDrop.itemStack.clone())
             DropEventDispatcher.callAuthorized(
                 DropEvent(
@@ -460,8 +462,7 @@ object LeafDecayListeners {
             val candidates = hashSetOf<BlockKey>()
             if (config.leafDecay.enabled) {
                 leaves.forEach { (key, leaf) ->
-                    val depthFromRemovedLog = depths[key] ?: return@forEach
-                    if (leaf.persistent || depthFromRemovedLog >= leaf.maximumDistance) return@forEach
+                    if (!isDecayCandidate(key, leaf)) return@forEach
                     if (!hasLogSupport(key, leaf.maximumDistance)) candidates.add(key)
                 }
             }
@@ -477,10 +478,19 @@ object LeafDecayListeners {
             }
 
             registeredEarlyDecays.forEach { (key, earlyDecay) ->
+                // The decay event already proves that this leaf was unsupported. A log
+                // observed later by the asynchronous scan must not invalidate that event.
                 earlyDecay.resolve(entry.takeIf {
-                    candidates.contains(key) && entry.expiresAt > earlyDecay.decayedAt
+                    val leaf = leaves[key]
+                    config.leafDecay.enabled && leaf != null && isDecayCandidate(key, leaf) &&
+                        entry.expiresAt > earlyDecay.decayedAt
                 })
             }
+        }
+
+        private fun isDecayCandidate(key: BlockKey, leaf: LeafState): Boolean {
+            val depthFromRemovedLog = depths[key] ?: return false
+            return !leaf.persistent && depthFromRemovedLog < leaf.maximumDistance
         }
 
         private fun hasLogSupport(leaf: BlockKey, maximumDistance: Int): Boolean {
