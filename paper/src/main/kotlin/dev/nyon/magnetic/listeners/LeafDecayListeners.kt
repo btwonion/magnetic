@@ -17,23 +17,22 @@ import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.type.Leaves
 import org.bukkit.craftbukkit.CraftWorld
-import org.bukkit.craftbukkit.inventory.CraftItemStack
+import org.bukkit.craftbukkit.entity.CraftEntity
+import org.bukkit.entity.EntitySnapshot
 import org.bukkit.entity.Item
-import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.LeavesDecayEvent
 import org.bukkit.event.entity.ItemSpawnEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import org.bukkit.util.Vector
-import net.minecraft.world.entity.item.ItemEntity
 import java.util.ArrayDeque
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.abs
 
 internal val leafDecayHandledDropKey = NamespacedKey("magnetic", "leaf_decay_handled")
 
@@ -61,14 +60,7 @@ object LeafDecayListeners {
     private data class ClaimedDrop(
         val location: Location,
         val itemStack: ItemStack,
-        val velocity: Vector,
-        val pickupDelay: Int,
-        val owner: UUID?,
-        val thrower: UUID?,
-        val canMobPickup: Boolean,
-        val unlimitedLifetime: Boolean,
-        val willAge: Boolean,
-        val health: Int
+        val entitySnapshot: EntitySnapshot
     )
 
     private val directions = listOf(
@@ -81,6 +73,8 @@ object LeafDecayListeners {
     )
     private val trackedLeaves = ConcurrentHashMap<BlockKey, Entry>()
     private val pendingDecay = ConcurrentHashMap<BlockKey, Entry>()
+    private val activeScans = ConcurrentHashMap<Long, CanopyScan>()
+    private val earlyDecays = ConcurrentHashMap<BlockKey, EarlyDecay>()
     private val generation = AtomicLong()
 
     private val blockBreakEvent = listen<BlockBreakEvent>(EventPriority.MONITOR) {
@@ -105,13 +99,26 @@ object LeafDecayListeners {
         if (block.type.isIgnored) return@listen
 
         val key = block.key()
-        val entry = activeEntry(key) ?: return@listen
-        trackedLeaves.remove(key, entry)
-        pendingDecay[key] = entry
+        val entry = activeEntry(key)
+        val leafData = block.blockData as? Leaves ?: return@listen
+        val buffered = bufferEarlyDecay(
+            key,
+            LeafState(leafData.maximumDistance, leafData.isPersistent),
+            block.location,
+            entry
+        )
+        if (buffered) {
+            if (entry != null) trackedLeaves.remove(key, entry)
+            return@listen
+        }
 
-        Main.INSTANCE.server.regionScheduler.runDelayed(Main.INSTANCE, block.location, {
-            pendingDecay.remove(key, entry)
-        }, 1L)
+        if (entry != null) {
+            promotePendingDecay(key, entry, block.location)
+            return@listen
+        }
+
+        // A scan may have completed between the first lookup and registration.
+        activeEntry(key)?.let { promotePendingDecay(key, it, block.location) }
     }
 
     private val itemSpawnEvent = listen<ItemSpawnEvent>(EventPriority.MONITOR) {
@@ -119,16 +126,28 @@ object LeafDecayListeners {
         if (entity.persistentDataContainer.has(leafDecayHandledDropKey)) return@listen
 
         val dropLocation = entity.location.clone()
-        val entry = pendingDecay[dropLocation.key()] ?: return@listen
-        val player = Bukkit.getPlayer(entry.authorization.playerId) ?: return@listen
-        if (player.world.uid != dropLocation.world.uid) return@listen
+        val key = dropLocation.key()
+        val entry = pendingDecay[key]
+        val earlyDecay = earlyDecays[key]
+        if (entry == null && earlyDecay == null) return@listen
+
+        if (entry != null) {
+            val player = Bukkit.getPlayer(entry.authorization.playerId) ?: return@listen
+            if (player.world.uid != dropLocation.world.uid) return@listen
+        }
 
         entity.persistentDataContainer.set(
             leafDecayHandledDropKey,
             PersistentDataType.BYTE,
             1.toByte()
         )
-        claimDrop(entity, player, entry.authorization)
+        claimDrop(entity) { claimedDrop ->
+            if (entry != null) {
+                dispatchClaimedDrop(claimedDrop, entry)
+            } else {
+                earlyDecay!!.accept(claimedDrop)
+            }
+        }
     }
 
     private val cleanupTask = Main.INSTANCE.server.asyncScheduler.runAtFixedRate(
@@ -149,41 +168,79 @@ object LeafDecayListeners {
         return null
     }
 
-    private fun claimDrop(entity: Item, player: Player, authorization: DropAuthorization) {
+    private fun promotePendingDecay(key: BlockKey, entry: Entry, location: Location) {
+        trackedLeaves.remove(key, entry)
+        pendingDecay[key] = entry
+
+        Main.INSTANCE.server.regionScheduler.runDelayed(Main.INSTANCE, location, {
+            pendingDecay.remove(key, entry)
+        }, 1L)
+    }
+
+    private fun bufferEarlyDecay(
+        key: BlockKey,
+        leafState: LeafState,
+        location: Location,
+        existingEntry: Entry?
+    ): Boolean {
+        val earlyDecay = EarlyDecay(existingEntry)
+        activeScans.values
+            .filter { it.couldContain(key) }
+            .forEach { it.registerEarlyDecay(key, leafState, earlyDecay) }
+        if (!earlyDecay.hasRegistrations()) return false
+
+        earlyDecays[key] = earlyDecay
+        Main.INSTANCE.server.regionScheduler.runDelayed(Main.INSTANCE, location, {
+            earlyDecays.remove(key, earlyDecay)
+        }, 1L)
+        earlyDecay.closeRegistrations()
+        return true
+    }
+
+    private fun claimDrop(entity: Item, onClaimed: (ClaimedDrop) -> Unit) {
         entity.scheduler.execute(Main.INSTANCE, {
             if (!entity.isValid) return@execute
 
+            val entitySnapshot = entity.createSnapshot() ?: return@execute
             val claimedDrop = ClaimedDrop(
                 entity.location.clone(),
                 entity.itemStack.clone(),
-                entity.velocity.clone(),
-                entity.pickupDelay,
-                entity.owner,
-                entity.thrower,
-                entity.canMobPickup(),
-                entity.isUnlimitedLifetime,
-                entity.willAge(),
-                entity.health
+                entitySnapshot
             )
             entity.remove()
-
-            player.scheduler.execute(Main.INSTANCE, {
-                val itemStacks = mutableListOf(claimedDrop.itemStack.clone())
-                DropEventDispatcher.callAuthorized(
-                    DropEvent(
-                        itemStacks,
-                        MutableInt(),
-                        player,
-                        claimedDrop.location,
-                        leafDecayHandledDropKey
-                    ),
-                    authorization
-                )
-                restoreResidualDrops(claimedDrop, itemStacks)
-            }, {
-                restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
-            }, 0L)
+            onClaimed(claimedDrop)
         }, null, 0L)
+    }
+
+    private fun dispatchClaimedDrop(claimedDrop: ClaimedDrop, entry: Entry?) {
+        if (entry == null) {
+            restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
+            return
+        }
+
+        val player = Bukkit.getPlayer(entry.authorization.playerId)
+        if (player == null || player.world.uid != claimedDrop.location.world.uid) {
+            restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
+            return
+        }
+
+        val scheduled = player.scheduler.execute(Main.INSTANCE, {
+            val itemStacks = mutableListOf(claimedDrop.itemStack.clone())
+            DropEventDispatcher.callAuthorized(
+                DropEvent(
+                    itemStacks,
+                    MutableInt(),
+                    player,
+                    claimedDrop.location,
+                    leafDecayHandledDropKey
+                ),
+                entry.authorization
+            )
+            restoreResidualDrops(claimedDrop, itemStacks)
+        }, {
+            restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
+        }, 0L)
+        if (!scheduled) restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
     }
 
     private fun restoreResidualDrops(claimedDrop: ClaimedDrop, items: List<ItemStack>) {
@@ -199,24 +256,10 @@ object LeafDecayListeners {
 
     private fun restoreDropWithoutEvent(claimedDrop: ClaimedDrop, itemStack: ItemStack) {
         val world = claimedDrop.location.world as CraftWorld
-        val handle = ItemEntity(
-            world.handle,
-            claimedDrop.location.x,
-            claimedDrop.location.y,
-            claimedDrop.location.z,
-            CraftItemStack.asNMSCopy(itemStack),
-            claimedDrop.velocity.x,
-            claimedDrop.velocity.y,
-            claimedDrop.velocity.z
-        )
-        val item = handle.bukkitEntity as Item
-        item.pickupDelay = claimedDrop.pickupDelay
-        item.owner = claimedDrop.owner
-        item.thrower = claimedDrop.thrower
-        item.setCanMobPickup(claimedDrop.canMobPickup)
-        item.isUnlimitedLifetime = claimedDrop.unlimitedLifetime
-        item.setWillAge(claimedDrop.willAge)
-        item.health = claimedDrop.health
+        val item = claimedDrop.entitySnapshot.createEntity(world) as Item
+        val handle = (item as CraftEntity).handle
+        handle.setPos(claimedDrop.location.x, claimedDrop.location.y, claimedDrop.location.z)
+        item.itemStack = itemStack
         item.persistentDataContainer.set(
             leafDecayHandledDropKey,
             PersistentDataType.BYTE,
@@ -229,6 +272,67 @@ object LeafDecayListeners {
         world.addEntityToWorld(handle, null)
     }
 
+    private class EarlyDecay(existingEntry: Entry?) {
+        private var registrationsOpen = true
+        private var registeredScans = 0
+        private var resolvedScans = 0
+        private var bestEntry: Entry? = existingEntry
+        private var completed = false
+        private val waitingDrops = mutableListOf<ClaimedDrop>()
+
+        fun registerScan() = synchronized(this) {
+            check(registrationsOpen) { "Cannot register a completed canopy scan." }
+            registeredScans++
+        }
+
+        fun hasRegistrations() = synchronized(this) { registeredScans > 0 }
+
+        fun closeRegistrations() {
+            val completion = synchronized(this) {
+                registrationsOpen = false
+                completeIfReady()
+            }
+            completion?.dispatch()
+        }
+
+        fun resolve(entry: Entry?) {
+            val completion = synchronized(this) {
+                if (entry != null && (bestEntry == null || entry.generation > bestEntry!!.generation)) {
+                    bestEntry = entry
+                }
+                resolvedScans++
+                completeIfReady()
+            }
+            completion?.dispatch()
+        }
+
+        fun accept(claimedDrop: ClaimedDrop) {
+            val entry = synchronized(this) {
+                if (!completed) {
+                    waitingDrops.add(claimedDrop)
+                    return
+                }
+                bestEntry
+            }
+            dispatchClaimedDrop(claimedDrop, entry)
+        }
+
+        private fun completeIfReady(): Completion? {
+            if (registrationsOpen || completed || resolvedScans < registeredScans) return null
+            completed = true
+            return Completion(waitingDrops.toList(), bestEntry).also { waitingDrops.clear() }
+        }
+
+        private data class Completion(
+            val drops: List<ClaimedDrop>,
+            val entry: Entry?
+        ) {
+            fun dispatch() {
+                drops.forEach { dispatchClaimedDrop(it, entry) }
+            }
+        }
+    }
+
     private class CanopyScan(
         private val world: World,
         private val removedLog: BlockKey,
@@ -237,12 +341,40 @@ object LeafDecayListeners {
         private val depths = ConcurrentHashMap<BlockKey, Int>()
         private val leaves = ConcurrentHashMap<BlockKey, LeafState>()
         private val logs = ConcurrentHashMap.newKeySet<BlockKey>()
+        private val earlyLeaves = ConcurrentHashMap<BlockKey, LeafState>()
+        private val registeredEarlyDecays = ConcurrentHashMap<BlockKey, EarlyDecay>()
         private val pendingReads = AtomicInteger()
+        private var finished = false
 
         fun start() {
+            activeScans[entry.generation] = this
             pendingReads.incrementAndGet()
             directions.forEach { scheduleRead(removedLog.relative(it), 1) }
-            if (pendingReads.decrementAndGet() == 0) finish()
+            if (pendingReads.decrementAndGet() == 0) finishIfReady()
+        }
+
+        fun couldContain(key: BlockKey): Boolean {
+            if (key.worldId != removedLog.worldId) return false
+            val distance = abs(key.x - removedLog.x) + abs(key.y - removedLog.y) + abs(key.z - removedLog.z)
+            return distance < MAXIMUM_LEAF_DISTANCE
+        }
+
+        fun registerEarlyDecay(key: BlockKey, leafState: LeafState, earlyDecay: EarlyDecay): Boolean =
+            synchronized(this) {
+                if (finished || !couldContain(key)) return@synchronized false
+
+                earlyDecay.registerScan()
+                earlyLeaves[key] = leafState
+                registeredEarlyDecays[key] = earlyDecay
+                depths[key]?.let { recordLeaf(key, leafState, it) }
+                true
+            }
+
+        private fun finishIfReady() = synchronized(this) {
+            if (finished || pendingReads.get() != 0) return@synchronized
+            finish()
+            finished = true
+            activeScans.remove(entry.generation, this)
         }
 
         private fun scheduleRead(key: BlockKey, depth: Int) {
@@ -265,7 +397,7 @@ object LeafDecayListeners {
                 try {
                     scanBlock(key, depth)
                 } finally {
-                    if (pendingReads.decrementAndGet() == 0) finish()
+                    if (pendingReads.decrementAndGet() == 0) finishIfReady()
                 }
             }
         }
@@ -273,6 +405,12 @@ object LeafDecayListeners {
         private fun scanBlock(key: BlockKey, scheduledDepth: Int) {
             val depth = depths[key] ?: return
             if (scheduledDepth > depth) return
+
+            val earlyLeaf = earlyLeaves[key]
+            if (earlyLeaf != null) {
+                recordLeaf(key, earlyLeaf, depth)
+                return
+            }
 
             val block = world.getBlockAt(key.x, key.y, key.z)
             if (Tag.LOGS.isTagged(block.type)) {
@@ -282,23 +420,36 @@ object LeafDecayListeners {
             if (!Tag.LEAVES.isTagged(block.type)) return
 
             val leafData = block.blockData as? Leaves ?: return
-            leaves[key] = LeafState(leafData.maximumDistance, leafData.isPersistent)
+            recordLeaf(key, LeafState(leafData.maximumDistance, leafData.isPersistent), depth)
+        }
+
+        private fun recordLeaf(key: BlockKey, leafState: LeafState, depth: Int) {
+            leaves[key] = leafState
             if (depth >= CANOPY_SCAN_RADIUS) return
 
             directions.forEach { scheduleRead(key.relative(it), depth + 1) }
         }
 
         private fun finish() {
-            if (!config.leafDecay.enabled || entry.expiresAt <= System.currentTimeMillis()) return
-
-            leaves.forEach { (key, leaf) ->
-                val depthFromRemovedLog = depths[key] ?: return@forEach
-                if (leaf.persistent || depthFromRemovedLog >= leaf.maximumDistance) return@forEach
-                if (hasLogSupport(key, leaf.maximumDistance)) return@forEach
-
-                trackedLeaves.compute(key) { _, current ->
-                    if (current == null || current.generation < entry.generation) entry else current
+            val candidates = hashSetOf<BlockKey>()
+            if (config.leafDecay.enabled && entry.expiresAt > System.currentTimeMillis()) {
+                leaves.forEach { (key, leaf) ->
+                    val depthFromRemovedLog = depths[key] ?: return@forEach
+                    if (leaf.persistent || depthFromRemovedLog >= leaf.maximumDistance) return@forEach
+                    if (!hasLogSupport(key, leaf.maximumDistance)) candidates.add(key)
                 }
+            }
+
+            candidates
+                .filterNot(registeredEarlyDecays::containsKey)
+                .forEach { key ->
+                    trackedLeaves.compute(key) { _, current ->
+                        if (current == null || current.generation < entry.generation) entry else current
+                    }
+                }
+
+            registeredEarlyDecays.forEach { (key, earlyDecay) ->
+                earlyDecay.resolve(entry.takeIf { candidates.contains(key) })
             }
         }
 
