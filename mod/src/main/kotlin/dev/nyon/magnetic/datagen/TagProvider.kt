@@ -27,6 +27,7 @@ class EnchantmentTagProvider(
         listOf(
             tagBuilder(magneticEffectId),
             tagBuilder(EnchantmentTags.TRADEABLE),
+            tagBuilder(EnchantmentTags.TRADES_DESERT_COMMON),
             tagBuilder(EnchantmentTags.IN_ENCHANTING_TABLE),
             tagBuilder(EnchantmentTags.TREASURE)
         ).forEach { it.addOptional(enchantmentResourceKey) }

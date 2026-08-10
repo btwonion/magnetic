@@ -79,6 +79,7 @@ public class MagneticBootstrapper implements PluginBootstrap {
             LifecycleEvents.TAGS.preFlatten(RegistryKey.ENCHANTMENT), event -> {
                 final PreFlattenTagRegistrar<Enchantment> registrar = event.registrar();
                 registrar.addToTag(EnchantmentTagKeys.TRADEABLE, Set.of(TagEntry.valueEntry(MAGNETIC)));
+                registrar.addToTag(EnchantmentTagKeys.TRADES_DESERT_COMMON, Set.of(TagEntry.valueEntry(MAGNETIC)));
                 registrar.addToTag(EnchantmentTagKeys.TREASURE, Set.of(TagEntry.valueEntry(MAGNETIC)));
                 registrar.addToTag(EnchantmentTagKeys.IN_ENCHANTING_TABLE, Set.of(TagEntry.valueEntry(MAGNETIC)));
             }

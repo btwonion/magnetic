@@ -77,6 +77,10 @@ See the [complete configuration reference](https://github.com/btwonion/magnetic/
 
 ## FAQ
 
+### Where can I find the Magnetic enchantment?
+
+Magnetic is available through the enchantment table, loot, and librarian trades. With the Villager Trade Rebalance experiment disabled, librarians from any biome can offer it. With the experiment enabled, look for a desert librarian; Magnetic is part of the desert's common enchanted-book pool.
+
 ### Does Magnetic work in multiplayer?
 
 Yes. It supports singleplayer, modded servers, and Paper servers. Players joining a Paper server do not need to install Magnetic themselves.

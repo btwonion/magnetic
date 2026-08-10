@@ -1,5 +1,6 @@
 ## Fabric, NeoForge & Paper
 
+- make Magnetic enchanted books available from desert librarians when the Villager Trade Rebalance experiment is enabled
 - add optional collection of natural leaf-decay drops ([**#99**](https://github.com/btwonion/magnetic/pull/99))
     - disabled by default through the new `leafDecay` config section
     - preserves eligibility from the original log break and supports accelerated decay mods
