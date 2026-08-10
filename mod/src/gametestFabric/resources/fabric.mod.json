@@ -1,0 +1,17 @@
+{
+    "schemaVersion": 1,
+    "id": "magnetic_test",
+    "version": "1.0.0",
+    "name": "Magnetic Game Tests",
+    "environment": "*",
+    "depends": {
+        "fabricloader": "*",
+        "fabric-api": "*",
+        "magnetic": "*"
+    },
+    "entrypoints": {
+        "fabric-gametest": [
+            "dev.nyon.magnetic.gametest.FabricMagneticGameTests"
+        ]
+    }
+}

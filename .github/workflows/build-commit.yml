@@ -22,7 +22,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build with Gradle
+    name: ${{ matrix.version }} / ${{ matrix.loader }}
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ["1.21.1", "1.21.11", "26.1.2", "26.2"]
+        loader: [fabric, neoforge]
 
     steps:
       - uses: actions/checkout@v7
@@ -35,8 +40,56 @@ jobs:
         run: chmod +x gradlew
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Build with Gradle
-        run: ./gradlew build --stacktrace
-      - uses: actions/upload-artifact@v7
+      - name: Build and test
+        run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:build --stacktrace
+      - name: Run headless GameTests
+        if: matrix.version == '26.2'
+        run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:runGameTest --stacktrace
+      - name: Store test reports and logs
+        if: failure()
+        uses: actions/upload-artifact@v7
         with:
-          path: ./**/build/libs/*.jar
+          name: test-reports-${{ matrix.version }}-${{ matrix.loader }}
+          if-no-files-found: warn
+          path: |
+            **/build/reports/
+            **/build/test-results/
+            **/build/run/**/logs/
+            **/build/run/**/crash-reports/
+      - name: Store build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: magnetic-${{ matrix.version }}-${{ matrix.loader }}
+          path: mod/versions/${{ matrix.version }}-${{ matrix.loader }}/build/libs/*.jar
+
+  build-paper:
+    runs-on: ubuntu-latest
+    name: Paper
+
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: 25
+          distribution: temurin
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Build and test
+        run: ./gradlew :paper:build --stacktrace
+      - name: Store test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-paper
+          if-no-files-found: warn
+          path: |
+            paper/build/reports/
+            paper/build/test-results/
+      - name: Store build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: magnetic-paper
+          path: paper/build/libs/*.jar

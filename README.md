@@ -97,3 +97,10 @@ You decide. Set `animation.canOtherPlayersPickup` to control whether flying item
 
 - **Issues:** https://github.com/btwonion/magnetic/issues
 - **Discord:** https://nyon.dev/discord
+
+## Development and testing
+
+Contributors can run fast JVM tests with `./gradlew testFast`, headless Fabric
+and NeoForge gameplay tests with `./gradlew testGameLatest`, or the complete
+build and verification suite with `./gradlew testAll`. See
+[`docs/TESTING.md`](docs/TESTING.md) before adding or moving tests.

@@ -4,6 +4,7 @@ import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.centerVec
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
+import dev.nyon.magnetic.utils.CooldownTracker
 import dev.nyon.magnetic.utils.MixinHelper.conditionAlreadyChecked
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerPlayer
@@ -13,12 +14,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import org.apache.commons.lang3.mutable.MutableInt
 import java.util.UUID
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
-@OptIn(ExperimentalTime::class)
 object DropEvent {
     @Suppress("KotlinConstantConditions")
     operator fun invoke(
@@ -57,19 +53,19 @@ object DropEvent {
         }
     }
 
-    private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(
-        config.fullInventoryAlert.soundAlert to mutableMapOf(),
-        config.fullInventoryAlert.textAlert to mutableMapOf(),
-        config.fullInventoryAlert.titleAlert to mutableMapOf()
-    )
+    private val cooldowns = CooldownTracker<Pair<AlertType, UUID>>()
 
     private fun tickInventoryAlert(player: ServerPlayer) {
-        val currentTime = Clock.System.now()
-        cooldowns.forEach { (alert, playerCooldowns) ->
+        val alerts = config.fullInventoryAlert.let {
+            listOf(
+                AlertType.SOUND to it.soundAlert,
+                AlertType.TEXT to it.textAlert,
+                AlertType.TITLE to it.titleAlert
+            )
+        }
+        alerts.forEach { (type, alert) ->
             if (!alert.enabled) return@forEach
-            val lastAlert = playerCooldowns[player.uuid]
-            if (lastAlert == null || currentTime > lastAlert + alert.cooldownInSeconds.seconds) {
-                playerCooldowns[player.uuid] = currentTime
+            if (cooldowns.tryAcquire(type to player.uuid, alert.cooldownInSeconds * 1_000L)) {
                 alert.invoke(player)
             }
         }
@@ -80,5 +76,11 @@ object DropEvent {
         if (player.hasInfiniteMaterials()) return true
         if (stack.isDamaged) return false
         return player.inventory.getSlotWithRemainingSpace(stack) > -1
+    }
+
+    private enum class AlertType {
+        SOUND,
+        TEXT,
+        TITLE
     }
 }
