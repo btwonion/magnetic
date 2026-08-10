@@ -2,6 +2,7 @@ package dev.nyon.magnetic.listeners
 
 import dev.nyon.magnetic.Animation
 import dev.nyon.magnetic.DropEvent
+import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.canAddItem
@@ -19,6 +20,10 @@ object DropEventListener {
 
     @Suppress("unused")
     private val magneticListener = listen<DropEvent> {
+        if (!DropEventDispatcher.isAuthorized(this) && !config.conditionStatement.checkAndReport(player)) {
+            return@listen
+        }
+
         if (config.itemsAllowed) {
             items.removeIf { item ->
                 if (config.animation.enabled && player.canAddItem(item)) {

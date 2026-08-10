@@ -2,30 +2,29 @@ package dev.nyon.magnetic.mixins.compat.treeharvester;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.nyon.magnetic.compat.treeharvester.TreeHarvesterLeafTracker;
+import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.BlockDropScope;
-import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.EnumSet;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
+import static dev.nyon.magnetic.utils.MixinHelper.conditionAlreadyChecked;
 import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
+import static dev.nyon.magnetic.utils.MixinHelper.leafDecayAuthorizedPlayer;
+import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Pseudo
 @Mixin(
@@ -58,27 +57,29 @@ public class LeafEventsMixin {
             return;
         }
 
-        PositionTracker tracker = ((ServerLevelHolder) serverLevel).getPositionTracker();
-        ServerPlayer player = TreeHarvesterLeafTracker.take(serverLevel, dropPos);
-        if (player == null) {
-            player = tracker.lookup(dropPos);
-        }
-        if (player == null) {
+        UUID playerUuid = ((ServerLevelHolder) serverLevel).getLeafDecayTracker().take(dropPos);
+        if (!ConfigKt.getConfig().getLeafDecay().getEnabled() || playerUuid == null) {
             original.call(dropLevel, dropPos);
             return;
         }
-        ServerPlayer scopedPlayer = player;
+
+        ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(playerUuid);
+        if (player == null || player.level() != serverLevel) {
+            original.call(dropLevel, dropPos);
+            return;
+        }
 
         BlockState state = serverLevel.getBlockState(dropPos);
-        if (!MagneticCheckKt.isIgnored(state)) {
-            tracker.recordNeighbors(dropPos, scopedPlayer, serverLevel);
-        }
         BlockDropScope.run(
             state,
             () -> ThreadLocalScope.run(
                 threadLocal,
-                scopedPlayer,
-                () -> original.call(dropLevel, dropPos)
+                player,
+                () -> ThreadLocalScope.run(
+                    conditionAlreadyChecked,
+                    true,
+                    () -> original.call(dropLevel, dropPos)
+                )
             )
         );
     }
@@ -106,89 +107,16 @@ public class LeafEventsMixin {
             && level instanceof ServerLevel serverLevel
             && element instanceof BlockPos leafPos
             && player != null
+            && player.getUUID().equals(leafDecayAuthorizedPlayer.get())
             && !Boolean.TRUE.equals(ignoreBlockDrops.get())
             && !MagneticCheckKt.isIgnored(state)) {
-            TreeHarvesterLeafTracker.record(serverLevel, leafPos, player);
+            long timeout = ConfigKt.getConfig().getLeafDecay().getAbilityTimeout();
+            ((ServerLevelHolder) serverLevel).getLeafDecayTracker().record(
+                leafPos,
+                player.getUUID(),
+                timeout
+            );
         }
         return added;
-    }
-
-    @WrapOperation(
-        method = "onWorldTick",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"
-        )
-    )
-    private static void scopeLeafTickToPlayer(
-        BlockState state,
-        ServerLevel level,
-        BlockPos pos,
-        RandomSource random,
-        Operation<Void> original
-    ) {
-        ServerPlayer player = findPlayer(level, pos, false);
-        if (player == null) {
-            original.call(state, level, pos, random);
-            return;
-        }
-
-        BlockDropScope.run(
-            state,
-            () -> ThreadLocalScope.run(
-                threadLocal,
-                player,
-                () -> original.call(state, level, pos, random)
-            )
-        );
-    }
-
-    @WrapOperation(
-        method = "onWorldTick",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/state/BlockState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V"
-        )
-    )
-    private static void scopeLeafRandomTickToPlayer(
-        BlockState state,
-        ServerLevel level,
-        BlockPos pos,
-        RandomSource random,
-        Operation<Void> original
-    ) {
-        ServerPlayer player = findPlayer(level, pos, true);
-        if (player == null) {
-            original.call(state, level, pos, random);
-            return;
-        }
-
-        BlockDropScope.run(
-            state,
-            () -> ThreadLocalScope.run(
-                threadLocal,
-                player,
-                () -> original.call(state, level, pos, random)
-            )
-        );
-    }
-
-    @Inject(method = "onWorldTick", at = @At("TAIL"))
-    private static void cleanupLeafPlayers(ServerLevel level, CallbackInfo ci) {
-        TreeHarvesterLeafTracker.cleanup(level);
-    }
-
-    private static ServerPlayer findPlayer(
-        ServerLevel level,
-        BlockPos pos,
-        boolean consume
-    ) {
-        ServerPlayer player = consume
-            ? TreeHarvesterLeafTracker.take(level, pos)
-            : TreeHarvesterLeafTracker.lookup(level, pos);
-        if (player != null) return player;
-
-        PositionTracker tracker = ((ServerLevelHolder) level).getPositionTracker();
-        return tracker.lookup(pos);
     }
 }

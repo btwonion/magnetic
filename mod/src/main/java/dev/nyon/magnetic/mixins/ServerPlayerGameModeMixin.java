@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 
+import static dev.nyon.magnetic.utils.MixinHelper.leafDecayAuthorizedPlayer;
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(ServerPlayerGameMode.class)
@@ -55,7 +56,13 @@ public class ServerPlayerGameModeMixin {
         boolean destroyed = ThreadLocalScope.call(
             threadLocal,
             player,
-            () -> BlockDropScope.call(state, () -> original.call(pos))
+            () -> trackLeafDecay
+                ? ThreadLocalScope.call(
+                    leafDecayAuthorizedPlayer,
+                    player.getUUID(),
+                    () -> BlockDropScope.call(state, () -> original.call(pos))
+                )
+                : BlockDropScope.call(state, () -> original.call(pos))
         );
         if (!destroyed) return false;
 

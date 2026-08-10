@@ -4,6 +4,7 @@ import dev.nyon.magnetic.DropEvent
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerPlayer
 import org.apache.commons.lang3.mutable.MutableInt
+import java.util.UUID
 
 object MixinHelper {
     @JvmField
@@ -17,6 +18,9 @@ object MixinHelper {
 
     @JvmField
     val conditionAlreadyChecked: ThreadLocal<Boolean> = ThreadLocal()
+
+    @JvmField
+    val leafDecayAuthorizedPlayer: ThreadLocal<UUID> = ThreadLocal()
 
     @JvmStatic
     fun modifyExpressionValuePlayerExp(player: ServerPlayer, exp: Int, pos: BlockPos): Int {
