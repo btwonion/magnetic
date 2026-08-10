@@ -64,7 +64,7 @@ public class MagneticBootstrapper implements PluginBootstrap {
             .newHandler(event -> event.registry()
                 .register(
                     MAGNETIC,
-                    builder -> builder.description(Component.text("Magnetic"))
+                    builder -> builder.description(Component.translatable("enchantment.magnetic.magnetic.name", "Magnetic"))
                         .supportedItems(event.getOrCreateTag(TOOLS))
                         .weight(2)
                         .maxLevel(1)
