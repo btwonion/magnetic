@@ -3,72 +3,79 @@ package dev.nyon.magnetic
 import com.destroystokyo.paper.event.server.ServerTickStartEvent
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.listen
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.bukkit.Location
+import org.bukkit.NamespacedKey
 import org.bukkit.craftbukkit.entity.CraftEntity
 import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
+import java.util.concurrent.ConcurrentHashMap
 
 object Animation {
-    private val animationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val blocksPerTick = config.animation.blocksPerSecond / 20
-    private val trackedItemEntities = mutableMapOf<Item, Player>()
-    private val trackedItemEntitiesMutex = Mutex()
+    private val trackedItemEntities = ConcurrentHashMap<Item, Player>()
 
-    fun pullItemToPlayer(item: ItemStack, pos: Location, player: Player) {
-        player.world.dropItem(pos, item) { itemEntity ->
-            if (!config.animation.canOtherPlayersPickup) {
-                val entityScheduler = itemEntity.scheduler
-                entityScheduler.execute(Main.INSTANCE, {
-                    itemEntity.owner = player.playerProfile.id
-                }, null, 0L)
-            }
-            animationScope.launch {
-                trackedItemEntitiesMutex.withLock {
-                    trackedItemEntities[itemEntity] = player
+    fun pullItemToPlayer(
+        item: ItemStack,
+        pos: Location,
+        player: Player,
+        itemSpawnMarker: NamespacedKey? = null
+    ) {
+        val spawnPos = pos.clone()
+        val ownerId = player.playerProfile.id
+        Main.INSTANCE.server.regionScheduler.execute(Main.INSTANCE, spawnPos) {
+            spawnPos.world.dropItem(spawnPos, item) { itemEntity ->
+                if (itemSpawnMarker != null) {
+                    itemEntity.persistentDataContainer.set(
+                        itemSpawnMarker,
+                        PersistentDataType.BYTE,
+                        1.toByte()
+                    )
                 }
+                if (!config.animation.canOtherPlayersPickup) {
+                    val entityScheduler = itemEntity.scheduler
+                    entityScheduler.execute(Main.INSTANCE, {
+                        itemEntity.owner = ownerId
+                    }, null, 0L)
+                }
+                trackedItemEntities[itemEntity] = player
             }
         }
     }
 
     private val tickListener = listen<ServerTickStartEvent> {
-        animationScope.launch {
-            val copiedItemEntities: Map<Item, Player>
-            trackedItemEntitiesMutex.withLock {
-                copiedItemEntities = trackedItemEntities.toMap()
-            }
+        trackedItemEntities.forEach(::tickItem)
+    }
 
-            copiedItemEntities.forEach { (itemEntity, target) ->
-                itemEntity.scheduler.execute(Main.INSTANCE, {
-                    val targetPos = target.location
-                    val itemEntityPos = itemEntity.location
-                    if (targetPos.world.uid != itemEntityPos.world.uid) {
-                        untrackEntity(itemEntity)
-                        return@execute
-                    }
-                    val mcEntity = (itemEntity as CraftEntity).handle
+    private fun tickItem(itemEntity: Item, target: Player) {
+        val targetScheduled = target.scheduler.execute(Main.INSTANCE, {
+            val targetPos = target.location.clone()
+            val itemScheduled = itemEntity.scheduler.execute(Main.INSTANCE, {
+                val itemEntityPos = itemEntity.location
+                if (targetPos.world.uid != itemEntityPos.world.uid) {
+                    untrackEntity(itemEntity)
+                    return@execute
+                }
+                val mcEntity = (itemEntity as CraftEntity).handle
 
-                    val vec = targetPos.subtract(itemEntityPos).toVector()
-                    val length = vec.length()
-                    val tickPart = blocksPerTick / length
-                    val tickVec = Vector(
-                        vec.x * tickPart,
-                        vec.y * (if (mcEntity.horizontalCollision) tickPart * 2 else tickPart),
-                        vec.z * tickPart
-                    )
-                    itemEntity.velocity = itemEntity.velocity.add(tickVec)
-                }, null, 0L)
-            }
-        }
+                val vec = targetPos.subtract(itemEntityPos).toVector()
+                val length = vec.length()
+                if (length == 0.0) return@execute
+                val tickPart = blocksPerTick / length
+                val tickVec = Vector(
+                    vec.x * tickPart,
+                    vec.y * (if (mcEntity.horizontalCollision) tickPart * 2 else tickPart),
+                    vec.z * tickPart
+                )
+                itemEntity.velocity = itemEntity.velocity.add(tickVec)
+            }, { untrackEntity(itemEntity) }, 0L)
+            if (!itemScheduled) untrackEntity(itemEntity)
+        }, { untrackEntity(itemEntity) }, 0L)
+        if (!targetScheduled) untrackEntity(itemEntity)
     }
 
     private val playerPickupItemListener = listen<PlayerAttemptPickupItemEvent>(EventPriority.HIGHEST) {
@@ -76,11 +83,7 @@ object Animation {
     }
 
     private fun untrackEntity(item: Item) {
-        animationScope.launch {
-            trackedItemEntitiesMutex.withLock {
-                if (trackedItemEntities.containsKey(item)) trackedItemEntities.remove(item)
-            }
-        }
+        trackedItemEntities.remove(item)
     }
 
     fun tracksItem(item: Item) = trackedItemEntities.containsKey(item)

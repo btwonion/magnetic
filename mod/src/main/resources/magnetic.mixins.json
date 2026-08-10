@@ -7,6 +7,7 @@
         "ExperienceOrbInvoker",
         "FishingHookMixin",
         "ItemEntityMixin",
+        "LeavesBlockMixin",
         "LevelMixin",
         "LivingEntityMixin",
         "RegistryLoadTaskMixin",

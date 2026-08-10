@@ -4,6 +4,7 @@ package dev.nyon.magnetic.listeners
 
 import dev.nyon.magnetic.Animation
 import dev.nyon.magnetic.DropEvent
+import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.isIgnored
@@ -15,10 +16,10 @@ import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Fluid
 import org.bukkit.World
 import org.bukkit.entity.Player
-import org.bukkit.event.Event
 import org.bukkit.event.block.BlockFromToEvent
 import org.bukkit.event.entity.ItemSpawnEvent
 import org.bukkit.event.player.PlayerBucketEmptyEvent
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
@@ -62,9 +63,14 @@ object FluidListeners {
     }
 
     private val itemSpawnEvent = listen<ItemSpawnEvent> {
+        if (isCancelled) return@listen
         val itemPos = entity.location
+        if (entity.persistentDataContainer.has(leafDecayHandledDropKey, PersistentDataType.BYTE)) return@listen
         if (Animation.tracksItem(entity)) return@listen
         regionScheduler.execute(Main.INSTANCE, itemPos) {
+            if (!entity.isValid || entity.persistentDataContainer.has(leafDecayHandledDropKey, PersistentDataType.BYTE)) {
+                return@execute
+            }
             val itemFluidData = itemPos.world.getFluidData(itemPos)
             if (ignoredFluids.contains(itemFluidData.fluidType)) return@execute
 
@@ -73,7 +79,7 @@ object FluidListeners {
             if (holder.ignoreDrops) return@execute
 
             val itemStacks = mutableListOf(entity.itemStack)
-            DropEvent(itemStacks, MutableInt(), holder.player, itemPos).also(Event::callEvent)
+            DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), holder.player, itemPos))
 
             if (itemStacks.isEmpty()) {
                 entity.scheduler.execute(Main.INSTANCE, { entity.remove() }, null, 1)

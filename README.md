@@ -59,6 +59,7 @@ Magnetic works out of the box with the enchantment. For more control, edit `magn
 | `conditionStatement.raw` | When Magnetic activates; accepts `ENCHANTMENT`, `SNEAK`, `PERMISSION`, `&&`, and `\|\|` |
 | `itemsAllowed` / `expAllowed` | Whether item drops and XP are collected |
 | `buckets` | Whether and for how long placed-bucket effects trigger Magnetic |
+| `leafDecay` | Whether natural leaf-decay drops caused by eligible log breaks are collected |
 | `ignoreBlocks` / `ignoreEntities` | Source blocks and entities to exclude by ID or tag |
 | `animation` | Flight effect, speed, and whether other players can intercept items |
 | `fullInventoryAlert` | Sound, message, and title alerts with separate cooldowns |

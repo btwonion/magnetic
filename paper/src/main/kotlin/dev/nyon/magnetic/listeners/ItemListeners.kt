@@ -1,13 +1,13 @@
 package dev.nyon.magnetic.listeners
 
 import dev.nyon.magnetic.DropEvent
+import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.extensions.failsLongRangeCheck
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
 import org.bukkit.entity.EntityType
-import org.bukkit.event.Event
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerFishEvent
 import org.bukkit.event.player.PlayerShearEntityEvent
@@ -24,7 +24,7 @@ object ItemListeners {
         ) return@listen // Disable player death drops in favor of GravesX
         val mutableInt = MutableInt(droppedExp)
         val itemStacks = drops.toMutableList()
-        DropEvent(itemStacks, mutableInt, killer, entity.location).also(Event::callEvent)
+        DropEventDispatcher.call(DropEvent(itemStacks, mutableInt, killer, entity.location))
         droppedExp = mutableInt.toInt()
 
         // Delete items that have been added to the inventory
@@ -35,7 +35,7 @@ object ItemListeners {
 
     private val playerShearEvent = listen<PlayerShearEntityEvent> {
         val itemStacks = drops.toMutableList()
-        DropEvent(itemStacks, MutableInt(), player, entity.location).also(Event::callEvent)
+        DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, entity.location))
 
         // Delete items that have been added to the inventory
         drops.removeIf { item ->
@@ -46,7 +46,7 @@ object ItemListeners {
     private val playerFishEvent = listen<PlayerFishEvent> {
         if (caught == null) return@listen
         val mutableInt = MutableInt(expToDrop)
-        DropEvent(mutableListOf(), mutableInt, player, caught!!.location).also(Event::callEvent)
+        DropEventDispatcher.call(DropEvent(mutableListOf(), mutableInt, player, caught!!.location))
         expToDrop = mutableInt.toInt()
     }
 }

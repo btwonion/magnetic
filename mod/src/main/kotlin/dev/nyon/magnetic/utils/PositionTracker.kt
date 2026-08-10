@@ -11,13 +11,16 @@ class PositionTracker {
     private val entries = HashMap<BlockPos, Entry>()
 
     fun recordNeighbors(pos: BlockPos, player: ServerPlayer, level: ServerLevel) {
+        record(snapshotNeighbors(pos, level), player)
+    }
+
+    fun snapshotNeighbors(pos: BlockPos, level: ServerLevel): List<BlockPos> = Direction.entries.mapNotNull { direction ->
+        pos.relative(direction).takeUnless { level.getBlockState(it).isAir }?.immutable()
+    }
+
+    fun record(positions: Iterable<BlockPos>, player: ServerPlayer) {
         val now = System.currentTimeMillis()
-        for (direction in Direction.entries) {
-            val neighbor = pos.relative(direction)
-            if (!level.getBlockState(neighbor).isAir) {
-                entries[neighbor.immutable()] = Entry(player, now)
-            }
-        }
+        for (pos in positions) entries[pos.immutable()] = Entry(player, now)
     }
 
     fun lookup(pos: BlockPos): ServerPlayer? {

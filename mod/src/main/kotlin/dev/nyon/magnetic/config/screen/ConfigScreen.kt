@@ -48,8 +48,26 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val abilityTimeout by options.registering {
-                binding(10000, { config.buckets.abilityTimeout }, { config.buckets.abilityTimeout = it })
+                binding(30000L, { config.buckets.abilityTimeout }, { config.buckets.abilityTimeout = it })
                 controller = numberField(-1, Long.MAX_VALUE)
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+        }
+
+        val leafDecay by groups.registering {
+            val enabled by options.registering {
+                binding(false, { config.leafDecay.enabled }, { config.leafDecay.enabled = it })
+                controller = tickBox()
+                descriptionBuilder {
+                    addDefaultText(1)
+                }
+            }
+
+            val abilityTimeout by options.registering {
+                binding(300000L, { config.leafDecay.abilityTimeout }, { config.leafDecay.abilityTimeout = it })
+                controller = numberField(0, Long.MAX_VALUE)
                 descriptionBuilder {
                     addDefaultText(1)
                 }
