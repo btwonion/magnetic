@@ -1,13 +1,13 @@
 package dev.nyon.magnetic.listeners
 
-import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropAuthorization
+import dev.nyon.magnetic.ClaimedDrop
+import dev.nyon.magnetic.DropEntityDispatcher
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
-import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
@@ -16,21 +16,16 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.type.Leaves
-import org.bukkit.craftbukkit.CraftWorld
-import org.bukkit.craftbukkit.entity.CraftEntity
-import org.bukkit.entity.EntitySnapshot
 import org.bukkit.entity.Item
 import org.bukkit.event.EventPriority
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.LeavesDecayEvent
 import org.bukkit.event.entity.ItemSpawnEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import java.util.ArrayDeque
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.abs
@@ -56,12 +51,6 @@ object LeafDecayListeners {
     private data class LeafState(
         val maximumDistance: Int,
         val persistent: Boolean
-    )
-
-    private data class ClaimedDrop(
-        val location: Location,
-        val itemStack: ItemStack,
-        val entitySnapshot: EntitySnapshot
     )
 
     private val directions = listOf(
@@ -141,7 +130,7 @@ object LeafDecayListeners {
             PersistentDataType.BYTE,
             1.toByte()
         )
-        claimDrop(entity) { claimedDrop ->
+        DropEntityDispatcher.claim(entity) { claimedDrop ->
             if (entry != null) {
                 dispatchClaimedDrop(claimedDrop, entry)
             } else {
@@ -198,88 +187,8 @@ object LeafDecayListeners {
         return true
     }
 
-    private fun claimDrop(entity: Item, onClaimed: (ClaimedDrop) -> Unit) {
-        entity.scheduler.execute(Main.INSTANCE, {
-            if (!entity.isValid) return@execute
-
-            val entitySnapshot = entity.createSnapshot() ?: return@execute
-            val claimedDrop = ClaimedDrop(
-                entity.location.clone(),
-                entity.itemStack.clone(),
-                entitySnapshot
-            )
-            entity.remove()
-            onClaimed(claimedDrop)
-        }, null, 0L)
-    }
-
     private fun dispatchClaimedDrop(claimedDrop: ClaimedDrop, entry: Entry?) {
-        if (entry == null) {
-            restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
-            return
-        }
-
-        val player = Bukkit.getPlayer(entry.authorization.playerId)
-        if (player == null) {
-            restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
-            return
-        }
-
-        val restored = AtomicBoolean()
-        val restoreOnFailure = {
-            if (restored.compareAndSet(false, true)) {
-                restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack))
-            }
-        }
-        val scheduled = player.scheduler.execute(Main.INSTANCE, {
-            if (player.world.uid != claimedDrop.location.world.uid) {
-                restoreOnFailure()
-                return@execute
-            }
-
-            val itemStacks = mutableListOf(claimedDrop.itemStack.clone())
-            DropEventDispatcher.callAuthorized(
-                DropEvent(
-                    itemStacks,
-                    MutableInt(),
-                    player,
-                    claimedDrop.location,
-                    leafDecayHandledDropKey
-                ),
-                entry.authorization
-            )
-            restoreResidualDrops(claimedDrop, itemStacks)
-        }, restoreOnFailure, 0L)
-        if (!scheduled) restoreOnFailure()
-    }
-
-    private fun restoreResidualDrops(claimedDrop: ClaimedDrop, items: List<ItemStack>) {
-        val residual = items
-            .filter { !it.type.isAir && it.amount > 0 }
-            .map(ItemStack::clone)
-        if (residual.isEmpty()) return
-
-        Main.INSTANCE.server.regionScheduler.execute(Main.INSTANCE, claimedDrop.location) {
-            residual.forEach { restoreDropWithoutEvent(claimedDrop, it) }
-        }
-    }
-
-    private fun restoreDropWithoutEvent(claimedDrop: ClaimedDrop, itemStack: ItemStack) {
-        val world = claimedDrop.location.world as CraftWorld
-        val item = claimedDrop.entitySnapshot.createEntity(world) as Item
-        val handle = (item as CraftEntity).handle
-        handle.setPos(claimedDrop.location.x, claimedDrop.location.y, claimedDrop.location.z)
-        item.itemStack = itemStack
-        item.persistentDataContainer.set(
-            leafDecayHandledDropKey,
-            PersistentDataType.BYTE,
-            1.toByte()
-        )
-
-        // A null spawn reason is Paper's event-free re-add path. Other plugins already
-        // observed and modified the original ItemSpawnEvent, so restoring a residual
-        // through that public event pipeline would apply their transformations twice.
-        world.addEntityToWorld(handle, null)
+        DropEntityDispatcher.dispatch(claimedDrop, entry?.authorization, leafDecayHandledDropKey)
     }
 
     private class EarlyDecay(existingEntry: Entry?, val decayedAt: Long) {
