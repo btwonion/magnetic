@@ -4,6 +4,7 @@ import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.compat.TreeCapitatorCompat
 import dev.nyon.magnetic.extensions.BreakChainedBlocks
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
@@ -30,7 +31,8 @@ object BlockListeners {
             if (blockState.type.isIgnored) return@listen
             val authorization = DropEventDispatcher.authorize(player) ?: return@listen
 
-            val itemStacks = items.map { it.itemStack }.toMutableList()
+            val magneticItems = items.filterNot(TreeCapitatorCompat::isTriggerItem)
+            val itemStacks = magneticItems.map { it.itemStack }.toMutableList()
 
             // Check for break-chained block upward and downward
             if (BreakChainedBlocks.breakChainedBlocks.contains(blockState.type)) handleBreakChainedBlocks(
@@ -52,7 +54,7 @@ object BlockListeners {
             )
 
             // Delete items that have been added to the inventory
-            items.clear()
+            items.removeAll(magneticItems.toSet())
             itemStacks.forEach { stack ->
                 player.world.dropItemNaturally(block.location, stack)
             }
