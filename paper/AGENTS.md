@@ -38,3 +38,16 @@ Run a local Paper or Folia server:
 ```
 
 The plugin artifact is written below `paper/build/libs`.
+
+## Verification
+
+The Paper project has no automated tests and will not have a test suite. Do not
+add Paper test sources or wire `:paper:test` into root verification tasks.
+Verify every change by building the plugin:
+
+```bash
+./gradlew :paper:build
+```
+
+For changes that require runtime validation, use `runServer` or `runFolia`
+and check the affected behavior manually.

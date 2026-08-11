@@ -1,9 +1,11 @@
 # Automated testing
 
-Magnetic uses two automated test layers. JVM tests cover deterministic logic;
-headless GameTests start Minecraft and verify behavior through the real loaders
-and mixins. A successful compile is not a replacement for a GameTest when code
-touches drops, entities, inventories, server ticks, or mixin injection points.
+Magnetic's mod uses two automated test layers. JVM tests cover deterministic
+logic; headless GameTests start Minecraft and verify behavior through the real
+loaders and mixins. A successful compile is not a replacement for a GameTest
+when mod code touches drops, entities, inventories, server ticks, or mixin
+injection points. The Paper project has no automated test suite; verify it with
+`./gradlew :paper:build` and manual server runs when appropriate.
 
 ## Commands
 
@@ -15,13 +17,13 @@ Run the smallest command that covers the change:
 ./gradlew testAll
 ```
 
-- `testFast` runs the JUnit suite for every Fabric and NeoForge target and the
-  Paper test task. It does not start a server. Use it during normal development.
+- `testFast` runs the JUnit suite for every Fabric and NeoForge target. It does
+  not start a server. Use it during normal mod development.
 - `testGameLatest` starts headless servers for the latest Fabric and NeoForge
   targets. Use it for mod gameplay, mixin, loader, inventory, XP, entity, or
   configuration-reload behavior.
-- `testAll` builds every platform and runs both gameplay servers. Use it before
-  release and for broad build-system changes.
+- `testAll` builds every platform and runs both mod gameplay servers. Use it
+  before release and for broad build-system changes.
 
 Run a single target while diagnosing a failure:
 
@@ -105,7 +107,8 @@ also run their GameTests. Releases run `testAll`. When an automated test fails,
 fix the behavior or the deterministic assertion; do not make required tests
 optional to get a green build.
 
-Manual release checks remain appropriate for animation feel, configuration
-screen usability, and third-party compatibility profiles that are not present
-in the automated test runtime. Record new deterministic regressions in JUnit or
-GameTests so they do not return to the manual checklist.
+Manual release checks remain appropriate for Paper behavior, animation feel,
+configuration screen usability, and third-party compatibility profiles that
+are not present in the automated test runtime. For the mod, record new
+deterministic regressions in JUnit or GameTests so they do not return to the
+manual checklist.

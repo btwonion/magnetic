@@ -77,17 +77,8 @@ jobs:
         run: chmod +x gradlew
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Build and test
+      - name: Build
         run: ./gradlew :paper:build --stacktrace
-      - name: Store test reports
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-reports-paper
-          if-no-files-found: warn
-          path: |
-            paper/build/reports/
-            paper/build/test-results/
       - name: Store build artifacts
         uses: actions/upload-artifact@v7
         with:

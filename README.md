@@ -104,7 +104,7 @@ You decide. Set `animation.canOtherPlayersPickup` to control whether flying item
 
 ## Development and testing
 
-Contributors can run fast JVM tests with `./gradlew testFast`, headless Fabric
-and NeoForge gameplay tests with `./gradlew testGameLatest`, or the complete
-build and verification suite with `./gradlew testAll`. See
-[`docs/TESTING.md`](docs/TESTING.md) before adding or moving tests.
+Contributors can run fast mod JVM tests with `./gradlew testFast`, headless
+Fabric and NeoForge gameplay tests with `./gradlew testGameLatest`, or the
+complete build and verification suite with `./gradlew testAll`. See
+[`docs/TESTING.md`](docs/TESTING.md) before adding or moving mod tests.

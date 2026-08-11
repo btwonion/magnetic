@@ -38,9 +38,8 @@ val supportedMcVersions: List<String> = project(":mod").subprojects
 tasks {
     register("testFast") {
         group = "verification"
-        description = "Run JVM tests for every mod target and the Paper plugin"
+        description = "Run JVM tests for every mod target"
         dependsOn(project(":mod").subprojects.map { "${it.path}:test" })
-        dependsOn(":paper:test")
     }
 
     register("testGameLatest") {
