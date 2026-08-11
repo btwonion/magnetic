@@ -2,67 +2,64 @@ package dev.nyon.magnetic
 
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.utils.MixinHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.phys.Vec3
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 object Animation {
-    private val animationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val blocksPerTick = config.animation.blocksPerSecond / 20
-    private val trackedItemEntities = mutableMapOf<ItemEntity, ServerPlayer>()
-    private val trackedItemEntitiesMutex = Mutex()
+    private val trackedItemEntities = ConcurrentHashMap<ItemEntity, UUID>()
 
-    fun pullItemToPlayer(item: ItemStack, pos: Vec3, player: ServerPlayer) {
+    fun pullItemToPlayer(item: ItemStack, pos: Vec3, player: ServerPlayer): ItemEntity {
         val itemEntity = ItemEntity(player.level(), pos.x, pos.y, pos.z, item)
         if (!config.animation.canOtherPlayersPickup) itemEntity.setTarget(player.uuid)
         MixinHelper.animationSkip.set(true)
-        try {
+        val spawned = try {
             player.level().addFreshEntity(itemEntity)
         } finally {
             MixinHelper.animationSkip.remove()
         }
-        animationScope.launch {
-            trackedItemEntitiesMutex.withLock {
-                trackedItemEntities[itemEntity] = player
-            }
-        }
+        if (spawned) trackedItemEntities[itemEntity] = player.uuid
+        return itemEntity
     }
 
-    internal fun tick() {
-        animationScope.launch {
-            val copiedItemEntities: Map<ItemEntity, ServerPlayer>
-            trackedItemEntitiesMutex.withLock {
-                copiedItemEntities = trackedItemEntities.toMap()
+    fun tick() {
+        trackedItemEntities.forEach { (itemEntity, targetId) ->
+            if (!itemEntity.isAlive) {
+                untrackEntity(itemEntity, targetId)
+                return@forEach
             }
 
-            copiedItemEntities.forEach { (itemEntity, target) ->
-                val targetPos = target.position()
-                val itemEntityPos = itemEntity.position()
-                val vec = targetPos.subtract(itemEntityPos)
-                val length = vec.length()
-                val tickPart = blocksPerTick / length
-                val tickVec = vec.multiply(
-                    tickPart,
-                    if (itemEntity.horizontalCollision) tickPart * 2 else tickPart,
-                    tickPart
-                )
-                itemEntity.addDeltaMovement(tickVec)
+            val target = itemEntity.level().server?.playerList?.getPlayer(targetId)
+            if (target == null || !target.isAlive || target.level() !== itemEntity.level()) {
+                untrackEntity(itemEntity, targetId)
+                return@forEach
             }
+
+            val vec = target.position().subtract(itemEntity.position())
+            val length = vec.length()
+            if (length == 0.0) return@forEach
+
+            val tickPart = blocksPerTick / length
+            val tickVec = vec.multiply(
+                tickPart,
+                if (itemEntity.horizontalCollision) tickPart * 2 else tickPart,
+                tickPart
+            )
+            itemEntity.addDeltaMovement(tickVec)
         }
     }
 
     fun invokePickupItemEntity(itemEntity: ItemEntity) {
-        animationScope.launch {
-            trackedItemEntitiesMutex.withLock {
-                if (trackedItemEntities.containsKey(itemEntity)) trackedItemEntities.remove(itemEntity)
-            }
-        }
+        trackedItemEntities.remove(itemEntity)
+    }
+
+    fun tracksItem(itemEntity: ItemEntity) = trackedItemEntities.containsKey(itemEntity)
+
+    private fun untrackEntity(itemEntity: ItemEntity, targetId: UUID) {
+        trackedItemEntities.remove(itemEntity, targetId)
     }
 }
