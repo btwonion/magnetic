@@ -48,7 +48,7 @@ Download the file for your platform from [Modrinth](https://modrinth.com/mod/mag
 **Tested integrations:**
 
 - **Fabric and NeoForge:** FallingTree, KleeSlabs, RightClickHarvest, Tree Harvester, and Veinminer
-- **Paper:** mcMMO, AuraSkills, and GravesX
+- **Paper:** mcMMO, AuraSkills, GravesX, and the TreeCapitator datapack
 
 ## Configuration
 

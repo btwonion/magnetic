@@ -16,3 +16,4 @@
 
 - make Magnetic enchantment name translatable
   - the client mod will now actually translate the enchantment name :)
+- add compatibility for the [TreeCapitator datapack](https://modrinth.com/datapack/treecapitator) ([**#89**](https://github.com/btwonion/magnetic/pull/89))
