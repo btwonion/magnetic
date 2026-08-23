@@ -25,7 +25,7 @@ public abstract class LivingEntityMixin {
         CallbackInfo ci
     ) {
         LivingEntity self = (LivingEntity) (Object) this;
-        if (!(source.getEntity() instanceof ServerPlayer player)) return;
+        if (!(self.getKillCredit() instanceof ServerPlayer player)) return;
         if (MagneticCheckKt.isIgnored(self.getType())) return;
         if (MagneticCheckKt.failsLongRangeCheck(self, player)) return;
         threadLocal.set(player);

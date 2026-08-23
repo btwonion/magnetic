@@ -23,7 +23,7 @@ public class FabricEventImplHelperMixin {
         int lastHurtByPlayerMemoryTime,
         CallbackInfoReturnable<Boolean> cir
     ) {
-        if (!(source.getEntity() instanceof ServerPlayer player)) return;
+        if (!(entity.getKillCredit() instanceof ServerPlayer player)) return;
         if (MagneticCheckKt.isIgnored(entity.getType())) return;
         if (MagneticCheckKt.failsLongRangeCheck(entity, player)) return;
         threadLocal.set(player);

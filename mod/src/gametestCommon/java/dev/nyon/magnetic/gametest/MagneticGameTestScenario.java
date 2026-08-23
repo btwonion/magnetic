@@ -10,7 +10,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,6 +38,7 @@ public final class MagneticGameTestScenario {
             verifyItemTogglePreservesDrop(helper, player);
             verifyExperienceIsCollected(helper, player);
             verifyFullInventoryPreservesDrop(helper, player);
+            verifyFireKillUsesPlayerKillCredit(helper, player);
             verifyRemovedAnimatedItemsAreUntracked(helper, player);
             helper.succeed();
         } finally {
@@ -120,6 +123,40 @@ public final class MagneticGameTestScenario {
         helper.assertItemEntityPresent(Items.DIRT, DROP_POS, 2.0);
         player.getInventory().clearContent();
         helper.despawnItem(DROP_POS, 2.0);
+    }
+
+    private static void verifyFireKillUsesPlayerKillCredit(GameTestHelper helper, ServerPlayer player) {
+        ConfigKt.setConfig(testConfig("", true, true));
+
+        LivingEntity uncreditedCow = helper.spawn(EntityTypes.COW, DROP_POS);
+        uncreditedCow.igniteForSeconds(5.0F);
+        if (!uncreditedCow.hurtServer(helper.getLevel(), uncreditedCow.damageSources().onFire(), Float.MAX_VALUE)) {
+            fail(helper, "uncredited fire damage did not kill the control mob");
+        }
+        assertEquals(helper, 0, count(player, Items.COOKED_BEEF), "uncredited fire kill changed the inventory");
+        helper.assertItemEntityPresent(Items.COOKED_BEEF, DROP_POS, 2.0);
+        helper.despawnItem(DROP_POS, 2.0);
+
+        LivingEntity creditedCow = helper.spawn(EntityTypes.COW, DROP_POS);
+        Arrow arrow = new Arrow(
+            helper.getLevel(),
+            player,
+            new ItemStack(Items.ARROW),
+            new ItemStack(Items.BOW)
+        );
+        if (!creditedCow.hurtServer(helper.getLevel(), creditedCow.damageSources().arrow(arrow, player), 1.0F)) {
+            fail(helper, "player-owned arrow did not damage the regression-test mob");
+        }
+        creditedCow.igniteForSeconds(5.0F);
+        if (!creditedCow.hurtServer(helper.getLevel(), creditedCow.damageSources().onFire(), Float.MAX_VALUE)) {
+            fail(helper, "credited fire damage did not kill the regression-test mob");
+        }
+
+        if (count(player, Items.COOKED_BEEF) == 0) {
+            fail(helper, "fire kill credited to a player did not collect the mob drop");
+        }
+        helper.assertItemEntityNotPresent(Items.COOKED_BEEF, DROP_POS, 2.0);
+        player.getInventory().clearContent();
     }
 
     private static Config testConfig(String condition, boolean itemsAllowed, boolean expAllowed) {
