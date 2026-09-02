@@ -27,9 +27,16 @@ object DropEvent {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
-                if (config.animation.enabled && canAddItem(item, player)) {
-                    Animation.pullItemToPlayer(item, pos.centerVec(), player)
-                    return@removeIf true
+                if (config.animation.enabled) {
+                    val canAddItem = try {
+                        canAddItem(item, player)
+                    } catch (_: RuntimeException) {
+                        return@removeIf false
+                    }
+                    if (canAddItem) {
+                        Animation.pullItemToPlayer(item, pos.centerVec(), player)
+                        return@removeIf true
+                    }
                 }
 
                 if (item.isEmpty) return@removeIf true
