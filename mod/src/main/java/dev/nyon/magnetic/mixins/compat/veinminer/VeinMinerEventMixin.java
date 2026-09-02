@@ -20,7 +20,7 @@ import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 @Mixin(targets = "de.miraculixx.veinminer.event.VeinMinerEvent")
 public class VeinMinerEventMixin {
 
-    @WrapMethod(method = "improvedDropResources")
+    @WrapMethod(method = "improvedDropResources", require = 0)
     private void scopeDropsToPlayer(
         BlockState state,
         Level level,
