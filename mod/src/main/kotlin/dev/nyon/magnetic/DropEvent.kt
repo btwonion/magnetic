@@ -13,9 +13,12 @@ import net.minecraft.world.entity.ExperienceOrb
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import org.apache.commons.lang3.mutable.MutableInt
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 object DropEvent {
+    private val logger = LoggerFactory.getLogger(DropEvent::class.java)
+
     @Suppress("KotlinConstantConditions")
     operator fun invoke(
         items: MutableList<ItemStack>,
@@ -27,9 +30,20 @@ object DropEvent {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
-                if (config.animation.enabled && canAddItem(item, player)) {
-                    Animation.pullItemToPlayer(item, pos.centerVec(), player)
-                    return@removeIf true
+                if (config.animation.enabled) {
+                    val canAddItem = try {
+                        canAddItem(item, player)
+                    } catch (exception: RuntimeException) {
+                        logger.error(
+                            "Failed to check inventory capacity; preserving dropped item",
+                            exception
+                        )
+                        return@removeIf false
+                    }
+                    if (canAddItem) {
+                        Animation.pullItemToPlayer(item, pos.centerVec(), player)
+                        return@removeIf true
+                    }
                 }
 
                 if (item.isEmpty) return@removeIf true
