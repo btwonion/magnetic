@@ -1,3 +1,3 @@
 ## Fabric & NeoForge
 
-- fix flame kills not being processed [**#105**](https://github.com/btwonion/magnetic/issues/105)
+- prevent item loss when inventory mods fail during capacity checks [**#106**](https://github.com/btwonion/magnetic/issues/106)

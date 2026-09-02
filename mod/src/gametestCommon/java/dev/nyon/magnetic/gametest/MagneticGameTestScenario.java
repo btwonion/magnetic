@@ -114,7 +114,9 @@ public final class MagneticGameTestScenario {
     }
 
     private static void verifyFullInventoryPreservesDrop(GameTestHelper helper, ServerPlayer player) {
-        ConfigKt.setConfig(testConfig("", true, true));
+        Config config = testConfig("", true, true);
+        config.getAnimation().setEnabled(true);
+        ConfigKt.setConfig(config);
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             player.getInventory().setItem(slot, new ItemStack(Items.COBBLESTONE, 64));
         }
