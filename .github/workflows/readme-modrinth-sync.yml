@@ -9,7 +9,7 @@ jobs:
     name: Sync Modrinth description
     steps:
       - uses: actions/checkout@v7
-      - uses: btwonion/mc-readme-sync@v1.0.0
+      - uses: btwonion/mc-readme-sync@v1
         with:
           modrinth-api-key: ${{ secrets.MODRINTH_API_KEY }}
           curseforge-api-key: ${{ secrets.CURSEFORGE_API_KEY }}
