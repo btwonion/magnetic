@@ -12,10 +12,8 @@ import org.bukkit.entity.Player
 import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-@OptIn(ExperimentalTime::class)
 object DropEventListener {
 
     @Suppress("unused")
