@@ -24,7 +24,7 @@ Inspired by the Hypixel SkyBlock Telekinesis enchantment, Magnetic feels like a 
 ## How it works
 
 1. Equip a tool with the **Magnetic** enchantment.
-2. Break a block or defeat a mob.
+2. Break a block or kill a mob.
 3. Its drops and XP travel straight to you.
 
 That is the default behavior. Server owners and modpack authors can also make Magnetic always active, permission-based, or active only while a player sneaks.
@@ -33,22 +33,22 @@ That is the default behavior. Server owners and modpack authors can also make Ma
 
 Download the file for your platform from [Modrinth](https://modrinth.com/mod/magnetic/versions). Fabric and NeoForge builds are also available on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/magnetic-telekinesis/files). Then add the required dependencies:
 
-| Platform | Installation | Required dependencies                                                                                                                                                  |
-| --- | --- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Platform | Installation | Required dependencies                                                                                                                                                   |
+| --- | --- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Fabric | Put Magnetic in the `mods` folder | [Fabric API](https://modrinth.com/mod/fabric-api), [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin), and [YACL](https://modrinth.com/mod/yacl) |
-| NeoForge | Put Magnetic in the `mods` folder | [KotlinLangForge](https://modrinth.com/mod/kotlin-lang-forge) and [YACL](https://modrinth.com/mod/yacl)                                                                |
-| Paper | Put Magnetic in the `plugins` folder | None; players can join without installing the mod, but for the best experience the client mod is required as well                                                      |
+| NeoForge | Put Magnetic in the `mods` folder | [KotlinLangForge](https://modrinth.com/mod/kotlin-lang-forge) and [YACL](https://modrinth.com/mod/yacl)                                                                 |
+| Paper | Put Magnetic in the `plugins` folder | None; players can join without installing the mod, but for the best experience the client mod is recommended                                                            |
 
 [Mod Menu](https://modrinth.com/mod/modmenu) is optional on Fabric and provides quick access to Magnetic's config screen.
 
 ## Compatibility
-
-**Minecraft versions:** Fabric and NeoForge builds are available for 1.21.1, 1.21.11, 26.1.1–26.1.2, and 26.2. Paper builds are published alongside the mod from the same project.
-
 **Tested integrations:**
 
 - **Fabric and NeoForge:** FallingTree, KleeSlabs, RightClickHarvest, Tree Harvester, and Veinminer
-- **Paper:** mcMMO, AuraSkills, GravesX, and the TreeCapitator datapack
+- **Paper:** mcMMO, AuraSkills, and the TreeCapitator datapack
+
+
+- Grave mods on paper require "minecraft:player" to be added to the "ignoredEntities" config options
 
 ## Configuration
 
@@ -99,12 +99,4 @@ You decide. Set `animation.canOtherPlayersPickup` to control whether flying item
 
 ## Support
 
-- **Issues:** https://github.com/btwonion/magnetic/issues
-- **Discord:** https://nyon.dev/discord
-
-## Development and testing
-
-Contributors can run fast mod JVM tests with `./gradlew testFast`, headless
-Fabric and NeoForge gameplay tests with `./gradlew testGameLatest`, or the
-complete build and verification suite with `./gradlew testAll`. See
-[`docs/TESTING.md`](docs/TESTING.md) before adding or moving mod tests.
+If you need help with any of my mods, just join my [discord server](https://nyon.dev/discord).

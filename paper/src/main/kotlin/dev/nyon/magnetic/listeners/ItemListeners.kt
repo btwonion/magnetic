@@ -19,9 +19,6 @@ object ItemListeners {
         if (entityType.isIgnored) return@listen
         val killer = entity.killer ?: return@listen
         if (entity.failsLongRangeCheck(killer)) return@listen
-        if (entityType == EntityType.PLAYER && Bukkit.getPluginManager()
-                .isPluginEnabled("GravesX")
-        ) return@listen // Disable player death drops in favor of GravesX
         val mutableInt = MutableInt(droppedExp)
         val itemStacks = drops.toMutableList()
         DropEventDispatcher.call(DropEvent(itemStacks, mutableInt, killer, entity.location))
