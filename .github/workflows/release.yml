@@ -36,7 +36,10 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           DISCORD_ROLE_ID: ${{ secrets.DISCORD_ROLE_ID }}
       - name: Sync Modrinth description
-        uses: funnyboy-roks/modrinth-auto-desc@v1.7
+        uses: btwonion/mc-readme-sync@v1
         with:
-          auth-token: ${{ secrets.MODRINTH_API_KEY }}
-          slug: 'magnetic'
+          modrinth-api-key: ${{ secrets.MODRINTH_API_KEY }}
+          curseforge-api-key: ${{ secrets.CURSEFORGE_API_KEY }}
+          modrinth-project-id: "LLfA8jAD"
+          curseforge-project-id: "1244695"
+          readme-path: README.md
