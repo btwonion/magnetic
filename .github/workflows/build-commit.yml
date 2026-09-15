@@ -26,8 +26,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ["1.21.1", "1.21.11", "26.1.2", "26.2"]
+        version: ["1.21.1", "1.21.11", "26.1.2", "26.2", "26.3"]
         loader: [fabric, neoforge]
+        exclude:
+          - version: "26.3"
+            loader: neoforge
 
     steps:
       - uses: actions/checkout@v7
@@ -43,7 +46,7 @@ jobs:
       - name: Build and test
         run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:build --stacktrace
       - name: Run headless GameTests
-        if: matrix.version == '26.2'
+        if: (matrix.version == '26.3' && matrix.loader == 'fabric') || (matrix.version == '26.2' && matrix.loader == 'neoforge')
         run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:runGameTest --stacktrace
       - name: Store test reports and logs
         if: failure()

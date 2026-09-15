@@ -45,7 +45,7 @@ tasks {
     register("testGameLatest") {
         group = "verification"
         description = "Run headless gameplay tests on the latest Fabric and NeoForge targets"
-        dependsOn(":mod:26.2-fabric:runGameTest")
+        dependsOn(":mod:26.3-fabric:runGameTest")
         dependsOn(":mod:26.2-neoforge:runGameTest")
     }
 

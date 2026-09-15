@@ -15,7 +15,7 @@ mod/
 
 Stonecutter evaluates `mod/build.gradle.kts` once for every target registered
 in `settings.gradle.kts`. Target names combine a logical Minecraft version and
-loader, such as `26.2-fabric` and `26.2-neoforge`.
+loader, such as `26.3-fabric` and `26.2-neoforge`.
 
 `mod/src/main` is the shared source tree. Stonecutter conditional comments
 select loader- or version-specific code while generating each target's build
@@ -34,7 +34,7 @@ integration, and return to the VCS target before committing source-comment
 changes:
 
 ```bash
-./gradlew ':mod:Set active project to 26.2-fabric'
+./gradlew ':mod:Set active project to 26.3-fabric'
 ./gradlew ':mod:Reset active project'
 ```
 
@@ -48,7 +48,7 @@ Use the target project path:
 ```bash
 ./gradlew :mod:1.21.1-fabric:build
 ./gradlew :mod:1.21.1-neoforge:build
-./gradlew :mod:26.2-fabric:build
+./gradlew :mod:26.3-fabric:build
 ./gradlew :mod:26.2-neoforge:build
 ```
 
@@ -101,7 +101,7 @@ mod/generated/<vers.versionName>/
 Generate one version explicitly or every registered Fabric version:
 
 ```bash
-./gradlew :mod:26.2-fabric:runDatagen
+./gradlew :mod:26.3-fabric:runDatagen
 ./gradlew runDatagen
 ```
 

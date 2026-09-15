@@ -28,8 +28,8 @@ Run the smallest command that covers the change:
 Run a single target while diagnosing a failure:
 
 ```bash
-./gradlew :mod:26.2-fabric:test
-./gradlew :mod:26.2-fabric:runGameTest
+./gradlew :mod:26.3-fabric:test
+./gradlew :mod:26.3-fabric:runGameTest
 ./gradlew :mod:26.2-neoforge:runGameTest
 ```
 

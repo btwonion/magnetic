@@ -94,7 +94,7 @@ if (isFabric) {
             client = true
             outputDirectory = generatedResources.asFile
         }
-        if (mcVersionName == "26.2") {
+        if (mcVersionName == "26.3") {
             configureTests {
                 createSourceSet = true
                 modId = "magnetic_test"
@@ -105,7 +105,7 @@ if (isFabric) {
         }
     }
 
-    if (mcVersionName == "26.2") {
+    if (mcVersionName == "26.3") {
         extensions.getByType<SourceSetContainer>().named("gametest") {
             java.setSrcDirs(listOf(
                 rootProject.file("mod/src/gametestCommon/java"),
