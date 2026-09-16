@@ -30,7 +30,7 @@ Run a single target while diagnosing a failure:
 ```bash
 ./gradlew :mod:26.3-fabric:test
 ./gradlew :mod:26.3-fabric:runGameTest
-./gradlew :mod:26.2-neoforge:runGameTest
+./gradlew :mod:26.3-neoforge:runGameTest
 ```
 
 JUnit HTML reports are below each target's `build/reports/tests`. GameTest logs

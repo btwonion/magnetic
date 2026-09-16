@@ -15,6 +15,7 @@ import org.slf4j.event.Level
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.moddev) apply false
     alias(libs.plugins.modstitch)
     alias(libs.plugins.mod.publish)
     `maven-publish`
@@ -130,7 +131,7 @@ if (isFabric) {
     }
 }
 
-if (!isFabric && mcVersionName == "26.2") {
+if (!isFabric && mcVersionName == "26.3") {
     val sourceSets = extensions.getByType<SourceSetContainer>()
     val gameTest = sourceSets.create("gameTest") {
         java.setSrcDirs(listOf(
