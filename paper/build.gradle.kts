@@ -83,7 +83,10 @@ tasks {
     }
 }
 
-runPaper.folia.registerTask()
+// Folia only publishes some patch releases, so it may need a different version than the dev bundle.
+runPaper.folia.registerTask {
+    minecraftVersion(property("foliaVersion").toString())
+}
 
 val changelogText = buildString {
     append("# v${project.version}\n")
