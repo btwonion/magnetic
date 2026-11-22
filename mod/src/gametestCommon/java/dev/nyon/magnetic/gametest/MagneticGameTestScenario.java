@@ -5,12 +5,15 @@ import dev.nyon.magnetic.config.Config;
 import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.config.conditions.ConditionChain;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
+import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.MixinHelper;
+import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -19,6 +22,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -52,6 +56,7 @@ public final class MagneticGameTestScenario {
             verifyFullInventoryPreservesDrop(helper, player);
             verifyFireKillUsesPlayerKillCredit(helper, player);
             verifyRemovedAnimatedItemsAreUntracked(helper, player);
+            verifyBucketPlacementIsTracked(helper, player);
             helper.succeed();
         } finally {
             ConfigKt.setConfig(previousConfig);
@@ -233,6 +238,30 @@ public final class MagneticGameTestScenario {
         }
         helper.assertItemEntityNotPresent(Items.COOKED_BEEF, DROP_POS, 2.0);
         player.getInventory().clearContent();
+    }
+
+    private static void verifyBucketPlacementIsTracked(GameTestHelper helper, ServerPlayer player) {
+        ConfigKt.setConfig(testConfig("", true, true));
+        verifyBucketPlacement(helper, player, (BucketItem) Items.WATER_BUCKET, new BlockPos(4, 1, 4));
+        // MobBucketItem overrides the placement sound without calling super, so it needs its own hook.
+        verifyBucketPlacement(helper, player, (BucketItem) Items.COD_BUCKET, new BlockPos(0, 1, 4));
+    }
+
+    private static void verifyBucketPlacement(GameTestHelper helper, ServerPlayer player, BucketItem bucket, BlockPos relativePos) {
+        ServerLevel level = helper.getLevel();
+        PositionTracker tracker = ((ServerLevelHolder) level).getPositionTracker();
+        BlockPos pos = helper.absolutePos(relativePos);
+        helper.setBlock(relativePos, Blocks.AIR);
+        try {
+            if (!bucket.emptyContents(player, level, pos, null)) {
+                fail(helper, "the test player could not empty " + bucket);
+            }
+            if (tracker.lookup(pos) != player) {
+                fail(helper, "placing fluid with " + bucket + " was not attributed to the player");
+            }
+        } finally {
+            helper.setBlock(relativePos, Blocks.AIR);
+        }
     }
 
     private static Config testConfig(String condition, boolean itemsAllowed, boolean expAllowed) {
