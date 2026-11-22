@@ -84,7 +84,7 @@ Controls the behavior of buckets.
 If `true`, drops that are caused by a placed bucket are pulled into the inventory.
 
 ### buckets.abilityTimeout
-The amount of time (in milliseconds) that the Magnetic ability will work for for a newly placed bucket.
+The amount of time (in milliseconds) that the Magnetic ability works for a newly placed bucket. Use `-1` to keep the ability active until the fluid disappears.
 
 ## leafDecay
 Controls collection of drops produced when leaves decay naturally after an eligible log break.
