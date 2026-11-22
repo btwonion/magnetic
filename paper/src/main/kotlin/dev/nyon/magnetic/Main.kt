@@ -51,7 +51,7 @@ class Main : JavaPlugin() {
         FluidListeners
 
         if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) McMMOCompat.listenForEvents()
-        if (Bukkit.getPluginManager().isPluginEnabled("Veinminer")) VeinminerCompat.listenForEvents()
+        VeinminerCompat.listenForEventsIfPresent()
         if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills")) AuraSkillsCompat.listenForEvents()
         TreeCapitatorCompat.listenForEvents()
     }
