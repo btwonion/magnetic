@@ -3,38 +3,19 @@ package dev.nyon.magnetic.compat
 import de.miraculixx.veinminer.VeinMinerEvent
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
-import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import org.apache.commons.lang3.mutable.MutableInt
-import org.bukkit.Bukkit
 
 object VeinminerCompat {
-    private const val PLUGIN_NAME = "Veinminer"
     private const val DROP_EVENT_CLASS = "de.miraculixx.veinminer.VeinMinerEvent\$VeinminerDropEvent"
 
     /**
-     * Registers the drop listener only when the enabled "Veinminer" plugin is Miraculixx's Veinminer.
-     * Other plugins share that name, so the plugin name alone is not enough to safely reference its classes.
+     * Registers the drop listener only when Miraculixx's Veinminer is on the classpath.
+     * Other plugins may share the "Veinminer" name, so the event class is checked instead of the plugin name.
      */
     fun listenForEventsIfPresent() {
-        if (!Bukkit.getPluginManager().isPluginEnabled(PLUGIN_NAME)) return
-
-        if (!isDropEventAvailable()) {
-            Main.INSTANCE.logger.warning(
-                "A plugin named '$PLUGIN_NAME' is enabled, but it is not Miraculixx's Veinminer " +
-                    "($DROP_EVENT_CLASS not found). Veinminer compatibility is disabled."
-            )
-            return
-        }
-
-        try {
-            listenForEvents()
-        } catch (e: LinkageError) {
-            Main.INSTANCE.logger.warning(
-                "Failed to hook into Veinminer, compatibility is disabled: ${e.javaClass.simpleName}: ${e.message}"
-            )
-        }
+        if (isDropEventAvailable()) listenForEvents()
     }
 
     private fun isDropEventAvailable(): Boolean {
