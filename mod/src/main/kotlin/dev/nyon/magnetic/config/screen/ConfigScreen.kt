@@ -4,6 +4,7 @@ import dev.isxander.yacl3.api.ListOption
 import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.dsl.*
 import dev.nyon.konfig.config.saveConfig
+import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.Identifier
 import dev.nyon.magnetic.config.conditions.ConditionChain
 import dev.nyon.magnetic.config.config
@@ -81,7 +82,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
                 .description(OptionDescription.createBuilder().text(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreEntities.description")).build())
                 .controller(stringField())
                 .binding(
-                    emptyList(),
+                    Config().ignoreEntities.map(Identifier::toString),
                     { config.ignoreEntities.map(Identifier::toString) },
                     { list->
                         config.ignoreEntities = list.mapNotNull { entry ->

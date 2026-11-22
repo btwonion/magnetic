@@ -22,7 +22,9 @@ Config file structure:
       "abilityTimeout": 300000
     },
     "ignoredEntitiesRangeMin": 50.0,
-    "ignoreEntities": [],
+    "ignoreEntities": [
+      "minecraft:ender_dragon"
+    ],
     "ignoreBlocks": [],
     "fullInventoryAlert": {
       "soundAlert": {
@@ -100,8 +102,9 @@ Ignores drops if the player was farther than this distance from the entity.
 - Set to `-1` to disable the range check.
 
 ## ignoreEntities
-List of entities to ignore entirely.
+List of entities whose item and experience drops Magnetic should ignore entirely.
 - Accepts entity ids (resource locations) and tags.
+- Defaults to `minecraft:ender_dragon`, so the dragon's experience drops normally when it dies. Existing config files keep their current list.
 Examples:
 - `minecraft:creeper`
 - `#minecraft:skeletons`
