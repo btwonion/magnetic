@@ -12,38 +12,43 @@ import net.minecraft.world.entity.LivingEntity;
 /*import net.minecraft.world.entity.player.Player;
 *//*?}*/
 import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.item.MobBucketItem;
+import net.minecraft.world.level.LevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(BucketItem.class)
+/**
+ * Records which player placed a fluid so drops washed away by the spreading fluid can be attributed to them.
+ *
+ * <p>The hook sits on {@code playEmptySound} instead of {@code emptyContents}: NeoForge adds an
+ * ItemStack-aware {@code emptyContents} overload and turns the vanilla one into a delegate, so a
+ * Fabric-built injection into {@code emptyContents} finds no target when the Fabric jar runs through
+ * Sinytra Connector and aborts startup. {@code playEmptySound} has the same descriptor on every
+ * loader and is called after the fluid has been placed. {@link MobBucketItem} overrides it without
+ * calling super, so it is targeted separately.
+ */
+@Mixin({BucketItem.class, MobBucketItem.class})
 public class BucketItemMixin {
 
     @Inject(
-        method =  /*? if fabric {*/ "emptyContents" /*?} else if >=1.21.11 {*/ /*"emptyContents(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z" *//*?} else {*/ /*"emptyContents(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/phys/BlockHitResult;Lnet/minecraft/world/item/ItemStack;)Z" *//*?}*/,
-        at = @At(
-            value = "INVOKE",
-            target = /*? if >=1.21.11 {*/ "Lnet/minecraft/world/item/BucketItem;playEmptySound(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;)V" /*?} else {*/ /*"Lnet/minecraft/world/item/BucketItem;playEmptySound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;)V" *//*?}*/,
-            shift = At.Shift.AFTER
-        )
+        method = "playEmptySound",
+        at = @At("HEAD")
     )
     private void recordBucketPlacement(
         /*? if >=1.21.11 {*/ LivingEntity /*?} else {*/ /*Player *//*?}*/ user,
-        Level level,
+        LevelAccessor level,
         BlockPos pos,
-        BlockHitResult hitResult,
-        /*? if neoforge {*/ /*ItemStack containerItem, *//*?}*/
-        CallbackInfoReturnable<Boolean> cir
+        CallbackInfo ci
     ) {
         if (!(user instanceof ServerPlayer serverPlayer)) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
         if (!ConfigKt.getConfig()
             .getBuckets()
             .getEnabled()) return;
+        // Mob buckets without a fluid only release the mob, so there is no flow to attribute.
+        if (serverLevel.getFluidState(pos).isEmpty()) return;
 
         PositionTracker tracker = ((ServerLevelHolder) serverLevel).getPositionTracker();
         tracker.record(
