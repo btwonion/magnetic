@@ -1,6 +1,5 @@
 package dev.nyon.magnetic
 
-import com.destroystokyo.paper.event.server.ServerTickStartEvent
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.listen
 import org.bukkit.Location
@@ -47,9 +46,11 @@ object Animation {
         }
     }
 
-    private val tickListener = listen<ServerTickStartEvent> {
+    // Folia fires ServerTickStartEvent once per region per tick, so drive the pull from the global
+    // region scheduler, which ticks exactly once per server tick on both Paper and Folia.
+    private val tickTask = Main.INSTANCE.server.globalRegionScheduler.runAtFixedRate(Main.INSTANCE, {
         trackedItemEntities.forEach(::tickItem)
-    }
+    }, 1L, 1L)
 
     private fun tickItem(itemEntity: Item, target: Player) {
         val targetScheduled = target.scheduler.execute(Main.INSTANCE, {

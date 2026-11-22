@@ -8,8 +8,10 @@ import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.entity.CraftEntity
 import org.bukkit.entity.EntitySnapshot
 import org.bukkit.entity.Item
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal data class ClaimedDrop(
@@ -44,7 +46,28 @@ internal object DropEntityDispatcher {
             return
         }
 
-        val player = Bukkit.getPlayer(authorization.playerId)
+        dispatch(claimedDrop, authorization.playerId, handledDropKey) { authorization }
+    }
+
+    /**
+     * Dispatches a claimed drop to a player whose conditions are only checked once the drop
+     * reaches the player's own thread.
+     */
+    fun dispatchWithCurrentConditions(
+        claimedDrop: ClaimedDrop,
+        playerId: UUID,
+        handledDropKey: NamespacedKey
+    ) {
+        dispatch(claimedDrop, playerId, handledDropKey, DropEventDispatcher::authorize)
+    }
+
+    private fun dispatch(
+        claimedDrop: ClaimedDrop,
+        playerId: UUID,
+        handledDropKey: NamespacedKey,
+        authorize: (Player) -> DropAuthorization?
+    ) {
+        val player = Bukkit.getPlayer(playerId)
         if (player == null) {
             restoreResidualDrops(claimedDrop, listOf(claimedDrop.itemStack), handledDropKey)
             return
@@ -58,6 +81,11 @@ internal object DropEntityDispatcher {
         }
         val scheduled = player.scheduler.execute(Main.INSTANCE, {
             if (player.world.uid != claimedDrop.location.world.uid) {
+                restoreOnFailure()
+                return@execute
+            }
+            val authorization = authorize(player)
+            if (authorization == null) {
                 restoreOnFailure()
                 return@execute
             }

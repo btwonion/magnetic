@@ -4,15 +4,21 @@ import dev.nyon.magnetic.Animation;
 import dev.nyon.magnetic.config.Config;
 import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.config.conditions.ConditionChain;
+import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.PositionTracker;
+import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
@@ -23,6 +29,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
 
 /** Shared loader-independent gameplay assertions. Loader adapters only register this scenario. */
 public final class MagneticGameTestScenario {
@@ -41,6 +49,10 @@ public final class MagneticGameTestScenario {
             verifyItemsAreCollected(helper, player);
             verifyItemTogglePreservesDrop(helper, player);
             verifyExperienceIsCollected(helper, player);
+            verifyIgnoredBlockDropsNormally(helper, player);
+            verifyEntityExperienceIsCollected(helper, player);
+            verifyIgnoredEntityDropsNormally(helper, player);
+            verifyEnderDragonIsIgnoredByDefault(helper);
             verifyFullInventoryPreservesDrop(helper, player);
             verifyFireKillUsesPlayerKillCredit(helper, player);
             verifyRemovedAnimatedItemsAreUntracked(helper, player);
@@ -113,9 +125,71 @@ public final class MagneticGameTestScenario {
         }
         helper.assertEntityNotPresent(EntityTypes.EXPERIENCE_ORB);
         player.getInventory().clearContent();
-        player.totalExperience = 0;
-        player.experienceLevel = 0;
-        player.experienceProgress = 0;
+        resetExperience(player);
+    }
+
+    private static void verifyIgnoredBlockDropsNormally(GameTestHelper helper, ServerPlayer player) {
+        Config config = testConfig("", true, true);
+        config.setIgnoreBlocks(List.of(ignoreEntry(BuiltInRegistries.BLOCK.getKey(Blocks.DIAMOND_ORE))));
+        ConfigKt.setConfig(config);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_PICKAXE));
+        breakBlock(helper, player, Blocks.DIAMOND_ORE);
+
+        assertEquals(helper, 0, count(player, Items.DIAMOND), "ignored block drop changed the inventory");
+        assertEquals(helper, 0, player.totalExperience, "ignored block experience was collected");
+        helper.assertItemEntityPresent(Items.DIAMOND, DROP_POS, 2.0);
+        helper.assertEntityPresent(EntityTypes.EXPERIENCE_ORB, DROP_POS, 2.0);
+        clearDrops(helper, player);
+    }
+
+    private static void verifyEntityExperienceIsCollected(GameTestHelper helper, ServerPlayer player) {
+        ConfigKt.setConfig(testConfig("", true, true));
+        killWithPlayerCredit(helper, player, EntityTypes.COW);
+
+        if (count(player, Items.BEEF) == 0) {
+            fail(helper, "active Magnetic did not collect the mob drop");
+        }
+        if (player.totalExperience == 0) {
+            fail(helper, "active Magnetic did not collect mob experience");
+        }
+        helper.assertEntityNotPresent(EntityTypes.EXPERIENCE_ORB);
+        clearDrops(helper, player);
+    }
+
+    private static void verifyIgnoredEntityDropsNormally(GameTestHelper helper, ServerPlayer player) {
+        Config config = testConfig("", true, true);
+        config.setIgnoreEntities(List.of(ignoreEntry(EntityType.getKey(EntityTypes.COW))));
+        ConfigKt.setConfig(config);
+        killWithPlayerCredit(helper, player, EntityTypes.COW);
+
+        assertEquals(helper, 0, count(player, Items.BEEF), "ignored mob drop changed the inventory");
+        assertEquals(helper, 0, player.totalExperience, "ignored mob experience was collected");
+        helper.assertItemEntityPresent(Items.BEEF, DROP_POS, 2.0);
+        helper.assertEntityPresent(EntityTypes.EXPERIENCE_ORB, DROP_POS, 2.0);
+        clearDrops(helper, player);
+
+        // 1.21.x delivers melee kills inside the interaction packet scope, which already names the player.
+        ThreadLocalScope.run(
+            MixinHelper.threadLocal,
+            player,
+            () -> killWithPlayerCredit(helper, player, EntityTypes.COW)
+        );
+
+        assertEquals(helper, 0, count(player, Items.BEEF), "ignored mob drop inside a player scope changed the inventory");
+        assertEquals(helper, 0, player.totalExperience, "ignored mob experience inside a player scope was collected");
+        helper.assertItemEntityPresent(Items.BEEF, DROP_POS, 2.0);
+        helper.assertEntityPresent(EntityTypes.EXPERIENCE_ORB, DROP_POS, 2.0);
+        clearDrops(helper, player);
+    }
+
+    private static void verifyEnderDragonIsIgnoredByDefault(GameTestHelper helper) {
+        ConfigKt.setConfig(new Config());
+        if (!MagneticCheckKt.isIgnored(EntityTypes.ENDER_DRAGON)) {
+            fail(helper, "the default config does not ignore the ender dragon");
+        }
+        if (MagneticCheckKt.isIgnored(EntityTypes.COW)) {
+            fail(helper, "the default config ignores an unlisted entity");
+        }
     }
 
     private static void verifyFullInventoryPreservesDrop(GameTestHelper helper, ServerPlayer player) {
@@ -200,6 +274,30 @@ public final class MagneticGameTestScenario {
         config.getFullInventoryAlert().getTextAlert().setEnabled(false);
         config.getFullInventoryAlert().getTitleAlert().setEnabled(false);
         return config;
+    }
+
+    private static void killWithPlayerCredit(GameTestHelper helper, ServerPlayer player, EntityType<? extends LivingEntity> type) {
+        LivingEntity entity = helper.spawn(type, DROP_POS);
+        if (!entity.hurtServer(helper.getLevel(), entity.damageSources().playerAttack(player), Float.MAX_VALUE)) {
+            fail(helper, "the test player could not kill " + type);
+        }
+    }
+
+    private static dev.nyon.magnetic.config.Identifier ignoreEntry(net.minecraft.resources.Identifier id) {
+        return new dev.nyon.magnetic.config.Identifier(id, false);
+    }
+
+    private static void clearDrops(GameTestHelper helper, ServerPlayer player) {
+        helper.despawnItem(DROP_POS, 2.0);
+        helper.killAllEntitiesOfClass(ExperienceOrb.class);
+        player.getInventory().clearContent();
+        resetExperience(player);
+    }
+
+    private static void resetExperience(ServerPlayer player) {
+        player.totalExperience = 0;
+        player.experienceLevel = 0;
+        player.experienceProgress = 0;
     }
 
     private static void breakBlock(GameTestHelper helper, ServerPlayer player, net.minecraft.world.level.block.Block block) {

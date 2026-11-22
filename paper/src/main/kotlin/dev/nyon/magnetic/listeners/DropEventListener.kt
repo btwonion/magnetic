@@ -10,6 +10,7 @@ import dev.nyon.magnetic.extensions.listen
 import org.bukkit.Statistic
 import org.bukkit.entity.Player
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
@@ -46,10 +47,11 @@ object DropEventListener {
         }
     }
 
+    // Drop events run on each player's region thread on Folia, so the cooldowns must be thread-safe.
     private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(
-        config.fullInventoryAlert.soundAlert to mutableMapOf(),
-        config.fullInventoryAlert.textAlert to mutableMapOf(),
-        config.fullInventoryAlert.titleAlert to mutableMapOf()
+        config.fullInventoryAlert.soundAlert to ConcurrentHashMap(),
+        config.fullInventoryAlert.textAlert to ConcurrentHashMap(),
+        config.fullInventoryAlert.titleAlert to ConcurrentHashMap()
     )
 
     private fun tickInventoryAlert(player: Player) {
