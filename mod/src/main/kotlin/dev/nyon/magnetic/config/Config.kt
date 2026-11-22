@@ -3,6 +3,7 @@ package dev.nyon.magnetic.config
 import dev.nyon.konfig.config.loadConfig
 import dev.nyon.magnetic.config.conditions.ConditionChain
 import dev.nyon.magnetic.extensions.IdentifierSerializer
+import dev.nyon.magnetic.extensions.minecraftIdentifier
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import net.minecraft.ChatFormatting
@@ -13,6 +14,10 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 
 var config: Config = loadConfig()
+    set(value) {
+        field = value
+        invalidateIgnoredCaches()
+    }
 
 @Serializable
 data class Config(
@@ -22,7 +27,7 @@ data class Config(
     var buckets: Buckets = Buckets(),
     var leafDecay: LeafDecay = LeafDecay(),
     var ignoredEntitiesRangeMin: Double = 50.0,
-    var ignoreEntities: List<Identifier> = listOf(),
+    var ignoreEntities: List<Identifier> = listOf(Identifier(minecraftIdentifier("minecraft", "ender_dragon"), false)),
     var ignoreBlocks: List<Identifier> = listOf(),
     var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert(),
     var animation: Animation = Animation()

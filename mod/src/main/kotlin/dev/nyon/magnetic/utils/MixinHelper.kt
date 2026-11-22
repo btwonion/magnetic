@@ -17,6 +17,9 @@ object MixinHelper {
     val ignoreBlockDrops: ThreadLocal<Boolean> = ThreadLocal()
 
     @JvmField
+    val ignoreEntityDrops: ThreadLocal<Boolean> = ThreadLocal()
+
+    @JvmField
     val conditionAlreadyChecked: ThreadLocal<Boolean> = ThreadLocal()
 
     @JvmField

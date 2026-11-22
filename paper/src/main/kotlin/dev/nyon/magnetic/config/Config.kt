@@ -10,6 +10,7 @@ import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
 var config: Config = loadConfig()
@@ -22,7 +23,7 @@ data class Config(
     var buckets: Buckets = Buckets(),
     var leafDecay: LeafDecay = LeafDecay(),
     var ignoredEntitiesRangeMin: Double = 50.0,
-    var ignoreEntities: List<Identifier> = listOf(),
+    var ignoreEntities: List<Identifier> = listOf(Identifier(NamespacedKey.minecraft("ender_dragon"), false)),
     var ignoreBlocks: List<Identifier> = listOf(),
     var fullInventoryAlert: FullInventoryAlert = FullInventoryAlert(),
     var animation: Animation = Animation()
