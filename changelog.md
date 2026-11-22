@@ -7,6 +7,10 @@
 
 - fix items and experience from ignored entities being collected when the kill happens inside another player action, such as a melee hit on 1.21.x
 
+## Fabric & NeoForge
+
+- fix full inventory alerts showing raw translation keys to players without the mod on server-only installs ([**#114**](https://github.com/btwonion/magnetic/pull/114))
+
 ## Paper
 
 - fix plugin failing to enable when a different plugin named "Veinminer" is installed

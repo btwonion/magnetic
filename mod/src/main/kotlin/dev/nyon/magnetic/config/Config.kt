@@ -74,7 +74,9 @@ data class Config(
         ) : Alert {
             override fun invoke(player: ServerPlayer) {
                 player.sendSystemMessage(
-                    Component.translatable("chat.message.fullinventoryalert.text").withStyle(ChatFormatting.GOLD)
+                    Component.translatableWithFallback(
+                        "chat.message.fullinventoryalert.text", "[Magnetic] Your inventory is full!"
+                    ).withStyle(ChatFormatting.GOLD)
                 )
             }
         }
@@ -85,12 +87,14 @@ data class Config(
         ) : Alert {
             override fun invoke(player: ServerPlayer) {
                 val titlePacket = ClientboundSetTitleTextPacket(
-                    Component.translatable("chat.message.fullinventoryalert.title.main").withStyle(
+                    Component.translatableWithFallback("chat.message.fullinventoryalert.title.main", "!!!").withStyle(
                         ChatFormatting.RED
                     )
                 )
                 val subtitlePacket = ClientboundSetSubtitleTextPacket(
-                    Component.translatable("chat.message.fullinventoryalert.title.subtitle").withStyle(
+                    Component.translatableWithFallback(
+                        "chat.message.fullinventoryalert.title.subtitle", "Your inventory is full!"
+                    ).withStyle(
                         ChatFormatting.RED
                     )
                 )
