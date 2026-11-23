@@ -1,0 +1,12 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "dev.nyon.magnetic.gametest.mixin",
+    "compatibilityLevel": "JAVA_21",
+    "mixins": [
+        "ItemEntityPickupHookMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

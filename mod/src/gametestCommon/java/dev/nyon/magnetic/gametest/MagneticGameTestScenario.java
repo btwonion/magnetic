@@ -59,8 +59,11 @@ public final class MagneticGameTestScenario {
             verifyEnderDragonIsIgnoredByDefault(helper);
             verifyFullInventoryPreservesDrop(helper, player);
             verifyPickupStatistics(helper, player);
+            verifyPickupHooksReceiveDrops(helper, player);
+            verifyRefusedPickupsStayOnTheGround(helper, player);
             verifyFireKillUsesPlayerKillCredit(helper, player);
             verifyRemovedAnimatedItemsAreUntracked(helper, player);
+            verifyRefusedAnimatedItemsAreReleased(helper);
             verifyBucketPlacementIsTracked(helper, player);
             helper.succeed();
         } finally {
@@ -231,6 +234,79 @@ public final class MagneticGameTestScenario {
         assertEquals(helper, 1, drops.size(), "partial pickup removed the leftover drop");
         assertEquals(helper, 6, drops.get(0).getCount(), "partial pickup left the wrong drop amount");
         player.getInventory().clearContent();
+    }
+
+    /** A backpack pickup upgrade takes the drop even though the player's own inventory is full. */
+    private static void verifyPickupHooksReceiveDrops(GameTestHelper helper, ServerPlayer player) {
+        for (boolean animation : new boolean[]{false, true}) {
+            Config config = testConfig("", true, true);
+            config.getAnimation().setEnabled(animation);
+            ConfigKt.setConfig(config);
+            fillInventory(player, Items.COBBLESTONE);
+
+            List<ItemStack> backpack = new ArrayList<>();
+            TestPickupHooks.run((itemEntity, ignored) -> {
+                if (!itemEntity.getItem().is(Items.DIRT)) return false;
+                backpack.add(itemEntity.getItem().copy());
+                itemEntity.setItem(ItemStack.EMPTY);
+                return true;
+            }, () -> breakBlock(helper, player, Blocks.DIRT));
+
+            int stored = backpack.stream().mapToInt(ItemStack::getCount).sum();
+            assertEquals(helper, 1, stored, "pickup hook did not receive the drop (animation=" + animation + ")");
+            helper.assertItemEntityNotPresent(Items.DIRT, DROP_POS, 2.0);
+            player.getInventory().clearContent();
+        }
+    }
+
+    /** A pickup filter refuses the drop, so it stays where it fell instead of entering the inventory. */
+    private static void verifyRefusedPickupsStayOnTheGround(GameTestHelper helper, ServerPlayer player) {
+        ConfigKt.setConfig(testConfig("", true, true));
+        TestPickupHooks.run(
+            (itemEntity, ignored) -> itemEntity.getItem().is(Items.DIRT),
+            () -> breakBlock(helper, player, Blocks.DIRT)
+        );
+
+        assertEquals(helper, 0, count(player, Items.DIRT), "refused drop entered the inventory");
+        helper.assertItemEntityPresent(Items.DIRT, DROP_POS, 2.0);
+        helper.despawnItem(DROP_POS, 2.0);
+    }
+
+    /** An animated item that a pickup filter keeps refusing must stop following its target. */
+    private static void verifyRefusedAnimatedItemsAreReleased(GameTestHelper helper) {
+        Config config = testConfig("", true, true);
+        config.getAnimation().setEnabled(true);
+        ConfigKt.setConfig(config);
+
+        // Animation resolves targets through the player list, which the scenario's mock player is not part of.
+        ServerPlayer target = helper.makeMockServerPlayerInLevel();
+        ItemEntity itemEntity = null;
+        try {
+            target.setPos(Vec3.atCenterOf(helper.absolutePos(new BlockPos(0, 1, 0))));
+            itemEntity = Animation.INSTANCE.pullItemToPlayer(new ItemStack(Items.DIRT), target.position(), target);
+
+            for (int tick = 1; tick < Animation.RELEASE_AFTER_TICKS; tick++) Animation.INSTANCE.tick();
+            if (!Animation.INSTANCE.tracksItem(itemEntity)) {
+                fail(helper, "animation released an item before the timeout");
+            }
+
+            Animation.INSTANCE.tick();
+            if (Animation.INSTANCE.tracksItem(itemEntity)) {
+                fail(helper, "animation kept pulling an item that stayed in pickup reach");
+            }
+            if (!itemEntity.isAlive()) {
+                fail(helper, "releasing an animated item removed it");
+            }
+        } finally {
+            if (itemEntity != null) itemEntity.discard();
+            helper.getLevel().getServer().getPlayerList().remove(target);
+        }
+    }
+
+    private static void fillInventory(ServerPlayer player, Item item) {
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            player.getInventory().setItem(slot, new ItemStack(item, 64));
+        }
     }
 
     private static int pickupStat(ServerPlayer player, Item item) {

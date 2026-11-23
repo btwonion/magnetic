@@ -5,6 +5,11 @@
 
 ## Fabric & NeoForge
 
+- add compatibility with mods that hook item pickup, such as Sophisticated Backpacks' pickup upgrades and pickup filters like FiltPick
+  - collected drops now go through vanilla item pickup, so a backpack can take them even when the inventory is full
+  - drops a pickup filter refuses stay on the ground, without a full inventory alert
+  - pulled items that a filter keeps refusing stop following the player after one second
+- fix the pull animation running faster on Fabric for every loaded dimension
 - fix items and experience from ignored entities being collected when the kill happens inside another player action, such as a melee hit on 1.21.x
 - fix full inventory alerts showing raw translation keys to players without the mod on server-only installs ([**#114**](https://github.com/btwonion/magnetic/pull/114))
 - fix the Fabric version crashing on startup when loaded through Sinytra Connector ([**#77**](https://github.com/btwonion/magnetic/issues/77))

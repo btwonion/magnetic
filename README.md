@@ -48,6 +48,7 @@ Download the file for your platform from [Modrinth](https://modrinth.com/mod/mag
 - **Paper:** mcMMO, AuraSkills, and the TreeCapitator datapack
 
 
+- On Fabric and NeoForge, collected drops go through vanilla item pickup, so mods that hook it (for example Sophisticated Backpacks' pickup upgrade or pickup filters like FiltPick) also apply to Magnetic's drops
 - Grave mods on paper require "minecraft:player" to be added to the "ignoredEntities" config options
 
 ## Configuration
