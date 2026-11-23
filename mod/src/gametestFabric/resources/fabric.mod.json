@@ -9,6 +9,9 @@
         "fabric-api": "*",
         "magnetic": "*"
     },
+    "mixins": [
+        "magnetic_test.mixins.json"
+    ],
     "entrypoints": {
         "fabric-gametest": [
             "dev.nyon.magnetic.gametest.FabricMagneticGameTests"

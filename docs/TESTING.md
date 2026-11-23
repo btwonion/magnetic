@@ -72,6 +72,12 @@ pickup, the item toggle, XP pickup, and full-inventory drop safety. It breaks
 real blocks through `ServerPlayerGameMode`, so the same production mixins used
 by a server are tested.
 
+Third-party pickup hooks, such as backpack pickup upgrades and pickup filters,
+are emulated by `TestPickupHooks`. The Fabric test mod calls it from a mixin at
+the head of `ItemEntity.playerTouch`, and the NeoForge test mod calls it from
+`ItemEntityPickupEvent.Pre`; those are the hooks such mods use on each loader.
+Install a hook only for the duration of one step with `TestPickupHooks.run`.
+
 Test mods are separate source sets. Never move their classes or metadata into
 `mod/src/main`; doing so would package test code in published artifacts.
 
