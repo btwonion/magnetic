@@ -3,7 +3,6 @@ package dev.nyon.magnetic.listeners
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
-import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.compat.SmeltingDatapackCompat
 import dev.nyon.magnetic.compat.TreeCapitatorCompat
 import dev.nyon.magnetic.extensions.BreakChainedBlocks
@@ -22,7 +21,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.player.PlayerHarvestBlockEvent
-import org.bukkit.event.player.PlayerShearEntityEvent
 import org.bukkit.inventory.ItemStack
 
 @Suppress("unused")

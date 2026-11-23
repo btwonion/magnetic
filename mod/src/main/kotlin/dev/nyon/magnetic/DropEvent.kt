@@ -5,11 +5,14 @@ import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.centerVec
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
 import dev.nyon.magnetic.utils.CooldownTracker
+import dev.nyon.magnetic.utils.MixinHelper
 import dev.nyon.magnetic.utils.MixinHelper.conditionAlreadyChecked
+import dev.nyon.magnetic.utils.ThreadLocalScope
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.stats.Stats
 import net.minecraft.world.entity.ExperienceOrb
+import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import org.apache.commons.lang3.mutable.MutableInt
@@ -40,17 +43,11 @@ object DropEvent {
                 }
 
                 if (item.isEmpty) return@removeIf true
-                val pickedUpItem = item.item
-                val originalCount = item.count
-                val fullyAdded = player.addItem(item)
-                // addItem shrinks the stack by the amount it inserted, even when the inventory fills up midway.
-                val addedCount = if (fullyAdded) originalCount else originalCount - item.count
-                if (addedCount > 0) player.awardStat(Stats.ITEM_PICKED_UP.get(pickedUpItem), addedCount)
-                if (!fullyAdded) {
-                    tickInventoryAlert(player)
-                    return@removeIf false
-                }
-                true
+                val remaining = pickUp(item, player)
+                if (remaining.isEmpty) return@removeIf true
+                item.count = remaining.count
+                if (isInventoryFull(remaining, player)) tickInventoryAlert(player)
+                false
             }
         }
 
@@ -80,6 +77,31 @@ object DropEvent {
                 alert.invoke(player)
             }
         }
+    }
+
+    /**
+     * Hands [stack] to [player] through vanilla's item pickup instead of inserting it directly, so mods that
+     * hook pickup see Magnetic's drops: backpack pickup upgrades, pickup filters, and NeoForge's
+     * `ItemEntityPickupEvent`. The transient entity is never added to the level.
+     *
+     * @return the part of [stack] the player did not take; empty when everything was taken or a mod consumed it
+     */
+    private fun pickUp(stack: ItemStack, player: ServerPlayer): ItemStack {
+        val itemEntity = ItemEntity(player.level(), player.x, player.y, player.z, stack.copy())
+        itemEntity.setNoPickUpDelay()
+        itemEntity.setTarget(player.uuid)
+        val inserted = MutableInt()
+        ThreadLocalScope.run(MixinHelper.directPickup, inserted) { itemEntity.playerTouch(player) }
+        // ItemEntityMixin measures what reached the inventory; items taken by other mods are theirs to count.
+        if (inserted.toInt() > 0) player.awardStat(Stats.ITEM_PICKED_UP.get(stack.item), inserted.toInt())
+        return if (itemEntity.isRemoved) ItemStack.EMPTY else itemEntity.item
+    }
+
+    /** Distinguishes a full inventory from a pickup that another mod refused, such as a pickup filter. */
+    private fun isInventoryFull(stack: ItemStack, player: Player): Boolean = try {
+        !canAddItem(stack, player)
+    } catch (_: RuntimeException) {
+        true
     }
 
     private fun canAddItem(stack: ItemStack, player: Player): Boolean {

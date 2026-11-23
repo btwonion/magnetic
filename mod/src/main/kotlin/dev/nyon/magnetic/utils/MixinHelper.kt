@@ -13,6 +13,13 @@ object MixinHelper {
     @JvmField
     val animationSkip: ThreadLocal<Boolean> = ThreadLocal()
 
+    /**
+     * Set while [DropEvent] hands a drop to a player through a transient item entity; accumulates the number of
+     * items vanilla inserted into the player's inventory.
+     */
+    @JvmField
+    val directPickup: ThreadLocal<MutableInt> = ThreadLocal()
+
     @JvmField
     val ignoreBlockDrops: ThreadLocal<Boolean> = ThreadLocal()
 

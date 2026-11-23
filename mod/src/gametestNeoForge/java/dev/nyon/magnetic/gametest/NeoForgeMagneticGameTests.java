@@ -10,10 +10,13 @@ import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.TriState;
 import net.minecraft.world.level.block.Rotation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
+import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 
 @Mod(NeoForgeMagneticGameTests.MOD_ID)
 public final class NeoForgeMagneticGameTests {
@@ -21,6 +24,10 @@ public final class NeoForgeMagneticGameTests {
 
     public NeoForgeMagneticGameTests(IEventBus modBus) {
         modBus.addListener(NeoForgeMagneticGameTests::registerTests);
+        // Backpack and pickup-filter mods hook pickup through this event on NeoForge.
+        NeoForge.EVENT_BUS.addListener(ItemEntityPickupEvent.Pre.class, event -> {
+            if (TestPickupHooks.handle(event.getItemEntity(), event.getPlayer())) event.setCanPickup(TriState.FALSE);
+        });
     }
 
     private static void registerTests(RegisterGameTestsEvent event) {

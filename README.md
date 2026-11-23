@@ -44,8 +44,8 @@ Download the file for your platform from [Modrinth](https://modrinth.com/mod/mag
 ## Compatibility
 **Tested integrations:**
 
-- **Fabric and NeoForge:** FallingTree, KleeSlabs, RightClickHarvest, Tree Harvester, and Veinminer
-- **Paper:** mcMMO, AuraSkills, and the TreeCapitator datapack
+- **Fabric and NeoForge:** FallingTree, HT's TreeChop, KleeSlabs, RightClickHarvest, Server Tree Feller, Tree Harvester, and Veinminer
+- **Paper:** mcMMO, AuraSkills, ThizzyZ Tree Feller, and the TreeCapitator datapack
 
 **Auto-smelt:** Magnetic collects the smelted items of auto-smelt mods, plugins, and datapacks, including on blocks
 mined with Veinminer. Loot-table datapacks such as Instant Smelt and mods such as Smelting Touch work as-is. For the
@@ -54,6 +54,7 @@ datapack can smelt them before Magnetic collects them. On Paper, Magnetic lets p
 ExcellentEnchants, and SuperEnchants smelt drops first.
 
 
+- On Fabric and NeoForge, collected drops go through vanilla item pickup, so mods that hook it (for example Sophisticated Backpacks' pickup upgrade or pickup filters like FiltPick) also apply to Magnetic's drops
 - Grave mods on paper require "minecraft:player" to be added to the "ignoredEntities" config options
 
 ## Configuration
