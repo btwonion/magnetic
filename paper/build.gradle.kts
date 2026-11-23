@@ -1,7 +1,5 @@
 @file:Suppress("SpellCheckingInspection", "UnstableApiUsage")
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import xyz.jpenilla.runpaper.task.RunServer
 import xyz.jpenilla.runtask.service.DownloadsAPIService
 import java.io.ByteArrayInputStream
@@ -10,7 +8,8 @@ import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.mod.publish)
+    // On the build classpath through buildSrc, which shares its release setup with the mod.
+    id("me.modmuss50.mod-publish-plugin")
     alias(libs.plugins.paper.userdev)
     alias(libs.plugins.run.paper)
     alias(libs.plugins.rfpc)
@@ -18,14 +17,10 @@ plugins {
     `maven-publish`
 }
 
-val beta: Int? = property("beta").toString().toIntOrNull() // The pattern is '1.0.0-beta1-1.20.6-pre.2'
-val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
-val mcVersion = property("mcVersion")!!.toString()
-val mcVersionName = property("versionName")!!.toString()
-version = "$featureVersion-$mcVersionName+paper"
-
-group = "dev.nyon"
-val githubRepo = "btwonion/magnetic"
+// Stonecutter evaluates this script once per node; paper/versions/<node>/gradle.properties sets these.
+val mcVersion = property("vers.mcVersion").toString()
+val javaVersion = property("vers.javaVersion").toString().toInt()
+useMagneticVersion("paper")
 
 base {
     archivesName.set(rootProject.name)
@@ -80,24 +75,9 @@ paperPluginYaml {
     dependencies.server("TimberZ", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
 }
 
-tasks {
-    register("releasePlugin") {
-        group = "publishing"
-
-        dependsOn("publishMods")
-        dependsOn("publish")
-    }
-
-    withType<KotlinCompile> {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_25
-        }
-    }
-}
-
 // Folia only publishes some patch releases, so it may need a different version than the dev bundle.
 // Read on the project: inside registerTask, property() resolves against the task.
-val foliaVersion = property("foliaVersion").toString()
+val foliaVersion = property("vers.foliaVersion").toString()
 runPaper.folia.registerTask {
     minecraftVersion(foliaVersion)
 }
@@ -158,71 +138,25 @@ fun registerGameTestServer(taskName: String, serverName: String, version: String
         }
     }
 
+val gameTestPort = property("vers.gameTestPort").toString().toInt()
 val runGameTestPaper = registerGameTestServer(
-    "runGameTestPaper", "Paper", property("gameTestPaperVersion").toString(), 25581, folia = false
+    "runGameTestPaper", "Paper", property("vers.gameTestPaperVersion").toString(), gameTestPort, folia = false
 )
-val runGameTestFolia = registerGameTestServer("runGameTestFolia", "Folia", foliaVersion, 25582, folia = true)
+val runGameTestFolia = registerGameTestServer("runGameTestFolia", "Folia", foliaVersion, gameTestPort + 1, folia = true)
 runGameTestFolia.configure { mustRunAfter(runGameTestPaper) }
 
-tasks.register("testGame") {
+tasks.register("runGameTest") {
     group = "verification"
     description = "Run Magnetic's gameplay tests on headless Paper and Folia servers"
     dependsOn(runGameTestPaper, runGameTestFolia)
 }
 
-val changelogText = buildString {
-    append("# v${project.version}\n")
-    rootProject.file("changelog.md").readText().also(::append)
-}
-
-val supportedMcVersions: List<String> =
-    property("supportedMcVersions")!!.toString().split(',').map(String::trim).filter(String::isNotEmpty)
-publishMods {
-    displayName = "v${project.version}"
-    changelog = changelogText
-    file = tasks.jar.get().archiveFile
-    type = if (beta != null) BETA else STABLE
-    modLoaders.addAll("paper", "folia", "purpur")
-
-    modrinth {
-        projectId = "LLfA8jAD"
-        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        minecraftVersions.addAll(supportedMcVersions)
-    }
-
-    github {
-        repository = githubRepo
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        commitish = "master"
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "nyon"
-            url = uri("https://repo.nyon.dev/releases")
-            credentials {
-                username = providers.environmentVariable("NYON_USERNAME").orNull
-                password = providers.environmentVariable("NYON_PASSWORD").orNull
-            }
-        }
-    }
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "dev.nyon"
-            artifactId = "magnetic"
-            version = project.version.toString()
-            from(components["java"])
-        }
-    }
-}
+configureMagneticRelease(tasks.jar.flatMap { it.archiveFile }, listOf("paper", "folia", "purpur"))
 
 java {
     withSourcesJar()
 
-    JavaVersion.VERSION_25.let {
-        sourceCompatibility = it
-        targetCompatibility = it
-    }
+    // The toolchain also runs paperweight's setup and the test servers: the 1.21.x dev bundles'
+    // remapper cannot read Java 25 classes, and 1.21.x servers run on Java 21.
+    toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
 }

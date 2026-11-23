@@ -8,6 +8,7 @@ import dev.nyon.magnetic.listeners.DropEventListener
 import dev.nyon.magnetic.listeners.LeafDecayListeners
 import dev.nyon.magnetic.listeners.ItemListeners
 import dev.nyon.magnetic.listeners.FluidListeners
+import dev.nyon.magnetic.listeners.SupportBreakListeners
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import net.kyori.adventure.translation.GlobalTranslator
 import org.bukkit.Bukkit
@@ -46,6 +47,7 @@ class Main : JavaPlugin() {
         BlockListeners
         LeafDecayListeners
         FluidListeners
+        SupportBreakListeners
 
         PluginCompats.registerAvailable()
     }

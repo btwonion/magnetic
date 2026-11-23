@@ -11,6 +11,8 @@ public final class MagneticGameTestPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(new TestContext.TickEndDriver(), this);
+        //? if <26.1
+        //Bukkit.getPluginManager().registerEvents(new MockPlayers.SpawnAtTestSite(), this);
         // The global region ticks once per server tick on Paper and Folia, so this runs after startup.
         Bukkit.getGlobalRegionScheduler().runDelayed(
             this,

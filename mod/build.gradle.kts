@@ -12,27 +12,31 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.slf4j.event.Level
 
+buildscript {
+    // Modstitch depends on an older mod-publish plugin; use only the one buildSrc provides.
+    configurations.classpath {
+        exclude(group = "me.modmuss50", module = "mod-publish-plugin")
+    }
+}
+
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.moddev) apply false
     alias(libs.plugins.modstitch)
-    alias(libs.plugins.mod.publish)
+    // On the build classpath through buildSrc, which shares its release setup with Paper.
+    id("me.modmuss50.mod-publish-plugin")
     `maven-publish`
 }
 
 val isFabric = modstitch.isLoom
 val loader = if (isFabric) "fabric" else "neoforge"
-val beta: Int? = property("beta").toString().toIntOrNull()
-val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
 val mcVersion = property("vers.mcVersion").toString()
 val mcVersionName = property("vers.versionName").toString()
 val generatedResources =
     rootProject.layout.projectDirectory.dir("mod/generated/$mcVersionName")
-version = "$featureVersion-$mcVersionName+$loader"
-group = "dev.nyon"
+useMagneticVersion(loader)
 
-val githubRepo = "btwonion/magnetic"
 val fabricLoader = libs.versions.fabric.loader.get()
 val fabricLanguageKotlin = "${libs.versions.fabric.language.kotlin.get()}${libs.versions.kotlin.get()}"
 
@@ -54,7 +58,7 @@ modstitch {
         modLicense = "GNU General Public License v3.0"
         modAuthor = "btwonion"
 
-        replacementProperties.put("github", githubRepo)
+        replacementProperties.put("github", Magnetic.GITHUB_REPO)
         replacementProperties.put("icon", "assets/magnetic/icon.png")
         replacementProperties.put("mc", property("vers.mcVersionRange").toString())
         replacementProperties.put("fabric_loader", fabricLoader)
@@ -294,13 +298,6 @@ if (!isFabric) {
 }
 
 tasks {
-    register("releaseMod") {
-        group = "publishing"
-        description = "Publish mod to Modrinth, CurseForge, GitHub and Maven"
-        dependsOn("publishMods")
-        dependsOn("publish")
-    }
-
     withType<KotlinCompile> {
         compilerOptions {
             jvmTarget = modstitch.javaVersion.map { JvmTarget.fromTarget(it.toString()) }
@@ -309,25 +306,11 @@ tasks {
     }
 }
 
-val changelogText = buildString {
-    append("# v${project.version}\n")
-    rootProject.file("changelog.md").readText().also(::append)
-}
-
-val supportedMcVersions = property("vers.supportedMcVersions").toString()
-    .split(',').map(String::trim).filter(String::isNotEmpty)
-
-publishMods {
-    displayName = "v${project.version}"
-    file = modstitch.finalJarTask.flatMap { it.archiveFile }
-    changelog = changelogText
-    type = if (beta != null) BETA else STABLE
-    if (isFabric) modLoaders.addAll("fabric", "quilt") else modLoaders.add("neoforge")
-
+configureMagneticRelease(
+    modstitch.finalJarTask.flatMap { it.archiveFile },
+    if (isFabric) listOf("fabric", "quilt") else listOf("neoforge")
+) {
     modrinth {
-        projectId = "LLfA8jAD"
-        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-        minecraftVersions.addAll(supportedMcVersions)
         environment = ModrinthEnvironment.CLIENT_AND_SERVER
 
         if (isFabric) {
@@ -360,33 +343,6 @@ publishMods {
             requires { slug = "kotlinlangforge" }
         }
         requires { slug = "yacl" }
-    }
-
-    github {
-        repository = githubRepo
-        accessToken = providers.environmentVariable("GITHUB_TOKEN")
-        commitish = "master"
-    }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "nyon"
-            url = uri("https://repo.nyon.dev/releases")
-            credentials {
-                username = providers.environmentVariable("NYON_USERNAME").orNull
-                password = providers.environmentVariable("NYON_PASSWORD").orNull
-            }
-        }
-    }
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "dev.nyon"
-            artifactId = "magnetic"
-            version = project.version.toString()
-            from(components["java"])
-        }
     }
 }
 

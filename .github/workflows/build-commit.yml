@@ -22,12 +22,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: ${{ matrix.version }} / ${{ matrix.loader }}
+    name: ${{ matrix.project }} ${{ matrix.target }}
     strategy:
       fail-fast: false
       matrix:
-        version: ["1.21.1", "1.21.11", "26.1.2", "26.2", "26.3"]
-        loader: [fabric, neoforge]
+        # Every Stonecutter target registered in settings.gradle.kts. Mod gameplay tests run on
+        # the latest target; every Paper target runs its own on the newest release of its range.
+        include:
+          - { project: mod, target: 1.21.1-fabric }
+          - { project: mod, target: 1.21.1-neoforge }
+          - { project: mod, target: 1.21.11-fabric }
+          - { project: mod, target: 1.21.11-neoforge }
+          - { project: mod, target: 26.1.2-fabric }
+          - { project: mod, target: 26.1.2-neoforge }
+          - { project: mod, target: 26.2-fabric }
+          - { project: mod, target: 26.2-neoforge }
+          - { project: mod, target: 26.3-fabric, gametest: true }
+          - { project: mod, target: 26.3-neoforge, gametest: true }
+          - { project: paper, target: 1.21.1, gametest: true }
+          - { project: paper, target: 1.21.6, gametest: true }
+          - { project: paper, target: 26.1, gametest: true }
 
     steps:
       - uses: actions/checkout@v7
@@ -41,58 +55,24 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
       - name: Build and test
-        run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:build --stacktrace
-      - name: Run headless GameTests
-        if: matrix.version == '26.3'
-        run: ./gradlew :mod:${{ matrix.version }}-${{ matrix.loader }}:runGameTest --stacktrace
+        run: ./gradlew :${{ matrix.project }}:${{ matrix.target }}:build --stacktrace
+      - name: Run headless gameplay tests
+        if: matrix.gametest
+        run: ./gradlew :${{ matrix.project }}:${{ matrix.target }}:runGameTest --stacktrace
       - name: Store test reports and logs
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports-${{ matrix.version }}-${{ matrix.loader }}
+          name: test-reports-${{ matrix.project }}-${{ matrix.target }}
           if-no-files-found: warn
           path: |
-            **/build/reports/
-            **/build/test-results/
-            **/build/run/**/logs/
-            **/build/run/**/crash-reports/
+            ${{ matrix.project }}/versions/${{ matrix.target }}/build/reports/
+            ${{ matrix.project }}/versions/${{ matrix.target }}/build/test-results/
+            ${{ matrix.project }}/versions/${{ matrix.target }}/build/run/**/logs/
+            ${{ matrix.project }}/versions/${{ matrix.target }}/build/run/**/crash-reports/
+            ${{ matrix.project }}/versions/${{ matrix.target }}/build/run/**/magnetic-gametest-results.txt
       - name: Store build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: magnetic-${{ matrix.version }}-${{ matrix.loader }}
-          path: mod/versions/${{ matrix.version }}-${{ matrix.loader }}/build/libs/*.jar
-
-  build-paper:
-    runs-on: ubuntu-latest
-    name: Paper
-
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up JDK
-        uses: actions/setup-java@v5
-        with:
-          java-version: 25
-          distribution: temurin
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-      - name: Build
-        run: ./gradlew :paper:build --stacktrace
-      - name: Run Paper and Folia gameplay tests
-        run: ./gradlew :paper:testGame --stacktrace
-      - name: Store gameplay test logs
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-reports-paper
-          if-no-files-found: warn
-          path: |
-            paper/build/run/**/magnetic-gametest-results.txt
-            paper/build/run/**/logs/
-            paper/build/run/**/crash-reports/
-      - name: Store build artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: magnetic-paper
-          path: paper/build/libs/*.jar
+          name: magnetic-${{ matrix.project }}-${{ matrix.target }}
+          path: ${{ matrix.project }}/versions/${{ matrix.target }}/build/libs/*.jar

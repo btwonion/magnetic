@@ -18,13 +18,18 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
+import org.bukkit.Fluid;
+//? if >=26.1
 import org.bukkit.GameRules;
+//? if <26.1
+//import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Statistic;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
@@ -39,8 +44,11 @@ import org.bukkit.inventory.ItemStack;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static dev.nyon.magnetic.gametest.TestContext.check;
 import static dev.nyon.magnetic.gametest.TestContext.checkEquals;
@@ -79,6 +87,7 @@ final class PaperGameTestScenarios {
             new GameTest("drops broken by bucket water are collected", PaperGameTestScenarios::bucketDropsAreCollected),
             new GameTest("drops in a dried-up bucket spot stay on the ground", PaperGameTestScenarios::driedUpBucketSpotKeepsDrops),
             new GameTest("full inventory keeps bucket drops in the world", PaperGameTestScenarios::fullInventoryKeepsBucketDrops),
+            new GameTest("blocks that break with their support are collected", PaperGameTestScenarios::blocksBreakingWithTheirSupportAreCollected),
             new GameTest("/magnetic reload applies the config file", PaperGameTestScenarios::reloadCommandAppliesConfig),
             new GameTest("leaf decay drops are collected", PaperGameTestScenarios::leafDecayDropsAreCollected)
         );
@@ -256,7 +265,7 @@ final class PaperGameTestScenarios {
         player.getInventory().setItemInMainHand(magnetic(Material.DIAMOND_PICKAXE));
         check(player.breakBlock(ctx.block(0, 0, 0)), "the player could not break the sugar cane");
 
-        checkEquals(3, inventoryCount(player, Material.SUGAR_CANE), "sugar cane in the inventory");
+        // Vanilla breaks the upper sugar cane on the following ticks.
         ctx.later(10, () -> {
             check(ctx.block(0, 1, 0).getType().isAir() && ctx.block(0, 2, 0).getType().isAir(), "upper sugar cane was not removed");
             checkEquals(0, ctx.groundCount(Material.SUGAR_CANE), "sugar cane dropped on the ground");
@@ -272,8 +281,11 @@ final class PaperGameTestScenarios {
         Sheep sheep = (Sheep) ctx.world.spawnEntity(ctx.center(0, 0, 0), EntityType.SHEEP);
         sheep.setAI(false);
         sheep.setColor(DyeColor.WHITE);
+        //? if >=26.1
         InteractionResult result = ((CraftEntity) sheep).getHandle().interact(nms(player), InteractionHand.MAIN_HAND, Vec3.ZERO);
-        check(result.consumesAction(), "the player could not shear the sheep: " + result);
+        //? if <26.1
+        //InteractionResult result = ((CraftEntity) sheep).getHandle().interact(nms(player), InteractionHand.MAIN_HAND);
+        check(consumesAction(result), "the player could not shear the sheep: " + result);
 
         check(inventoryCount(player, Material.WHITE_WOOL) > 0, "wool was not collected");
         ctx.later(2, () -> {
@@ -302,7 +314,7 @@ final class PaperGameTestScenarios {
             InteractionHand.MAIN_HAND,
             new BlockHitResult(Vec3.atCenterOf(pos), Direction.NORTH, pos, false)
         );
-        check(result.consumesAction(), "the player could not harvest the bush: " + result);
+        check(consumesAction(result), "the player could not harvest the bush: " + result);
 
         check(inventoryCount(player, Material.SWEET_BERRIES) > 0, "berries were not collected");
         ctx.later(2, () -> {
@@ -404,7 +416,7 @@ final class PaperGameTestScenarios {
             handle.getMainHandItem(),
             InteractionHand.MAIN_HAND
         );
-        check(result.consumesAction(), "the player could not empty the bucket: " + result);
+        check(consumesAction(result), "the player could not empty the bucket: " + result);
         check(ctx.block(0, 0, 0).getType() == Material.WATER, "the bucket did not place water at the player");
     }
 
@@ -457,8 +469,13 @@ final class PaperGameTestScenarios {
         player.getInventory().setItemInMainHand(magnetic(Material.DIAMOND_AXE));
         Set<Material> leafDrops = Set.of(Material.OAK_SAPLING, Material.STICK, Material.APPLE);
 
+        //? if >=26.1 {
         ctx.onCleanupGlobal(() -> ctx.world.setGameRule(GameRules.RANDOM_TICK_SPEED, 3));
         ctx.global(() -> ctx.world.setGameRule(GameRules.RANDOM_TICK_SPEED, 1000), () -> {
+        //?} else {
+        /*ctx.onCleanupGlobal(() -> ctx.world.setGameRule(GameRule.RANDOM_TICK_SPEED, 3));
+        ctx.global(() -> ctx.world.setGameRule(GameRule.RANDOM_TICK_SPEED, 1000), () -> {
+        *///?}
             check(player.breakBlock(log), "the player could not break the log");
             checkEquals(1, inventoryCount(player, Material.OAK_LOG), "log in the inventory");
             ctx.await("all " + leafCount + " leaves decay", 400, () -> countLeaves(ctx) == 0, () -> ctx.later(10, () -> {
@@ -470,6 +487,161 @@ final class PaperGameTestScenarios {
                 ctx.succeed();
             }));
         });
+    }
+
+    // Upward columns stand on the floor and hanging ones below a ceiling three blocks up. The grid
+    // keeps a free block between columns, and the player stands outside it so vanilla pickup cannot
+    // reach a drop.
+    private static final int[][] COLUMN_GRID = columnGrid();
+    private static final int COLUMN_HEIGHT = 3;
+
+    private record Column(String name, List<BlockData> pieces, boolean hanging) {
+    }
+
+    /**
+     * Blocks that cannot stay without the block below or above them, such as carpets or sugar cane,
+     * break with it, in the same tick or a few ticks later. Magnetic collects them through Paper's
+     * BlockDestroyEvent. The candidates come from the server's placement rules rather than a list,
+     * so blocks added by a new Minecraft release are checked as well.
+     */
+    private static void blocksBreakingWithTheirSupportAreCollected(TestContext ctx) throws Exception {
+        apply(testConfig("ENCHANTMENT"));
+        Player player = ctx.player(0, 5);
+        player.getInventory().setItemInMainHand(magnetic(Material.NETHERITE_PICKAXE));
+
+        List<Material> blocks = new ArrayList<>();
+        for (Material type : Material.values()) {
+            if (type.isBlock() && !type.isAir() && !type.isLegacy()) blocks.add(type);
+        }
+        List<Column> columns = new ArrayList<>();
+        for (Material type : blocks) {
+            BlockData data = type.createBlockData();
+            if (needsOwnKind(ctx, data, data, false)) columns.add(new Column(type.name(), List.of(data, data, data), false));
+            if (needsOwnKind(ctx, data, data, true)) columns.add(new Column(type.name(), List.of(data, data, data), true));
+        }
+        Set<String> failures = new TreeSet<>();
+        // Only columns that break over several ticks get heads; the others pop off at once.
+        Set<String> popsAtOnce = new TreeSet<>();
+        Set<Column> chains = new LinkedHashSet<>();
+        runColumns(ctx, player, columns, 0, failures, popsAtOnce, chains, () -> {
+            // Plant heads, such as a cactus flower, break once the column below them breaks.
+            List<Column> heads = new ArrayList<>();
+            for (Column chain : chains) {
+                BlockData base = chain.pieces().getFirst();
+                for (Material type : blocks) {
+                    if (type.name().equals(chain.name()) || popsAtOnce.contains(type.name())) continue;
+                    BlockData head = type.createBlockData();
+                    if (!needsOwnKind(ctx, base, head, chain.hanging())) continue;
+                    heads.add(new Column(chain.name() + "+" + type.name(), List.of(base, base, head), chain.hanging()));
+                }
+            }
+            runColumns(ctx, player, heads, 0, failures, popsAtOnce, new LinkedHashSet<>(), () -> {
+                check(failures.isEmpty(), "drops of blocks that broke with their support stayed on the ground: " + failures);
+                ctx.succeed();
+            });
+        });
+    }
+
+    /**
+     * Whether {@code piece} survives next to {@code support} (below it, or above it when hanging)
+     * with another {@code piece} on its far side, but not with air in place of {@code support}.
+     */
+    private static boolean needsOwnKind(TestContext ctx, BlockData support, BlockData piece, boolean hanging) {
+        Block near = ctx.block(4, hanging ? 3 : 1, 4);
+        Block middle = ctx.block(4, 2, 4);
+        Block far = ctx.block(4, hanging ? 1 : 3, 4);
+        Block anchor = ctx.block(4, hanging ? 4 : 0, 4);
+        anchor.setType(Material.STONE, false);
+        far.setBlockData(piece, false);
+        near.setBlockData(support, false);
+        boolean supported = middle.canPlace(piece);
+        near.setType(Material.AIR, false);
+        boolean unsupported = middle.canPlace(piece);
+        for (Block block : List.of(anchor, near, far)) block.setType(Material.AIR, false);
+        return supported && !unsupported;
+    }
+
+    private static void runColumns(
+        TestContext ctx, Player player, List<Column> columns, int start,
+        Set<String> failures, Set<String> popsAtOnce, Set<Column> chains, TestContext.Step then
+    ) throws Exception {
+        if (start >= columns.size()) {
+            then.run();
+            return;
+        }
+        clearGrid(ctx);
+        // A full inventory keeps drops on the ground, so only the tool stays between batches.
+        ItemStack tool = player.getInventory().getItemInMainHand();
+        player.getInventory().clear();
+        player.getInventory().setItemInMainHand(tool);
+        // Water plants turn into water when they break, which would flow into the other columns.
+        boolean water = holdsWater(ctx, columns.get(start));
+        int end = water ? start + 1 : start;
+        if (!water) {
+            while (end < columns.size() && end - start < COLUMN_GRID.length && !holdsWater(ctx, columns.get(end))) end++;
+        }
+
+        List<Runnable> checks = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            Column column = columns.get(i);
+            int[] cell = COLUMN_GRID[i - start];
+            List<Block> pieces = build(ctx, cell, column);
+            Block broken = pieces.getFirst();
+            Block next = pieces.get(1);
+            Material nextType = next.getType();
+            if (!player.breakBlock(broken)) continue;
+            boolean poppedAtOnce = next.getType() != nextType;
+            if (poppedAtOnce) popsAtOnce.add(column.name());
+            checks.add(() -> {
+                if (next.getType() == nextType) return;
+                if (!poppedAtOnce) chains.add(column);
+                if (!ctx.world.getNearbyEntitiesByType(Item.class, ctx.center(cell[0], 1, cell[1]), 0.9, 3.0, 0.9).isEmpty()) {
+                    failures.add(column.name() + (column.hanging() ? " (hanging)" : ""));
+                }
+            });
+        }
+        int resume = end;
+        ctx.later(4, () -> {
+            checks.forEach(Runnable::run);
+            runColumns(ctx, player, columns, resume, failures, popsAtOnce, chains, then);
+        });
+    }
+
+    /** Builds {@code column} at {@code cell} and returns its pieces, starting with the one the player breaks. */
+    private static List<Block> build(TestContext ctx, int[] cell, Column column) {
+        List<Block> pieces = new ArrayList<>();
+        if (column.hanging()) ctx.block(cell[0], COLUMN_HEIGHT, cell[1]).setType(Material.STONE, false);
+        for (int i = 0; i < COLUMN_HEIGHT; i++) {
+            Block block = ctx.block(cell[0], column.hanging() ? COLUMN_HEIGHT - 1 - i : i, cell[1]);
+            block.setBlockData(column.pieces().get(i), false);
+            pieces.add(block);
+        }
+        return pieces;
+    }
+
+    private static boolean holdsWater(TestContext ctx, Column column) {
+        Block probe = ctx.block(4, 1, 4);
+        probe.setBlockData(column.pieces().getFirst(), false);
+        boolean water = ctx.world.getFluidData(probe.getLocation()).getFluidType() != Fluid.EMPTY;
+        probe.setType(Material.AIR, false);
+        return water;
+    }
+
+    private static void clearGrid(TestContext ctx) {
+        for (int dx = -5; dx <= 5; dx++) {
+            for (int dz = -5; dz <= 3; dz++) {
+                for (int dy = 0; dy <= COLUMN_HEIGHT; dy++) ctx.block(dx, dy, dz).setType(Material.AIR, false);
+            }
+        }
+        for (Item item : ctx.world.getNearbyEntitiesByType(Item.class, ctx.center(0, 1, 0), 6.5, 4.0, 6.5)) item.remove();
+    }
+
+    private static int[][] columnGrid() {
+        List<int[]> cells = new ArrayList<>();
+        for (int dz = -4; dz <= 2; dz += 2) {
+            for (int dx = -4; dx <= 4; dx += 2) cells.add(new int[]{dx, dz});
+        }
+        return cells.toArray(int[][]::new);
     }
 
     // Helpers
@@ -522,6 +694,22 @@ final class PaperGameTestScenarios {
             }
         }
         return count;
+    }
+
+    /**
+     * InteractionResult was an enum on 1.21.1 and is an interface from 1.21.2, inside the 1.21.1
+     * target's range. A direct call only links on one of them, so that target calls it reflectively.
+     */
+    private static boolean consumesAction(InteractionResult result) {
+        //? if >=1.21.6 {
+        return result.consumesAction();
+        //?} else {
+        /*try {
+            return (boolean) result.getClass().getMethod("consumesAction").invoke(result);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("cannot read the interaction result " + result, e);
+        }
+        *///?}
     }
 
     private static ServerPlayer nms(Player player) {

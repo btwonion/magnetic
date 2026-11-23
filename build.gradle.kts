@@ -26,20 +26,15 @@ repositories {
     mavenCentral()
 }
 
-val beta: Int? = property("beta").toString().toIntOrNull() // Pattern is '1.0.0-beta1-1.20.6-pre.2'
-val featureVersion = "${property("featureVersion")}${if (beta != null) "-beta$beta" else ""}"
-val supportedMcVersions: List<String> = project(":mod").subprojects
-    .flatMap { modProject ->
-        modProject.property("vers.supportedMcVersions").toString()
-            .split(',').map(String::trim).filter(String::isNotEmpty)
-    }
-    .distinct()
+// Stonecutter registers one project per target, such as :mod:26.3-fabric and :paper:26.1.
+val modTargets = project(":mod").subprojects
+val paperTargets = project(":paper").subprojects
 
 tasks {
     register("testFast") {
         group = "verification"
         description = "Run JVM tests for every mod target"
-        dependsOn(project(":mod").subprojects.map { "${it.path}:test" })
+        dependsOn(modTargets.map { "${it.path}:test" })
     }
 
     register("testGameLatest") {
@@ -49,20 +44,23 @@ tasks {
         dependsOn(":mod:26.3-neoforge:runGameTest")
     }
 
+    register("testGamePaper") {
+        group = "verification"
+        description = "Run headless Paper and Folia gameplay tests for every Paper target"
+        dependsOn(paperTargets.map { "${it.path}:runGameTest" })
+    }
+
     register("testAll") {
         group = "verification"
         description = "Build every platform and run all automated test layers"
-        dependsOn(project(":mod").subprojects.map { "${it.path}:build" })
-        dependsOn(":paper:build")
-        dependsOn("testGameLatest")
-        dependsOn(":paper:testGame")
+        dependsOn((modTargets + paperTargets).map { "${it.path}:build" })
+        dependsOn("testGameLatest", "testGamePaper")
     }
 
     register("releaseAllPlatforms") {
         group = "publishing"
 
-        dependsOn(project(":mod").subprojects.map { "${it.path}:releaseMod" })
-        dependsOn(":paper:releasePlugin")
+        dependsOn((modTargets + paperTargets).map { "${it.path}:release" })
     }
 
     register("postUpdate") {
@@ -81,9 +79,8 @@ tasks {
                     timestamp = Instant.now().toString(),
                     color = 0xff0080,
                     fields = listOf(
-                        Field(
-                            "Supported versions", supportedMcVersions.joinToString(), false
-                        ),
+                        Field("Fabric & NeoForge versions", modTargets.flatMap { it.supportedMcVersions }.distinct().joinToString(), false),
+                        Field("Paper versions", paperTargets.flatMap { it.supportedMcVersions }.distinct().joinToString(), false),
                         Field(
                             "Supported loaders", "Fabric, Quilt, NeoForge, Paper, Folia, PurPur", false
                         ),
