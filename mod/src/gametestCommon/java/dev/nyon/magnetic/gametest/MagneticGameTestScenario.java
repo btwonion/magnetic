@@ -1,6 +1,7 @@
 package dev.nyon.magnetic.gametest;
 
 import dev.nyon.magnetic.Animation;
+import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.config.Config;
 import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.config.conditions.ConditionChain;
@@ -15,6 +16,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -29,7 +31,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.mutable.MutableInt;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Shared loader-independent gameplay assertions. Loader adapters only register this scenario. */
@@ -54,6 +58,7 @@ public final class MagneticGameTestScenario {
             verifyIgnoredEntityDropsNormally(helper, player);
             verifyEnderDragonIsIgnoredByDefault(helper);
             verifyFullInventoryPreservesDrop(helper, player);
+            verifyPickupStatistics(helper, player);
             verifyFireKillUsesPlayerKillCredit(helper, player);
             verifyRemovedAnimatedItemsAreUntracked(helper, player);
             verifyBucketPlacementIsTracked(helper, player);
@@ -204,6 +209,32 @@ public final class MagneticGameTestScenario {
         helper.assertItemEntityPresent(Items.DIRT, DROP_POS, 2.0);
         player.getInventory().clearContent();
         helper.despawnItem(DROP_POS, 2.0);
+    }
+
+    private static void verifyPickupStatistics(GameTestHelper helper, ServerPlayer player) {
+        ConfigKt.setConfig(testConfig("", true, true));
+        int before = pickupStat(player, Items.DIRT);
+        breakBlock(helper, player, Blocks.DIRT);
+        assertEquals(helper, before + 1, pickupStat(player, Items.DIRT), "collected block drop was not counted as picked up");
+        player.getInventory().clearContent();
+
+        // Only 4 of 10 items fit; those 4 must still be counted while the remaining 6 stay in the drop list.
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            player.getInventory().setItem(slot, new ItemStack(Items.COBBLESTONE, 64));
+        }
+        player.getInventory().setItem(0, new ItemStack(Items.DIRT, 60));
+        before = pickupStat(player, Items.DIRT);
+        List<ItemStack> drops = new ArrayList<>(List.of(new ItemStack(Items.DIRT, 10)));
+        DropEvent.INSTANCE.invoke(drops, new MutableInt(0), player, helper.absolutePos(DROP_POS));
+
+        assertEquals(helper, before + 4, pickupStat(player, Items.DIRT), "partial pickup was not counted");
+        assertEquals(helper, 1, drops.size(), "partial pickup removed the leftover drop");
+        assertEquals(helper, 6, drops.get(0).getCount(), "partial pickup left the wrong drop amount");
+        player.getInventory().clearContent();
+    }
+
+    private static int pickupStat(ServerPlayer player, Item item) {
+        return player.getStats().getValue(Stats.ITEM_PICKED_UP.get(item));
     }
 
     private static void verifyFireKillUsesPlayerKillCredit(GameTestHelper helper, ServerPlayer player) {
