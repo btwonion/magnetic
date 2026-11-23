@@ -80,14 +80,7 @@ object BlockBreakDropCapture {
                 return@forEach
             }
 
-            val stacks = mutableListOf(item.itemStack.clone())
-            DropEventDispatcher.callAuthorized(
-                DropEvent(stacks, MutableInt(), player, item.location),
-                authorization
-            )
-
-            val remaining = stacks.firstOrNull()
-            if (remaining == null || remaining.isEmpty) item.remove() else item.itemStack = remaining
+            collectDrop(item, player, authorization)
         }
 
         val experience = orbs.sumOf { it.experience }

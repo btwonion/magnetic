@@ -22,6 +22,11 @@ Paper-specific behavior here, and place optional plugin integrations in
 `compat/`. Veinminer, mcMMO, AuraSkills, and Tree Feller are compile-only
 dependencies and must remain optional at runtime.
 
+Register every integration in `compat/PluginCompats.kt`, which checks the
+required plugin or class before the integration's code is loaded. Use
+`collectDrop` from `compat/CompatDrops.kt` to collect single stacks or item
+entities that another plugin drops.
+
 ## Building and running
 
 Build the plugin:
