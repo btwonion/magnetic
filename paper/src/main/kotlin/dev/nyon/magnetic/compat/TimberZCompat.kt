@@ -35,9 +35,6 @@ import java.util.concurrent.ConcurrentHashMap
  * read, and claims expire by wall-clock time because region ticks advance independently.
  */
 object TimberZCompat {
-    private const val PLUGIN_NAME = "TimberZ"
-    private const val PLUGIN_CLASS = "com.zetaplugins.timberz.TimberZ"
-
     /**
      * TimberZ breaks one log per tick. Each log is allowed two ticks so lagging servers still finish within the
      * window, and logs stay claimable for a grace period after the last one is due.
@@ -71,22 +68,8 @@ object TimberZCompat {
     // That holds on Folia as well, where the event, the break and the spawn all run on the block's region thread.
     private val leafBreaks = ThreadLocal.withInitial { ArrayDeque<LeafBreak>() }
 
-    fun registerIfPresent() {
-        val plugin = Bukkit.getPluginManager().getPlugin(PLUGIN_NAME) ?: return
-        if (!plugin.isEnabled || !isApiAvailable()) return
-        listenForEvents(plugin as? TimberZ ?: return)
-    }
-
-    // Other plugins may also be named "TimberZ"; only hook into ZetaPlugins' plugin.
-    private fun isApiAvailable(): Boolean {
-        return try {
-            Class.forName(PLUGIN_CLASS, false, TimberZCompat::class.java.classLoader)
-            true
-        } catch (_: ClassNotFoundException) {
-            false
-        } catch (_: LinkageError) {
-            false
-        }
+    fun register() {
+        listenForEvents(Bukkit.getPluginManager().getPlugin("TimberZ") as? TimberZ ?: return)
     }
 
     private fun listenForEvents(timberZ: TimberZ) {

@@ -1,14 +1,7 @@
 package dev.nyon.magnetic
 
 import dev.nyon.konfig.config.config
-import dev.nyon.magnetic.compat.AuraSkillsCompat
-import dev.nyon.magnetic.compat.BlockBreakDropCapture
-import dev.nyon.magnetic.compat.McMMOCompat
-import dev.nyon.magnetic.compat.SmeltingDatapackCompat
-import dev.nyon.magnetic.compat.TimberZCompat
-import dev.nyon.magnetic.compat.TreeCapitatorCompat
-import dev.nyon.magnetic.compat.TreeFellerCompat
-import dev.nyon.magnetic.compat.VeinminerCompat
+import dev.nyon.magnetic.compat.PluginCompats
 import dev.nyon.magnetic.config.*
 import dev.nyon.magnetic.listeners.BlockListeners
 import dev.nyon.magnetic.listeners.DropEventListener
@@ -54,14 +47,7 @@ class Main : JavaPlugin() {
         LeafDecayListeners
         FluidListeners
 
-        if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) McMMOCompat.listenForEvents()
-        VeinminerCompat.listenForEventsIfPresent()
-        if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills")) AuraSkillsCompat.listenForEvents()
-        TreeCapitatorCompat.listenForEvents()
-        BlockBreakDropCapture.listenForEvents()
-        SmeltingDatapackCompat.listenForEvents()
-        TreeFellerCompat.registerIfPresent()
-        TimberZCompat.registerIfPresent()
+        PluginCompats.registerAvailable()
     }
 
     private fun moveConfigToNewPath(newPath: Path) {
