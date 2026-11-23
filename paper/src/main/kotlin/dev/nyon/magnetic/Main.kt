@@ -2,6 +2,7 @@ package dev.nyon.magnetic
 
 import dev.nyon.konfig.config.config
 import dev.nyon.magnetic.compat.AuraSkillsCompat
+import dev.nyon.magnetic.compat.BlockBreakDropCapture
 import dev.nyon.magnetic.compat.McMMOCompat
 import dev.nyon.magnetic.compat.TreeCapitatorCompat
 import dev.nyon.magnetic.compat.VeinminerCompat
@@ -54,6 +55,7 @@ class Main : JavaPlugin() {
         VeinminerCompat.listenForEventsIfPresent()
         if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills")) AuraSkillsCompat.listenForEvents()
         TreeCapitatorCompat.listenForEvents()
+        BlockBreakDropCapture.listenForEvents()
     }
 
     private fun moveConfigToNewPath(newPath: Path) {

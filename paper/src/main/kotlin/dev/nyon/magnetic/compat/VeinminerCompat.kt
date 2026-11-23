@@ -6,6 +6,7 @@ import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
 import org.apache.commons.lang3.mutable.MutableInt
+import org.bukkit.event.EventPriority
 
 object VeinminerCompat {
     private const val DROP_EVENT_CLASS = "de.miraculixx.veinminer.VeinMinerEvent\$VeinminerDropEvent"
@@ -30,18 +31,18 @@ object VeinminerCompat {
     }
 
     private fun listenForEvents() {
-        listen<VeinMinerEvent.VeinminerDropEvent> {
+        // Runs late so plugins that rewrite Veinminer's drops first, such as auto-smelt plugins, are respected.
+        listen<VeinMinerEvent.VeinminerDropEvent>(EventPriority.HIGHEST) {
             if (block.type.isIgnored) return@listen
 
             val mutableInt = MutableInt(exp)
             val itemStacks = items.toMutableList()
-            DropEventDispatcher.call(DropEvent(itemStacks, mutableInt, player, block.location))
+            DropEventDispatcher.call(DropEvent(itemStacks, mutableInt, player, block.location, blockDrop = true))
             exp = mutableInt.toInt()
 
-            // Delete items that have been added to the inventory
-            items.removeIf { item ->
-                itemStacks.none { stack -> stack.isSimilar(item) }
-            }
+            // Keep only what was not collected. Veinminer drops its own list instance, so update it in place.
+            items.clear()
+            items.addAll(itemStacks)
         }
     }
 }

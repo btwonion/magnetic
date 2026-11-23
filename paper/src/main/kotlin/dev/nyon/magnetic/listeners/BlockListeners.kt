@@ -15,6 +15,7 @@ import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
+import org.bukkit.event.EventPriority
 import org.bukkit.craftbukkit.block.CraftBlock
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
@@ -26,9 +27,10 @@ import org.bukkit.inventory.ItemStack
 @Suppress("unused")
 object BlockListeners {
 
+    // Runs late so plugins that rewrite the drops first, such as auto-smelt enchantments, are respected.
     private val blockDropItemEvent =
-        listen<BlockDropItemEvent> { // Return before calling the DropEvent to prevent executing expensive logic
-            if (blockState.type.isIgnored) return@listen
+        listen<BlockDropItemEvent>(EventPriority.HIGHEST) { // Return before calling the DropEvent to prevent executing expensive logic
+            if (isCancelled || blockState.type.isIgnored) return@listen
             val authorization = DropEventDispatcher.authorize(player) ?: return@listen
 
             val magneticItems = items.filterNot(TreeCapitatorCompat::isTriggerItem)
@@ -49,7 +51,7 @@ object BlockListeners {
             }
 
             DropEventDispatcher.callAuthorized(
-                DropEvent(itemStacks, MutableInt(), player, block.location),
+                DropEvent(itemStacks, MutableInt(), player, block.location, blockDrop = true),
                 authorization
             )
 

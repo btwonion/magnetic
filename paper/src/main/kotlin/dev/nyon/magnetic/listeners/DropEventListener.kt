@@ -3,11 +3,13 @@ package dev.nyon.magnetic.listeners
 import dev.nyon.magnetic.Animation
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
+import dev.nyon.magnetic.compat.autosmelt.AutoSmeltSession
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.canAddItem
 import dev.nyon.magnetic.extensions.listen
 import org.bukkit.Statistic
+import org.bukkit.entity.ExperienceOrb
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -23,10 +25,19 @@ object DropEventListener {
             return@listen
         }
 
+        // Auto-smelt datapacks only act on spawned item entities, so smelt block drops that Magnetic collects.
+        val smelting = if (config.itemsAllowed && blockDrop) AutoSmeltSession.start(items, player) else null
+
         if (config.itemsAllowed) {
             items.removeIf { item ->
                 if (config.animation.enabled && player.canAddItem(item)) {
-                    Animation.pullItemToPlayer(item, pos.toCenterLocation(), player, itemSpawnMarker)
+                    Animation.pullItemToPlayer(
+                        item,
+                        pos.toCenterLocation(),
+                        player,
+                        itemSpawnMarker,
+                        smelting?.isSmelted(item) == true
+                    )
                     return@removeIf true
                 }
 
@@ -43,6 +54,15 @@ object DropEventListener {
                 true
             }
         }
+        val smeltingExperience = smelting?.finish(items) ?: 0
+        if (smeltingExperience > 0) {
+            if (config.expAllowed) {
+                exp.add(smeltingExperience)
+            } else {
+                pos.world.spawn(pos.toCenterLocation(), ExperienceOrb::class.java) { it.experience = smeltingExperience }
+            }
+        }
+
         if (config.expAllowed) {
             player.giveExp(exp.toInt(), true)
             exp.value = 0

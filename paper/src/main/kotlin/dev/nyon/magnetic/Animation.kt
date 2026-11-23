@@ -18,16 +18,22 @@ object Animation {
     private val blocksPerTick = config.animation.blocksPerSecond / 20
     private val trackedItemEntities = ConcurrentHashMap<Item, Player>()
 
+    /**
+     * @param alreadySmelted marks the entity as thrown by [player] so auto-smelt datapacks that skip thrown
+     * items do not smelt Magnetic's already smelted drop a second time.
+     */
     fun pullItemToPlayer(
         item: ItemStack,
         pos: Location,
         player: Player,
-        itemSpawnMarker: NamespacedKey? = null
+        itemSpawnMarker: NamespacedKey? = null,
+        alreadySmelted: Boolean = false
     ) {
         val spawnPos = pos.clone()
         val ownerId = player.playerProfile.id
         Main.INSTANCE.server.regionScheduler.execute(Main.INSTANCE, spawnPos) {
             spawnPos.world.dropItem(spawnPos, item) { itemEntity ->
+                if (alreadySmelted) itemEntity.thrower = ownerId
                 if (itemSpawnMarker != null) {
                     itemEntity.persistentDataContainer.set(
                         itemSpawnMarker,

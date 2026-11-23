@@ -13,7 +13,9 @@ data class DropEvent(
     val exp: MutableInt,
     val player: Player,
     val pos: Location,
-    val itemSpawnMarker: NamespacedKey? = null
+    val itemSpawnMarker: NamespacedKey? = null,
+    /** Whether the drops come from a block broken by [player], which enables auto-smelt compatibility. */
+    val blockDrop: Boolean = false
 ) : Event() {
     companion object {
         private val HANDLER_LIST = HandlerList()
