@@ -2,6 +2,9 @@
 
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import xyz.jpenilla.runpaper.task.RunServer
+import xyz.jpenilla.runtask.service.DownloadsAPIService
+import java.io.ByteArrayInputStream
 import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 
 plugins {
@@ -93,8 +96,78 @@ tasks {
 }
 
 // Folia only publishes some patch releases, so it may need a different version than the dev bundle.
+// Read on the project: inside registerTask, property() resolves against the task.
+val foliaVersion = property("foliaVersion").toString()
 runPaper.folia.registerTask {
-    minecraftVersion(property("foliaVersion").toString())
+    minecraftVersion(foliaVersion)
+}
+
+// Gameplay tests: a separate test plugin, never published, that joins client-less players on a
+// headless server, runs the scenarios in src/gametest and stops the server. See docs/TESTING.md.
+val gametest: SourceSet = sourceSets.create("gametest") {
+    compileClasspath += sourceSets.main.get().output + sourceSets.main.get().compileClasspath
+}
+
+val gametestJar = tasks.register<Jar>("gametestJar") {
+    archiveBaseName.set("magnetic-gametest")
+    destinationDirectory.set(layout.buildDirectory.dir("gametest-libs"))
+    from(gametest.output)
+}
+
+fun registerGameTestServer(taskName: String, serverName: String, version: String, port: Int, folia: Boolean) =
+    tasks.register<RunServer>(taskName) {
+        group = "verification"
+        description = "Run Magnetic's gameplay tests on a headless $serverName $version server"
+        displayName.set(serverName)
+        if (folia) downloadsApiService.set(DownloadsAPIService.folia(project))
+        minecraftVersion(version)
+        pluginJars(tasks.jar.flatMap { it.archiveFile }, gametestJar.flatMap { it.archiveFile })
+        // Running these tasks accepts the Minecraft EULA for their throwaway test servers.
+        systemProperty("com.mojang.eula.agree", "true")
+        standardInput = ByteArrayInputStream(ByteArray(0))
+
+        val runDir = layout.buildDirectory.dir("run/gameTest$serverName").get().asFile
+        runDirectory(runDir)
+        val results = runDir.resolve("magnetic-gametest-results.txt")
+        doFirst {
+            // Keep the downloaded libraries, but start every run from a fresh world and config.
+            listOf("world", "world_nether", "world_the_end", "plugins", "logs", results.name)
+                .forEach { runDir.resolve(it).deleteRecursively() }
+            runDir.mkdirs()
+            runDir.resolve("server.properties").writeText(
+                """
+                level-type=minecraft\:flat
+                generator-settings={"biome"\:"minecraft\:plains","layers"\:[{"block"\:"minecraft\:bedrock","height"\:1},{"block"\:"minecraft\:stone","height"\:3}]}
+                generate-structures=false
+                spawn-monsters=false
+                spawn-protection=0
+                online-mode=false
+                view-distance=4
+                simulation-distance=4
+                server-port=$port
+                """.trimIndent()
+            )
+        }
+        doLast {
+            if (!results.exists()) throw GradleException("$serverName gameplay tests did not report results; see $runDir/logs")
+            val report = results.readText()
+            if (!report.lineSequence().any { it.startsWith("PASSED:") }) {
+                throw GradleException("$serverName gameplay tests failed:\n$report")
+            }
+            logger.lifecycle(report.lines().last(String::isNotBlank).let { "$serverName gameplay tests $it" })
+        }
+    }
+
+val runGameTestPaper = registerGameTestServer(
+    "runGameTestPaper", "Paper", property("gameTestPaperVersion").toString(), 25581, folia = false
+)
+val runGameTestFolia = registerGameTestServer("runGameTestFolia", "Folia", foliaVersion, 25582, folia = true)
+runGameTestFolia.configure { mustRunAfter(runGameTestPaper) }
+
+tasks.register("testGame") {
+    group = "verification"
+    description = "Run Magnetic's gameplay tests on headless Paper and Folia servers"
+    dependsOn(runGameTestPaper, runGameTestFolia)
 }
 
 val changelogText = buildString {

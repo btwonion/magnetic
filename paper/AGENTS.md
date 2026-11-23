@@ -13,6 +13,7 @@ paper/
 │   ├── MagneticBootstrapper.java
 │   └── MagneticLoader.java
 ├── src/main/resources/       Runtime resources and translations
+├── src/gametest/             Test plugin with headless gameplay scenarios
 ├── gradle.properties         Paper and Minecraft versions
 └── build.gradle.kts          Paper build, run, and publishing configuration
 ```
@@ -46,13 +47,17 @@ The plugin artifact is written below `paper/build/libs`.
 
 ## Verification
 
-The Paper project has no automated tests and will not have a test suite. Do not
-add Paper test sources or wire `:paper:test` into root verification tasks.
-Verify every change by building the plugin:
+Build the plugin and run its gameplay tests on headless Paper and Folia
+servers:
 
 ```bash
 ./gradlew :paper:build
+./gradlew :paper:testGame
 ```
 
-For changes that require runtime validation, use `runServer` or `runFolia`
-and check the affected behavior manually.
+The tests live in `src/gametest`, a separate test plugin that is never
+packaged into the published jar. Add a scenario to `PaperGameTestScenarios`
+for every behavior change or regression that a server-side player can trigger,
+and follow the rules in `docs/TESTING.md`. Optional plugin integrations are
+not present in the test runtime; check them, and anything visual, manually
+with `runServer` or `runFolia`.

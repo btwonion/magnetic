@@ -55,6 +55,7 @@ tasks {
         dependsOn(project(":mod").subprojects.map { "${it.path}:build" })
         dependsOn(":paper:build")
         dependsOn("testGameLatest")
+        dependsOn(":paper:testGame")
     }
 
     register("releaseAllPlatforms") {

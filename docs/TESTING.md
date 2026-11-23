@@ -4,8 +4,8 @@ Magnetic's mod uses two automated test layers. JVM tests cover deterministic
 logic; headless GameTests start Minecraft and verify behavior through the real
 loaders and mixins. A successful compile is not a replacement for a GameTest
 when mod code touches drops, entities, inventories, server ticks, or mixin
-injection points. The Paper project has no automated test suite; verify it with
-`./gradlew :paper:build` and manual server runs when appropriate.
+injection points. The Paper plugin has its own gameplay tests that run on
+headless Paper and Folia servers; see [Paper gameplay tests](#paper-gameplay-tests).
 
 ## Commands
 
@@ -14,6 +14,7 @@ Run the smallest command that covers the change:
 ```bash
 ./gradlew testFast
 ./gradlew testGameLatest
+./gradlew :paper:testGame
 ./gradlew testAll
 ```
 
@@ -22,8 +23,10 @@ Run the smallest command that covers the change:
 - `testGameLatest` starts headless servers for the latest Fabric and NeoForge
   targets. Use it for mod gameplay, mixin, loader, inventory, XP, entity, or
   configuration-reload behavior.
-- `testAll` builds every platform and runs both mod gameplay servers. Use it
-  before release and for broad build-system changes.
+- `:paper:testGame` runs the Paper plugin's gameplay tests on the newest
+  supported Paper release and on Folia. Use it for any Paper plugin change.
+- `testAll` builds every platform and runs the mod and Paper gameplay servers.
+  Use it before release and for broad build-system changes.
 
 Run a single target while diagnosing a failure:
 
@@ -92,6 +95,44 @@ isolation. Always restore global state in a `finally` block. Use deterministic
 blocks and loot; for example, coal ore is unsuitable for asserting positive XP
 because zero XP is a valid result.
 
+## Paper gameplay tests
+
+The Paper plugin is tested by a separate test plugin in `paper/src/gametest`.
+It is built into `paper/build/gametest-libs`, never into the published jar.
+`runGameTestPaper` and `runGameTestFolia` start a headless server with both
+plugins on a fresh flat world, run every scenario and stop the server:
+
+```bash
+./gradlew :paper:runGameTestPaper   # Paper version from gameTestPaperVersion
+./gradlew :paper:runGameTestFolia   # Folia version from foliaVersion
+```
+
+Both versions are set in `paper/gradle.properties`. Keep `gameTestPaperVersion`
+at the newest supported release, because the plugin is compiled against an
+older dev bundle and its server internals must still work there. Running these
+tasks accepts the Minecraft EULA for their throwaway servers below
+`paper/build/run/`.
+
+Each server writes `magnetic-gametest-results.txt` next to its logs, and the
+task fails unless every scenario passed.
+
+`PaperGameTestScenarios` holds the scenarios. Each one joins a client-less
+player through Paper's normal login path (`MockPlayers`), then acts through the
+same server code a real player triggers: `Player#breakBlock`, entity damage,
+item use, or entity interaction. Follow these rules when adding a scenario:
+
+- Steps run at the end of a tick on the thread that owns the test site. That is
+  where real players act, after the world ticked. Schedule follow-up steps with
+  `TestContext.later` or `await` instead of the Bukkit schedulers.
+- Every test gets a fresh player and a cleared site. Players stand three blocks
+  from the drop so vanilla pickup cannot collect normal drops before they are
+  counted.
+- Configure Magnetic in memory with `ConfigKt.setConfig`; the runner restores
+  the original config after each test. Change game rules or files only through
+  `global` and `onCleanupGlobal`, and keep such tests at the end of the list.
+- Use deterministic blocks and loot. When a drop is random, such as leaf decay,
+  make the chance of no drop at all negligible.
+
 ## Moving tests to a new latest target
 
 Headless gameplay coverage intentionally follows the latest supported target;
@@ -113,12 +154,13 @@ new latest Minecraft version is added:
 
 Pushes and pull requests use a target matrix: every Fabric and NeoForge target
 and Paper build independently, while the latest Fabric and NeoForge entries
-also run their GameTests. Releases run `testAll`. When an automated test fails,
+also run their GameTests and the Paper job runs `:paper:testGame`. Releases run
+`testAll`. When an automated test fails,
 fix the behavior or the deterministic assertion; do not make required tests
 optional to get a green build.
 
-Manual release checks remain appropriate for Paper behavior, animation feel,
-configuration screen usability, and third-party compatibility profiles that
-are not present in the automated test runtime. For the mod, record new
-deterministic regressions in JUnit or GameTests so they do not return to the
+Manual release checks remain appropriate for animation feel, configuration
+screen usability, and third-party plugin or mod integrations that are not
+present in the automated test runtime. Record new deterministic regressions in
+JUnit, mod GameTests, or Paper gameplay tests so they do not return to the
 manual checklist.
