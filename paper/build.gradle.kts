@@ -35,7 +35,7 @@ repositories {
     maven("https://nexus.neetgames.com/repository/maven-public") // mcMMO
     maven("https://maven.enginehub.org/repo/") // dependency of mcMMO
     maven("https://central.sonatype.com/repository/maven-snapshots") // AuraSkills
-    maven("https://api.modrinth.com/maven") { // Tree Feller
+    maven("https://api.modrinth.com/maven") { // Tree Feller, TimberZ
         content {
             includeGroup("maven.modrinth")
         }
@@ -56,6 +56,7 @@ dependencies {
     compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.050-SNAPSHOT")
     compileOnly("dev.aurelium:auraskills-api-bukkit:2.3.5")
     compileOnly("maven.modrinth:thizzyz-tree-feller:1.33.0")
+    compileOnly("maven.modrinth:timberz:TmpFEQ0J") // 1.3.0 for 1.21.9 to 26.2
 }
 
 val modId = property("modId").toString()
@@ -73,6 +74,7 @@ paperPluginYaml {
     dependencies.server("mcMMO", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
     dependencies.server("AuraSkills", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
     dependencies.server("TreeFeller", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
+    dependencies.server("TimberZ", PaperPluginYaml.Load.BEFORE, required = false, joinClasspath = true)
 }
 
 tasks {

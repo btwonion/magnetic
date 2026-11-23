@@ -19,7 +19,7 @@ paper/
 
 The Paper implementation is independent of the mod source tree. Keep
 Paper-specific behavior here, and place optional plugin integrations in
-`compat/`. Veinminer, mcMMO, AuraSkills, and Tree Feller are compile-only
+`compat/`. Veinminer, mcMMO, AuraSkills, Tree Feller, and TimberZ are compile-only
 dependencies and must remain optional at runtime.
 
 ## Building and running

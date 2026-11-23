@@ -5,6 +5,7 @@ import dev.nyon.magnetic.compat.AuraSkillsCompat
 import dev.nyon.magnetic.compat.BlockBreakDropCapture
 import dev.nyon.magnetic.compat.McMMOCompat
 import dev.nyon.magnetic.compat.SmeltingDatapackCompat
+import dev.nyon.magnetic.compat.TimberZCompat
 import dev.nyon.magnetic.compat.TreeCapitatorCompat
 import dev.nyon.magnetic.compat.TreeFellerCompat
 import dev.nyon.magnetic.compat.VeinminerCompat
@@ -60,6 +61,7 @@ class Main : JavaPlugin() {
         BlockBreakDropCapture.listenForEvents()
         SmeltingDatapackCompat.listenForEvents()
         TreeFellerCompat.registerIfPresent()
+        TimberZCompat.registerIfPresent()
     }
 
     private fun moveConfigToNewPath(newPath: Path) {
