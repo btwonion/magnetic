@@ -63,7 +63,9 @@ object BlockBreakDropCapture {
     private fun collect(capture: Capture) {
         val event = capture.event
         val block = event.block
-        val items = capture.items.filter { it.isValid && it.world == block.world && !Animation.tracksItem(it) }
+        val items = capture.items.filter {
+            it.isValid && it.world == block.world && !Animation.tracksItem(it) && !SmeltingDatapackCompat.isDeferred(it)
+        }
         val orbs = capture.orbs.filter { it.isValid && it.world == block.world }
         if (items.isEmpty() && orbs.isEmpty()) return
         if (block.type.isIgnored) return
@@ -72,9 +74,15 @@ object BlockBreakDropCapture {
         val authorization = DropEventDispatcher.authorize(player) ?: return
 
         items.forEach { item ->
+            // Auto-smelt datapacks still need to smelt the plugin's items.
+            if (SmeltingDatapackCompat.defersDrops(player)) {
+                SmeltingDatapackCompat.collectAfterDatapack(item, authorization)
+                return@forEach
+            }
+
             val stacks = mutableListOf(item.itemStack.clone())
             DropEventDispatcher.callAuthorized(
-                DropEvent(stacks, MutableInt(), player, item.location, blockDrop = true),
+                DropEvent(stacks, MutableInt(), player, item.location),
                 authorization
             )
 

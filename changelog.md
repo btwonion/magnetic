@@ -4,7 +4,7 @@
   - only applies to new configs; existing configs keep their current `ignoreEntities` list
 - add compatibility with auto-smelt datapacks that smelt dropped items, also when mining with Veinminer
   - supports Smelting Enchantment, Veinmine & Autosmelt Enchantments, Smelt Mining, and Smelt Enchant
-  - collected drops are smelted with the same rules and experience as the datapack; drops that do not fit stay unsmelted so the datapack still handles them
+  - while the tool has one of their enchantments, block drops briefly land so the datapack can smelt them, then Magnetic collects the result
 
 ## Fabric & NeoForge
 

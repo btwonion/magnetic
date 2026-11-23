@@ -20,13 +20,6 @@ public final class BlockDropScope {
         );
     }
 
-    /**
-     * Whether the current thread is inside a block break or block interaction started by a player.
-     */
-    public static boolean isActive() {
-        return ignoreBlockDrops.get() != null;
-    }
-
     public static void run(BlockState state, Runnable action) {
         call(state, () -> {
             action.run();

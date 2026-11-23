@@ -4,6 +4,7 @@ import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.compat.SmeltingDatapackCompat
 import dev.nyon.magnetic.compat.TreeCapitatorCompat
 import dev.nyon.magnetic.extensions.BreakChainedBlocks
 import dev.nyon.magnetic.extensions.isIgnored
@@ -27,7 +28,7 @@ import org.bukkit.inventory.ItemStack
 @Suppress("unused")
 object BlockListeners {
 
-    // Runs late so plugins that rewrite the drops first, such as auto-smelt enchantments, are respected.
+    // Runs late so plugins that rewrite the drops first, such as auto-smelt plugins, are respected.
     private val blockDropItemEvent =
         listen<BlockDropItemEvent>(EventPriority.HIGHEST) { // Return before calling the DropEvent to prevent executing expensive logic
             if (isCancelled || blockState.type.isIgnored) return@listen
@@ -50,8 +51,20 @@ object BlockListeners {
                 )
             }
 
+            // Let auto-smelt datapacks smelt the spawned items before they are collected.
+            if (SmeltingDatapackCompat.defersDrops(player)) {
+                items.removeAll(magneticItems.toSet())
+                itemStacks.forEach { stack ->
+                    SmeltingDatapackCompat.collectAfterDatapack(
+                        player.world.dropItemNaturally(block.location, stack),
+                        authorization
+                    )
+                }
+                return@listen
+            }
+
             DropEventDispatcher.callAuthorized(
-                DropEvent(itemStacks, MutableInt(), player, block.location, blockDrop = true),
+                DropEvent(itemStacks, MutableInt(), player, block.location),
                 authorization
             )
 

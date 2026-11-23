@@ -1,12 +1,10 @@
 package dev.nyon.magnetic
 
-import dev.nyon.magnetic.compat.autosmelt.AutoSmeltSession
 import dev.nyon.magnetic.config.Config
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.centerVec
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
 import dev.nyon.magnetic.utils.CooldownTracker
-import dev.nyon.magnetic.utils.BlockDropScope
 import dev.nyon.magnetic.utils.MixinHelper.conditionAlreadyChecked
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerPlayer
@@ -27,9 +25,6 @@ object DropEvent {
     ) {
         if (conditionAlreadyChecked.get() != true && !config.conditionStatement.checkAndReport(player)) return
 
-        // Auto-smelt datapacks only act on spawned item entities, so smelt block drops that Magnetic collects.
-        val smelting = if (config.itemsAllowed && BlockDropScope.isActive()) AutoSmeltSession.start(items, player) else null
-
         if (config.itemsAllowed) {
             items.removeIf { item ->
                 if (config.animation.enabled) {
@@ -39,7 +34,7 @@ object DropEvent {
                         return@removeIf false
                     }
                     if (canAddItem) {
-                        Animation.pullItemToPlayer(item, pos.centerVec(), player, smelting?.isSmelted(item) == true)
+                        Animation.pullItemToPlayer(item, pos.centerVec(), player)
                         return@removeIf true
                     }
                 }
@@ -56,19 +51,6 @@ object DropEvent {
                     return@removeIf false
                 }
                 true
-            }
-        }
-
-        val smeltingExperience = smelting?.finish(items) ?: 0
-        if (smeltingExperience > 0) {
-            if (config.expAllowed) {
-                exp.add(smeltingExperience)
-            } else {
-                ExperienceOrb.award(
-                    /*? if >=1.21.11 {*/ player.level() /*?} else {*/ /*player.serverLevel() *//*?}*/,
-                    pos.centerVec(),
-                    smeltingExperience
-                )
             }
         }
 

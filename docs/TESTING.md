@@ -68,8 +68,8 @@ mod/src/gametestNeoForge/    NeoForge registration and neoforge.mods.toml
 ```
 
 The common scenario currently verifies normal inactive drops, instant item
-pickup, the item toggle, XP pickup, full-inventory drop safety, and auto-smelt
-datapack compatibility. It breaks real blocks through `ServerPlayerGameMode`, so
+pickup, the item toggle, XP pickup, full-inventory drop safety, and deferred
+pickup for auto-smelt datapacks. It breaks real blocks through `ServerPlayerGameMode`, so
 the same production mixins used by a server are tested.
 
 `mod/src/gametestCommon/resources` is packaged into both test mods. It holds

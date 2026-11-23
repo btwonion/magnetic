@@ -13,20 +13,9 @@ object Animation {
     private val blocksPerTick = config.animation.blocksPerSecond / 20
     private val trackedItemEntities = ConcurrentHashMap<ItemEntity, UUID>()
 
-    /**
-     * @param alreadySmelted marks the entity as thrown by [player] so auto-smelt datapacks that skip thrown
-     * items do not smelt Magnetic's already smelted drop a second time.
-     */
-    @JvmOverloads
-    fun pullItemToPlayer(
-        item: ItemStack,
-        pos: Vec3,
-        player: ServerPlayer,
-        alreadySmelted: Boolean = false
-    ): ItemEntity {
+    fun pullItemToPlayer(item: ItemStack, pos: Vec3, player: ServerPlayer): ItemEntity {
         val itemEntity = ItemEntity(player.level(), pos.x, pos.y, pos.z, item)
         if (!config.animation.canOtherPlayersPickup) itemEntity.setTarget(player.uuid)
-        if (alreadySmelted) itemEntity.setThrower(player)
         MixinHelper.animationSkip.set(true)
         val spawned = try {
             player.level().addFreshEntity(itemEntity)

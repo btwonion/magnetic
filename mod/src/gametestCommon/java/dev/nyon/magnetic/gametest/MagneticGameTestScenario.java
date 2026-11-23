@@ -2,6 +2,7 @@ package dev.nyon.magnetic.gametest;
 
 import dev.nyon.magnetic.Animation;
 import dev.nyon.magnetic.DropEvent;
+import dev.nyon.magnetic.compat.SmeltingDatapackCompat;
 import dev.nyon.magnetic.config.Config;
 import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.config.conditions.ConditionChain;
@@ -32,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -64,7 +66,7 @@ public final class MagneticGameTestScenario {
             verifyFireKillUsesPlayerKillCredit(helper, player);
             verifyRemovedAnimatedItemsAreUntracked(helper, player);
             verifyBucketPlacementIsTracked(helper, player);
-            verifyAutoSmeltDatapackEnchantment(helper, player);
+            verifyAutoSmeltDatapackDropsAreDeferred(helper, player);
             helper.succeed();
         } finally {
             ConfigKt.setConfig(previousConfig);
@@ -299,12 +301,11 @@ public final class MagneticGameTestScenario {
     }
 
     /**
-     * The test mod ships a stand-in for the Smelt Mining datapack enchantment, whose pack smelts item entities
-     * and would otherwise never see drops collected by Magnetic.
+     * Auto-smelt datapacks such as Smelt Mining smelt item entities after the block broke. The test mod ships a
+     * stand-in for the Smelt Mining enchantment; with it, drops must spawn and only be collected after the delay.
      */
-    private static void verifyAutoSmeltDatapackEnchantment(GameTestHelper helper, ServerPlayer player) {
+    private static void verifyAutoSmeltDatapackDropsAreDeferred(GameTestHelper helper, ServerPlayer player) {
         ConfigKt.setConfig(testConfig("", true, true));
-        // Earlier steps may leave experience on the player; the recipe experience is asserted exactly.
         clearDrops(helper, player);
         ItemStack pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
         pickaxe.enchant(
@@ -318,34 +319,28 @@ public final class MagneticGameTestScenario {
         );
 
         try {
-            player.setItemInHand(InteractionHand.MAIN_HAND, pickaxe.copy());
+            player.setItemInHand(InteractionHand.MAIN_HAND, pickaxe);
             breakBlock(helper, player, Blocks.ANCIENT_DEBRIS);
-            assertEquals(helper, 1, count(player, Items.NETHERITE_SCRAP), "auto-smelt enchantment did not smelt the collected drop");
-            assertEquals(helper, 0, count(player, Items.ANCIENT_DEBRIS), "auto-smelt enchantment kept the raw drop");
-            assertEquals(helper, 2, player.totalExperience, "auto-smelt enchantment did not grant the recipe experience");
-            helper.assertItemEntityNotPresent(Items.NETHERITE_SCRAP, DROP_POS, 2.0);
-            clearDrops(helper, player);
+            assertEquals(helper, 0, count(player, Items.ANCIENT_DEBRIS), "drop was collected before the datapack could smelt it");
+            List<ItemEntity> drops = helper.getLevel().getEntitiesOfClass(
+                ItemEntity.class,
+                new AABB(helper.absolutePos(DROP_POS)).inflate(2.0),
+                entity -> entity.getItem().is(Items.ANCIENT_DEBRIS)
+            );
+            assertEquals(helper, 1, drops.size(), "auto-smelt datapack tool did not let the drop spawn");
 
-            // Smelt Mining is disabled while sneaking.
-            player.setItemInHand(InteractionHand.MAIN_HAND, pickaxe.copy());
-            player.setShiftKeyDown(true);
-            breakBlock(helper, player, Blocks.ANCIENT_DEBRIS);
-            player.setShiftKeyDown(false);
-            assertEquals(helper, 1, count(player, Items.ANCIENT_DEBRIS), "sneaking still smelted the collected drop");
-            assertEquals(helper, 0, count(player, Items.NETHERITE_SCRAP), "sneaking still smelted the collected drop");
-            clearDrops(helper, player);
+            // Stand in for the datapack's smelting function.
+            drops.getFirst().setItem(new ItemStack(Items.NETHERITE_SCRAP));
+            SmeltingDatapackCompat.collectDue(helper.getLevel(), helper.getLevel().getGameTime() - 1);
+            helper.assertItemEntityPresent(Items.NETHERITE_SCRAP, DROP_POS, 2.0);
 
-            // Drops that do not fit are reverted so the datapack can smelt the item entity itself.
-            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
-                player.getInventory().setItem(slot, new ItemStack(Items.COBBLESTONE, 64));
-            }
-            player.setItemInHand(InteractionHand.MAIN_HAND, pickaxe.copy());
-            breakBlock(helper, player, Blocks.ANCIENT_DEBRIS);
-            helper.assertItemEntityPresent(Items.ANCIENT_DEBRIS, DROP_POS, 2.0);
+            SmeltingDatapackCompat.collectDue(
+                helper.getLevel(),
+                helper.getLevel().getGameTime() + SmeltingDatapackCompat.COLLECTION_DELAY_TICKS
+            );
+            assertEquals(helper, 1, count(player, Items.NETHERITE_SCRAP), "smelted drop was not collected after the delay");
             helper.assertItemEntityNotPresent(Items.NETHERITE_SCRAP, DROP_POS, 2.0);
-            assertEquals(helper, 0, player.totalExperience, "uncollected smelted drop granted experience");
         } finally {
-            player.setShiftKeyDown(false);
             clearDrops(helper, player);
             player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         }

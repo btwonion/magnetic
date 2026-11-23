@@ -1,6 +1,7 @@
 package dev.nyon.magnetic.mixins;
 
 import dev.nyon.magnetic.DropEvent;
+import dev.nyon.magnetic.compat.SmeltingDatapackCompat;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.LeafDecayTracker;
 import dev.nyon.magnetic.utils.MixinHelper;
@@ -57,6 +58,8 @@ public class ServerLevelMixin implements ServerLevelHolder {
     private void cleanupPositionTracker(CallbackInfo ci) {
         magnetic$positionTracker.cleanup();
         magnetic$leafDecayTracker.cleanup();
+        ServerLevel level = (ServerLevel) (Object) this;
+        SmeltingDatapackCompat.collectDue(level, level.getGameTime());
     }
 
     // Central interception: addFreshEntity
@@ -82,6 +85,12 @@ public class ServerLevelMixin implements ServerLevelHolder {
         if (entity instanceof ItemEntity itemEntity) {
             ItemStack stack = itemEntity.getItem();
             if (stack.isEmpty()) return;
+
+            // Block drops of auto-smelt datapack tools must spawn so the datapack can smelt them first.
+            boolean blockDrop = Boolean.FALSE.equals(ignoreBlockDrops.get());
+            if (blockDrop && SmeltingDatapackCompat.deferIfNeeded(itemEntity, player, (ServerLevel) (Object) this)) {
+                return;
+            }
 
             ArrayList<ItemStack> items = new ArrayList<>(List.of(stack.copy()));
             DropEvent.INSTANCE.invoke(
