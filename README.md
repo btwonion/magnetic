@@ -45,7 +45,7 @@ Download the file for your platform from [Modrinth](https://modrinth.com/mod/mag
 **Tested integrations:**
 
 - **Fabric and NeoForge:** FallingTree, HT's TreeChop, KleeSlabs, RightClickHarvest, Server Tree Feller, Tree Harvester, and Veinminer
-- **Paper:** mcMMO, AuraSkills, ThizzyZ Tree Feller, and the TreeCapitator datapack
+- **Paper:** mcMMO, AuraSkills, ThizzyZ Tree Feller, TimberZ, and the TreeCapitator datapack
 
 **Auto-smelt:** Magnetic collects the smelted items of auto-smelt mods, plugins, and datapacks, including on blocks
 mined with Veinminer. Loot-table datapacks such as Instant Smelt and mods such as Smelting Touch work as-is. For the

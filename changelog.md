@@ -27,6 +27,9 @@
   - items and experience that plugins such as AutoSmelt spawn themselves while a block is broken are now collected
   - block and Veinminer drops are now collected after other plugins changed them, so ExcellentEnchants' Smelter and SuperEnchants' autosmelt deliver smelted items
 - add [ThizzyZ Tree Feller](https://modrinth.com/plugin/thizzyz-tree-feller) compatibility
+- add [TimberZ](https://modrinth.com/plugin/timberz) compatibility ([**#62**](https://github.com/btwonion/magnetic/issues/62))
+  - logs of trees felled with TimberZ are collected by the player who felled them
+  - leaves broken by TimberZ's instant leaf decay are collected when `leafDecay` is enabled, and leaves insta-broken with a TimberZ axe are always collected
 - fix partially collected Veinminer drops being dropped in full
 - fix plugin failing to enable when a different plugin named "Veinminer" is installed
 - fix Folia compatibility

@@ -61,7 +61,13 @@ internal object PluginCompats {
             "Tree Feller",
             plugin = "TreeFeller",
             requiredClass = "com.thizthizzydizzy.treefeller.compat.TreeFellerCompat"
-        ) { TreeFellerCompat.register() }
+        ) { TreeFellerCompat.register() },
+        // Other plugins may also be named "TimberZ"; only hook into ZetaPlugins' plugin.
+        PluginCompat(
+            "TimberZ",
+            plugin = "TimberZ",
+            requiredClass = "com.zetaplugins.timberz.TimberZ"
+        ) { TimberZCompat.register() }
     )
 
     /** Registers every available integration. A failing integration is logged and does not disable Magnetic. */
