@@ -62,15 +62,19 @@ in a GameTest.
 Gameplay tests use three source roots:
 
 ```text
-mod/src/gametestCommon/      Shared loader-independent scenarios
+mod/src/gametestCommon/      Shared loader-independent scenarios and test data
 mod/src/gametestFabric/      Fabric registration and fabric.mod.json
 mod/src/gametestNeoForge/    NeoForge registration and neoforge.mods.toml
 ```
 
 The common scenario currently verifies normal inactive drops, instant item
-pickup, the item toggle, XP pickup, and full-inventory drop safety. It breaks
-real blocks through `ServerPlayerGameMode`, so the same production mixins used
-by a server are tested.
+pickup, the item toggle, XP pickup, full-inventory drop safety, and deferred
+pickup for auto-smelt datapacks. It breaks real blocks through `ServerPlayerGameMode`, so
+the same production mixins used by a server are tested.
+
+`mod/src/gametestCommon/resources` is packaged into both test mods. It holds
+stand-in data for third-party datapacks, such as the Smelt Mining enchantment,
+so compatibility can be tested without downloading the original pack.
 
 Third-party pickup hooks, such as backpack pickup upgrades and pickup filters,
 are emulated by `TestPickupHooks`. The Fabric test mod calls it from a mixin at

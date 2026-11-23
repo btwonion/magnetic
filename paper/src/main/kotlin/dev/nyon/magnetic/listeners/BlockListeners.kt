@@ -3,7 +3,7 @@ package dev.nyon.magnetic.listeners
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
-import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.compat.SmeltingDatapackCompat
 import dev.nyon.magnetic.compat.TreeCapitatorCompat
 import dev.nyon.magnetic.extensions.BreakChainedBlocks
 import dev.nyon.magnetic.extensions.isIgnored
@@ -15,20 +15,21 @@ import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
+import org.bukkit.event.EventPriority
 import org.bukkit.craftbukkit.block.CraftBlock
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.player.PlayerHarvestBlockEvent
-import org.bukkit.event.player.PlayerShearEntityEvent
 import org.bukkit.inventory.ItemStack
 
 @Suppress("unused")
 object BlockListeners {
 
+    // Runs late so plugins that rewrite the drops first, such as auto-smelt plugins, are respected.
     private val blockDropItemEvent =
-        listen<BlockDropItemEvent> { // Return before calling the DropEvent to prevent executing expensive logic
-            if (blockState.type.isIgnored) return@listen
+        listen<BlockDropItemEvent>(EventPriority.HIGHEST) { // Return before calling the DropEvent to prevent executing expensive logic
+            if (isCancelled || blockState.type.isIgnored) return@listen
             val authorization = DropEventDispatcher.authorize(player) ?: return@listen
 
             val magneticItems = items.filterNot(TreeCapitatorCompat::isTriggerItem)
@@ -46,6 +47,18 @@ object BlockListeners {
                 ) handleBreakChainedBlocks(
                     other, other.state, player, itemStacks, dontIgnoreRoot = true
                 )
+            }
+
+            // Let auto-smelt datapacks smelt the spawned items before they are collected.
+            if (SmeltingDatapackCompat.defersDrops(player)) {
+                items.removeAll(magneticItems.toSet())
+                itemStacks.forEach { stack ->
+                    SmeltingDatapackCompat.collectAfterDatapack(
+                        player.world.dropItemNaturally(block.location, stack),
+                        authorization
+                    )
+                }
+                return@listen
             }
 
             DropEventDispatcher.callAuthorized(

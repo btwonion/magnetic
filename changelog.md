@@ -2,6 +2,9 @@
 
 - ignore the ender dragon by default so its experience drops normally
   - only applies to new configs; existing configs keep their current `ignoreEntities` list
+- add compatibility with auto-smelt datapacks that smelt dropped items, also when mining with Veinminer
+  - supports Smelting Enchantment, Veinmine & Autosmelt Enchantments, Smelt Mining, and Smelt Enchant
+  - while the tool has one of their enchantments, block drops briefly land so the datapack can smelt them, then Magnetic collects the result
 
 ## Fabric & NeoForge
 
@@ -20,7 +23,11 @@
 
 ## Paper
 
+- add compatibility with auto-smelt plugins, including on blocks broken by Veinminer
+  - items and experience that plugins such as AutoSmelt spawn themselves while a block is broken are now collected
+  - block and Veinminer drops are now collected after other plugins changed them, so ExcellentEnchants' Smelter and SuperEnchants' autosmelt deliver smelted items
 - add [ThizzyZ Tree Feller](https://modrinth.com/plugin/thizzyz-tree-feller) compatibility
+- fix partially collected Veinminer drops being dropped in full
 - fix plugin failing to enable when a different plugin named "Veinminer" is installed
 - fix Folia compatibility
   - bucket drops are now handed to the player's own region thread instead of being processed on the fluid's thread

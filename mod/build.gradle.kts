@@ -112,7 +112,10 @@ if (isFabric) {
                 rootProject.file("mod/src/gametestCommon/java"),
                 rootProject.file("mod/src/gametestFabric/java")
             ))
-            resources.setSrcDirs(listOf(rootProject.file("mod/src/gametestFabric/resources")))
+            resources.setSrcDirs(listOf(
+                rootProject.file("mod/src/gametestCommon/resources"),
+                rootProject.file("mod/src/gametestFabric/resources")
+            ))
         }
 
         // Loom normally attaches runGameTest to test. Keep the fast JVM layer
@@ -138,7 +141,10 @@ if (!isFabric && mcVersionName == "26.3") {
             rootProject.file("mod/src/gametestCommon/java"),
             rootProject.file("mod/src/gametestNeoForge/java")
         ))
-        resources.setSrcDirs(listOf(rootProject.file("mod/src/gametestNeoForge/resources")))
+        resources.setSrcDirs(listOf(
+            rootProject.file("mod/src/gametestCommon/resources"),
+            rootProject.file("mod/src/gametestNeoForge/resources")
+        ))
         compileClasspath += sourceSets.named("main").get().output
         runtimeClasspath += output + compileClasspath
     }

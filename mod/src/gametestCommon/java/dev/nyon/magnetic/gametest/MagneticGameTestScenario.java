@@ -2,6 +2,7 @@ package dev.nyon.magnetic.gametest;
 
 import dev.nyon.magnetic.Animation;
 import dev.nyon.magnetic.DropEvent;
+import dev.nyon.magnetic.compat.SmeltingDatapackCompat;
 import dev.nyon.magnetic.config.Config;
 import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.config.conditions.ConditionChain;
@@ -11,9 +12,11 @@ import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.PositionTracker;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -30,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -65,6 +69,7 @@ public final class MagneticGameTestScenario {
             verifyRemovedAnimatedItemsAreUntracked(helper, player);
             verifyRefusedAnimatedItemsAreReleased(helper);
             verifyBucketPlacementIsTracked(helper, player);
+            verifyAutoSmeltDatapackDropsAreDeferred(helper, player);
             helper.succeed();
         } finally {
             ConfigKt.setConfig(previousConfig);
@@ -368,6 +373,52 @@ public final class MagneticGameTestScenario {
             }
         } finally {
             helper.setBlock(relativePos, Blocks.AIR);
+        }
+    }
+
+    /**
+     * Auto-smelt datapacks such as Smelt Mining smelt item entities after the block broke. The test mod ships a
+     * stand-in for the Smelt Mining enchantment; with it, drops must spawn and only be collected after the delay.
+     */
+    private static void verifyAutoSmeltDatapackDropsAreDeferred(GameTestHelper helper, ServerPlayer player) {
+        ConfigKt.setConfig(testConfig("", true, true));
+        clearDrops(helper, player);
+        ItemStack pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
+        pickaxe.enchant(
+            helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(
+                ResourceKey.create(
+                    Registries.ENCHANTMENT,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("smelt_mining", "smelt_mining")
+                )
+            ),
+            1
+        );
+
+        try {
+            player.setItemInHand(InteractionHand.MAIN_HAND, pickaxe);
+            breakBlock(helper, player, Blocks.ANCIENT_DEBRIS);
+            assertEquals(helper, 0, count(player, Items.ANCIENT_DEBRIS), "drop was collected before the datapack could smelt it");
+            List<ItemEntity> drops = helper.getLevel().getEntitiesOfClass(
+                ItemEntity.class,
+                new AABB(helper.absolutePos(DROP_POS)).inflate(2.0),
+                entity -> entity.getItem().is(Items.ANCIENT_DEBRIS)
+            );
+            assertEquals(helper, 1, drops.size(), "auto-smelt datapack tool did not let the drop spawn");
+
+            // Stand in for the datapack's smelting function.
+            drops.getFirst().setItem(new ItemStack(Items.NETHERITE_SCRAP));
+            SmeltingDatapackCompat.collectDue(helper.getLevel(), helper.getLevel().getGameTime() - 1);
+            helper.assertItemEntityPresent(Items.NETHERITE_SCRAP, DROP_POS, 2.0);
+
+            SmeltingDatapackCompat.collectDue(
+                helper.getLevel(),
+                helper.getLevel().getGameTime() + SmeltingDatapackCompat.COLLECTION_DELAY_TICKS
+            );
+            assertEquals(helper, 1, count(player, Items.NETHERITE_SCRAP), "smelted drop was not collected after the delay");
+            helper.assertItemEntityNotPresent(Items.NETHERITE_SCRAP, DROP_POS, 2.0);
+        } finally {
+            clearDrops(helper, player);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         }
     }
 
