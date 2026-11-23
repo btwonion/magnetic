@@ -44,8 +44,8 @@ Download the file for your platform from [Modrinth](https://modrinth.com/mod/mag
 ## Compatibility
 **Tested integrations:**
 
-- **Fabric and NeoForge:** FallingTree, KleeSlabs, RightClickHarvest, Tree Harvester, and Veinminer
-- **Paper:** mcMMO, AuraSkills, and the TreeCapitator datapack
+- **Fabric and NeoForge:** FallingTree, HT's TreeChop, KleeSlabs, RightClickHarvest, Server Tree Feller, Tree Harvester, and Veinminer
+- **Paper:** mcMMO, AuraSkills, ThizzyZ Tree Feller, and the TreeCapitator datapack
 
 
 - On Fabric and NeoForge, collected drops go through vanilla item pickup, so mods that hook it (for example Sophisticated Backpacks' pickup upgrade or pickup filters like FiltPick) also apply to Magnetic's drops
