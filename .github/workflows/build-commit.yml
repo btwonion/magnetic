@@ -79,6 +79,18 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
       - name: Build
         run: ./gradlew :paper:build --stacktrace
+      - name: Run Paper and Folia gameplay tests
+        run: ./gradlew :paper:testGame --stacktrace
+      - name: Store gameplay test logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-paper
+          if-no-files-found: warn
+          path: |
+            paper/build/run/**/magnetic-gametest-results.txt
+            paper/build/run/**/logs/
+            paper/build/run/**/crash-reports/
       - name: Store build artifacts
         uses: actions/upload-artifact@v7
         with:

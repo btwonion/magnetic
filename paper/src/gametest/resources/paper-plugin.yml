@@ -1,0 +1,12 @@
+name: magnetic-gametest
+version: '1.0'
+main: dev.nyon.magnetic.gametest.MagneticGameTestPlugin
+description: Gameplay tests for Magnetic. Never ship this plugin.
+api-version: '1.21'
+folia-supported: true
+dependencies:
+  server:
+    magnetic:
+      load: BEFORE
+      required: true
+      join-classpath: true

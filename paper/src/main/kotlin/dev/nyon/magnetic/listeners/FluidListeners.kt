@@ -76,11 +76,17 @@ object FluidListeners {
         val itemPos = entity.location
         val holder = activeHolder(itemPos.key()) ?: return@listen
         if (holder.ignoreDrops) return@listen
-        if (ignoredFluids.contains(itemPos.world.getFluidData(itemPos).fluidType)) return@listen
         if (Bukkit.getPlayer(holder.playerId) == null) return@listen
 
         entity.persistentDataContainer.set(bucketHandledDropKey, PersistentDataType.BYTE, 1.toByte())
         DropEntityDispatcher.claim(entity) { claimedDrop ->
+            // Vanilla drops a block's items before the fluid flows into it, so the fluid can only
+            // be checked once the drop is claimed on the next tick. Drops without it stay in the world.
+            val location = claimedDrop.location
+            if (ignoredFluids.contains(location.world.getFluidData(location).fluidType)) {
+                DropEntityDispatcher.dispatch(claimedDrop, null, bucketHandledDropKey)
+                return@claim
+            }
             DropEntityDispatcher.dispatchWithCurrentConditions(claimedDrop, holder.playerId, bucketHandledDropKey)
         }
     }
