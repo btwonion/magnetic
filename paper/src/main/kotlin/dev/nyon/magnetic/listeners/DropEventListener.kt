@@ -30,14 +30,16 @@ object DropEventListener {
                     return@removeIf true
                 }
 
-                val copiedStack = item.clone()
-                if (player.inventory.addItem(item).isNotEmpty()) {
+                val pickedUpType = item.type
+                val originalAmount = item.amount
+                val leftover = player.inventory.addItem(item)
+                // Count whatever made it into the inventory, even when it filled up midway.
+                val addedAmount = originalAmount - leftover.values.sumOf { it.amount }
+                if (addedAmount > 0) player.incrementStatistic(Statistic.PICKUP, pickedUpType, addedAmount)
+                if (leftover.isNotEmpty()) {
                     tickInventoryAlert(player)
                     return@removeIf false
                 }
-                if (copiedStack.amount > 0) player.incrementStatistic(
-                    Statistic.PICKUP, copiedStack.type, copiedStack.amount
-                )
                 true
             }
         }

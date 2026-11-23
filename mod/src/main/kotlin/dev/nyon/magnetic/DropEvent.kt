@@ -40,12 +40,16 @@ object DropEvent {
                 }
 
                 if (item.isEmpty) return@removeIf true
-                val copiedStack = item.copy()
-                if (!player.addItem(item)) {
+                val pickedUpItem = item.item
+                val originalCount = item.count
+                val fullyAdded = player.addItem(item)
+                // addItem shrinks the stack by the amount it inserted, even when the inventory fills up midway.
+                val addedCount = if (fullyAdded) originalCount else originalCount - item.count
+                if (addedCount > 0) player.awardStat(Stats.ITEM_PICKED_UP.get(pickedUpItem), addedCount)
+                if (!fullyAdded) {
                     tickInventoryAlert(player)
                     return@removeIf false
                 }
-                player.awardStat(Stats.ITEM_PICKED_UP.get(copiedStack.item), copiedStack.count)
                 true
             }
         }
