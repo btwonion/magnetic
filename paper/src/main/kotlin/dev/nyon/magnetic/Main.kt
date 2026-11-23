@@ -4,6 +4,7 @@ import dev.nyon.konfig.config.config
 import dev.nyon.magnetic.compat.AuraSkillsCompat
 import dev.nyon.magnetic.compat.McMMOCompat
 import dev.nyon.magnetic.compat.TreeCapitatorCompat
+import dev.nyon.magnetic.compat.TreeFellerCompat
 import dev.nyon.magnetic.compat.VeinminerCompat
 import dev.nyon.magnetic.config.*
 import dev.nyon.magnetic.listeners.BlockListeners
@@ -54,6 +55,7 @@ class Main : JavaPlugin() {
         VeinminerCompat.listenForEventsIfPresent()
         if (Bukkit.getPluginManager().isPluginEnabled("AuraSkills")) AuraSkillsCompat.listenForEvents()
         TreeCapitatorCompat.listenForEvents()
+        TreeFellerCompat.registerIfPresent()
     }
 
     private fun moveConfigToNewPath(newPath: Path) {

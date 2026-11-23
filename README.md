@@ -44,8 +44,8 @@ Download the file for your platform from [Modrinth](https://modrinth.com/mod/mag
 ## Compatibility
 **Tested integrations:**
 
-- **Fabric and NeoForge:** FallingTree, KleeSlabs, RightClickHarvest, Tree Harvester, and Veinminer
-- **Paper:** mcMMO, AuraSkills, and the TreeCapitator datapack
+- **Fabric and NeoForge:** FallingTree, HT's TreeChop, KleeSlabs, RightClickHarvest, Server Tree Feller, Tree Harvester, and Veinminer
+- **Paper:** mcMMO, AuraSkills, ThizzyZ Tree Feller, and the TreeCapitator datapack
 
 
 - Grave mods on paper require "minecraft:player" to be added to the "ignoredEntities" config options
