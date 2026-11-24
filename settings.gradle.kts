@@ -12,12 +12,17 @@ pluginManagement {
 
 plugins {
     id("dev.kikugie.stonecutter") version "0.9"
+    // Downloads a JDK when a Java toolchain is missing, such as Java 21 for the 1.21.x Paper targets.
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
+// Every Stonecutter target is registered here; each has gradle.properties in <project>/versions/<target>.
 stonecutter {
     kotlinController = true
     centralScript = "build.gradle.kts"
-    shared {
+
+    // Fabric and NeoForge targets, named <Minecraft version>-<loader>.
+    create("mod") {
         version("1.21.1-fabric", "1.21.1")
         version("1.21.1-neoforge", "1.21.1")
         version("1.21.11-fabric", "1.21.11")
@@ -30,7 +35,12 @@ stonecutter {
         version("26.3-neoforge", "26.3")
         vcsVersion = "26.3-fabric"
     }
-    create("mod")
-}
 
-include(":paper")
+    // Paper targets, named after the oldest release of the range each one supports.
+    create("paper") {
+        version("1.21.1")
+        version("1.21.6")
+        version("26.1")
+        vcsVersion = "26.1"
+    }
+}

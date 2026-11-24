@@ -15,6 +15,9 @@
 
 ## Paper
 
+- support Minecraft **1.21 – 1.21.11** alongside 26.1 – 26.3
+- collect every block that breaks with the block you mine, such as torches, flowers, carpets, signs and banners on top of it, as well as whole **big dripleaf** plants and **pointed dripstone** stalagmites
+  - these blocks now drop exactly what vanilla drops; the tool no longer applies to them, so shears no longer collect every vine of a column
 - add compatibility with **AutoSmelt**, **ExcellentEnchants**, **SuperEnchants**, [**ThizzyZ Tree Feller**](https://modrinth.com/plugin/thizzyz-tree-feller) and [**TimberZ**](https://modrinth.com/plugin/timberz) ([**#62**](https://github.com/btwonion/magnetic/issues/62))
 - fix **Veinminer** drops that only partly fit into the inventory being dropped in full, duplicating items
 - fix the plugin failing to enable when a different plugin named "Veinminer" is installed

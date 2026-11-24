@@ -14,7 +14,7 @@ Run the smallest command that covers the change:
 ```bash
 ./gradlew testFast
 ./gradlew testGameLatest
-./gradlew :paper:testGame
+./gradlew testGamePaper
 ./gradlew testAll
 ```
 
@@ -23,8 +23,9 @@ Run the smallest command that covers the change:
 - `testGameLatest` starts headless servers for the latest Fabric and NeoForge
   targets. Use it for mod gameplay, mixin, loader, inventory, XP, entity, or
   configuration-reload behavior.
-- `:paper:testGame` runs the Paper plugin's gameplay tests on the newest
-  supported Paper release and on Folia. Use it for any Paper plugin change.
+- `testGamePaper` runs the Paper plugin's gameplay tests for every Paper
+  target, each on the newest Paper release of its range and on Folia. Use it
+  for any Paper plugin change; `:paper:<target>:runGameTest` runs one target.
 - `testAll` builds every platform and runs the mod and Paper gameplay servers.
   Use it before release and for broad build-system changes.
 
@@ -34,6 +35,7 @@ Run a single target while diagnosing a failure:
 ./gradlew :mod:26.3-fabric:test
 ./gradlew :mod:26.3-fabric:runGameTest
 ./gradlew :mod:26.3-neoforge:runGameTest
+./gradlew :paper:26.1:runGameTest
 ```
 
 JUnit HTML reports are below each target's `build/reports/tests`. GameTest logs
@@ -98,20 +100,24 @@ because zero XP is a valid result.
 ## Paper gameplay tests
 
 The Paper plugin is tested by a separate test plugin in `paper/src/gametest`.
-It is built into `paper/build/gametest-libs`, never into the published jar.
+Like the plugin, it is built once per Paper target into
+`paper/versions/<target>/build/gametest-libs`, never into the published jar.
 `runGameTestPaper` and `runGameTestFolia` start a headless server with both
 plugins on a fresh flat world, run every scenario and stop the server:
 
 ```bash
-./gradlew :paper:runGameTestPaper   # Paper version from gameTestPaperVersion
-./gradlew :paper:runGameTestFolia   # Folia version from foliaVersion
+./gradlew :paper:26.1:runGameTestPaper   # Paper version from vers.gameTestPaperVersion
+./gradlew :paper:26.1:runGameTestFolia   # Folia version from vers.foliaVersion
 ```
 
-Both versions are set in `paper/gradle.properties`. Keep `gameTestPaperVersion`
-at the newest supported release, because the plugin is compiled against an
-older dev bundle and its server internals must still work there. Running these
-tasks accepts the Minecraft EULA for their throwaway servers below
-`paper/build/run/`.
+Both versions are set per target in `paper/versions/<target>/gradle.properties`.
+Each target is compiled against the oldest Paper release of its range, so keep
+`vers.gameTestPaperVersion` at the newest release of that range: the server
+internals the plugin and the test plugin use must still work there. Code that
+must differ inside a range cannot use a Stonecutter condition, because one jar
+serves the whole range; use API or internals that exist across it instead.
+Running these tasks accepts the Minecraft EULA for their throwaway servers
+below `paper/versions/<target>/build/run/`.
 
 Each server writes `magnetic-gametest-results.txt` next to its logs, and the
 task fails unless every scenario passed.
@@ -133,6 +139,12 @@ item use, or entity interaction. Follow these rules when adding a scenario:
 - Use deterministic blocks and loot. When a drop is random, such as leaf decay,
   make the chance of no drop at all negligible.
 
+The scenario "blocks that break with their support are collected" does not use
+a fixed block list. It asks the server which blocks only stand on, or hang
+from, their own kind, builds a column of each, breaks its base, and requires
+every part that breaks with it, in the same tick or later, to be collected. New
+blocks of a new Minecraft release are covered without editing the test.
+
 ## Moving tests to a new latest target
 
 Headless gameplay coverage intentionally follows the latest supported target;
@@ -152,9 +164,9 @@ new latest Minecraft version is added:
 
 ## CI and manual checks
 
-Pushes and pull requests use a target matrix: every Fabric and NeoForge target
-and Paper build independently, while the latest Fabric and NeoForge entries
-also run their GameTests and the Paper job runs `:paper:testGame`. Releases run
+Pushes and pull requests build every Stonecutter target in one matrix. The
+latest Fabric and NeoForge targets and every Paper target also run their
+`runGameTest`. Releases run
 `testAll`. When an automated test fails,
 fix the behavior or the deterministic assertion; do not make required tests
 optional to get a green build.

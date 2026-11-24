@@ -24,7 +24,11 @@ public class MagneticLoader implements PluginLoader {
         resolver.addRepository(new RemoteRepository.Builder(
             "central",
             "default",
+            //? if >=1.21.6
             MavenLibraryResolver.MAVEN_CENTRAL_DEFAULT_MIRROR
+            // Paper's default Maven Central mirror, before MavenLibraryResolver exposed it.
+            //? if <1.21.6
+            //"https://maven-central.storage-download.googleapis.com/maven2"
         ).build());
 
         var dependencies = Arrays.asList(

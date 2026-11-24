@@ -1,12 +1,24 @@
 package dev.nyon.magnetic.config
 
 import net.kyori.adventure.key.Key
-import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator
 import org.bukkit.Bukkit
 import java.util.*
 import kotlin.io.path.*
+//? if >=1.21.6 {
+import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator
+//?} else {
+/*import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.translation.Translator
+import java.text.MessageFormat
+*///?}
 
+// Adventure added MiniMessageTranslator after the Adventure release that Paper 1.21.1 ships.
+//? if >=1.21.6
 object MiniMessageTranslator : MiniMessageTranslator() {
+//? if <1.21.6
+//object MiniMessageTranslator : Translator {
     private val supportedLanguages = listOf("en_us", "de_de")
     private val translationEntries = mutableMapOf<String, MutableMap<String, String>>()
 
@@ -42,11 +54,22 @@ object MiniMessageTranslator : MiniMessageTranslator() {
         }
     }
 
-    override fun getMiniMessageString(key: String, locale: Locale): String? {
+    private fun miniMessageString(key: String, locale: Locale): String? {
         val values = translationEntries[key] ?: return null
         val language = locale.toString().lowercase()
         return values[language] ?: return values["en_us"]
     }
+
+    //? if >=1.21.6 {
+    override fun getMiniMessageString(key: String, locale: Locale): String? = miniMessageString(key, locale)
+    //?} else {
+    /*override fun translate(key: String, locale: Locale): MessageFormat? = null
+
+    override fun translate(component: TranslatableComponent, locale: Locale): Component? {
+        val text = miniMessageString(component.key(), locale) ?: return null
+        return MiniMessage.miniMessage().deserialize(text).applyFallbackStyle(component.style())
+    }
+    *///?}
 
     override fun name(): Key {
         return Key.key("magnetic:translator")
