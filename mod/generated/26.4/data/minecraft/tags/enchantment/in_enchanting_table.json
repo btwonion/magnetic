@@ -1,0 +1,8 @@
+{
+  "values": [
+    {
+      "id": "magnetic:magnetic",
+      "required": false
+    }
+  ]
+}

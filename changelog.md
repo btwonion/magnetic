@@ -8,6 +8,7 @@
 
 ## Fabric & NeoForge
 
+- support Minecraft **26.4-pre-1** on Fabric
 - add compatibility with **Sophisticated Backpacks**, **FiltPick** and [**Server Tree Feller**](https://modrinth.com/mod/server-tree-feller)
 - improve [**HT's TreeChop**](https://modrinth.com/mod/treechop) compatibility: every felled block is now checked against `ignoreBlocks`, not only the chopped log
 - fix the pull animation on Fabric speeding up with every loaded dimension

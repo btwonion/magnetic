@@ -37,6 +37,7 @@ jobs:
           - { project: mod, target: 26.2-neoforge }
           - { project: mod, target: 26.3-fabric, gametest: true }
           - { project: mod, target: 26.3-neoforge, gametest: true }
+          - { project: mod, target: 26.4-fabric }
           - { project: paper, target: 1.21.1, gametest: true }
           - { project: paper, target: 1.21.6, gametest: true }
           - { project: paper, target: 26.1, gametest: true }
