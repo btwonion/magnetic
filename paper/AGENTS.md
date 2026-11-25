@@ -21,10 +21,17 @@ paper/
 └── stonecutter.gradle.kts    Active IDE target
 ```
 
-The Paper implementation is independent of the mod source tree. Keep
-Paper-specific behavior here, and place optional plugin integrations in
+The Paper implementation is independent of the mod source tree; both share
+only the root `common` module, whose classes are copied into the plugin jar.
+Keep Paper-specific behavior here, and place optional plugin integrations in
 `compat/`. Veinminer, mcMMO, AuraSkills, Tree Feller, and TimberZ are compile-only
 dependencies and must remain optional at runtime.
+
+Kotlin, konfig and kotlinx-serialization are not bundled. `MagneticLoader`
+downloads the versions listed in the jar's `magnetic-libraries.txt`, which the
+build generates from the `paperLibrary` configuration; declare runtime
+libraries there so the server loads the versions the plugin was compiled
+against.
 
 Register every integration in `compat/PluginCompats.kt`, which checks the
 required plugin or class before the integration's code is loaded. Use

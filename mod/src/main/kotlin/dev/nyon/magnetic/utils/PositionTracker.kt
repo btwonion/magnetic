@@ -28,9 +28,6 @@ class PositionTracker {
         entries.put(pos.immutable(), player, timeout)
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun lookupFluid(pos: BlockPos, timeout: Long): ServerPlayer? = entries[pos]
-
     companion object {
         private const val DEFAULT_TIMEOUT = 5000L
     }

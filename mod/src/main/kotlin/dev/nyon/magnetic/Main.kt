@@ -3,10 +3,10 @@
 package dev.nyon.magnetic
 
 import dev.nyon.konfig.config.config
-import dev.nyon.magnetic.config.Config
+import dev.nyon.magnetic.common.config.CONFIG_VERSION
+import dev.nyon.magnetic.common.config.Config
+import dev.nyon.magnetic.common.config.migrate
 import dev.nyon.magnetic.config.ConfigCommand
-import dev.nyon.magnetic.config.config
-import dev.nyon.magnetic.config.migrate
 import java.nio.file.Path
 
 /*? if fabric {*/
@@ -15,13 +15,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.commands.Commands
 /*? if <1.21.11 {*/
-/*import dev.nyon.magnetic.extensions.getFabricPermissionCheck
+/*import dev.nyon.magnetic.common.conditions.ConditionType
+import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.getFabricPermissionCheck
 *//*?}*/
 
 fun init() {
     initialize(FabricLoader.getInstance().configDir.resolve("magnetic.json"))
     /*? if <1.21.11 {*/
-    /*if (config.conditionStatement.raw.contains("PERMISSION"))
+    /*if (config.conditionStatement.references(ConditionType.PERMISSION))
         getFabricPermissionCheck()
     *//*?}*/
     CommandRegistrationCallback.EVENT.register { dispatcher, _, environment ->
@@ -76,7 +78,7 @@ object MagneticEntrypoint {
 *//*?}*/
 
 private fun initialize(configPath: Path) {
-    config(configPath, 6, Config()) { _, element, version ->
+    config(configPath, CONFIG_VERSION, Config()) { _, element, version ->
         migrate(element, version)
     }
 }

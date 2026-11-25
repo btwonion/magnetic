@@ -1,5 +1,8 @@
 package dev.nyon.magnetic.mixins;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
@@ -7,9 +10,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
@@ -20,27 +20,12 @@ public abstract class FishingHookMixin {
     @Nullable
     public abstract Player getPlayerOwner();
 
-    @Inject(
-        method = "retrieve",
-        at = @At("HEAD")
-    )
-    private void setPlayerOnRetrieve(
+    @WrapMethod(method = "retrieve")
+    private int scopeRetrieveToPlayer(
         ItemStack stack,
-        CallbackInfoReturnable<Integer> cir
+        Operation<Integer> original
     ) {
-        if (getPlayerOwner() instanceof ServerPlayer player) {
-            threadLocal.set(player);
-        }
-    }
-
-    @Inject(
-        method = "retrieve",
-        at = @At("RETURN")
-    )
-    private void clearPlayerOnRetrieve(
-        ItemStack stack,
-        CallbackInfoReturnable<Integer> cir
-    ) {
-        threadLocal.remove();
+        if (!(getPlayerOwner() instanceof ServerPlayer player)) return original.call(stack);
+        return ThreadLocalScope.call(threadLocal, player, () -> original.call(stack));
     }
 }

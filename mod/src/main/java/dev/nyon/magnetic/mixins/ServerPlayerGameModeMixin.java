@@ -3,6 +3,7 @@ package dev.nyon.magnetic.mixins;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.nyon.magnetic.config.ConfigKt;
+import dev.nyon.magnetic.config.conditions.ConditionsKt;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.BlockDropScope;
@@ -48,7 +49,7 @@ public class ServerPlayerGameModeMixin {
         boolean trackLeafDecay = ConfigKt.getConfig().getLeafDecay().getEnabled()
             && state.is(BlockTags.LOGS)
             && !MagneticCheckKt.isIgnored(state)
-            && ConfigKt.getConfig().getConditionStatement().checkAndReport(player);
+            && ConditionsKt.checkAndReport(ConfigKt.getConfig().getConditionStatement(), player);
         ServerLevelHolder holder = (ServerLevelHolder) level;
         PositionTracker tracker = holder.getPositionTracker();
         List<BlockPos> neighborSnapshot = tracker.snapshotNeighbors(pos, level);

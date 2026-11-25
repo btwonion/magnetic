@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.LeavesBlock
 import java.util.ArrayDeque
 import java.util.UUID
 
-class LeafDecayTracker {
+class LeafDecayTracker(private val currentTimeMillis: () -> Long = System::currentTimeMillis) {
     private data class Entry(
         val playerUuid: UUID,
         val expiresAt: Long,
@@ -23,7 +23,7 @@ class LeafDecayTracker {
     }
 
     fun record(positions: Iterable<BlockPos>, playerUuid: UUID, timeout: Long) {
-        val now = System.currentTimeMillis()
+        val now = currentTimeMillis()
         val positiveTimeout = timeout.coerceAtLeast(0)
         val expiresAt = if (positiveTimeout > Long.MAX_VALUE - now) Long.MAX_VALUE else now + positiveTimeout
         val entry = Entry(
@@ -59,13 +59,13 @@ class LeafDecayTracker {
     }
 
     fun cleanup() {
-        val now = System.currentTimeMillis()
+        val now = currentTimeMillis()
         entries.values.removeIf { it.expiresAt <= now }
     }
 
     private fun getActive(pos: BlockPos): Entry? {
         val entry = entries[pos] ?: return null
-        if (entry.expiresAt <= System.currentTimeMillis()) {
+        if (entry.expiresAt <= currentTimeMillis()) {
             entries.remove(pos)
             return null
         }

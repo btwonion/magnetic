@@ -2,12 +2,10 @@ package dev.nyon.magnetic.mixins.compat.treeharvester;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
-import dev.nyon.magnetic.holders.ServerLevelHolder;
+import dev.nyon.magnetic.utils.MixinHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -15,10 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
-import static dev.nyon.magnetic.utils.MixinHelper.leafDecayAuthorizedPlayer;
-import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Pseudo
 @Mixin(
@@ -47,20 +41,11 @@ public class LeafProcessingMixin {
         BlockPos topLog
     ) {
         boolean added = original.call(leaves, element);
-        ServerPlayer player = threadLocal.get();
         if (added
             && level instanceof ServerLevel serverLevel
             && element instanceof BlockPos leafPos
-            && player != null
-            && player.getUUID().equals(leafDecayAuthorizedPlayer.get())
-            && !Boolean.TRUE.equals(ignoreBlockDrops.get())
             && !MagneticCheckKt.isIgnored(serverLevel.getBlockState(leafPos))) {
-            long timeout = ConfigKt.getConfig().getLeafDecay().getAbilityTimeout();
-            ((ServerLevelHolder) serverLevel).getLeafDecayTracker().record(
-                leafPos,
-                player.getUUID(),
-                timeout
-            );
+            MixinHelper.recordLeafDecay(serverLevel, leafPos);
         }
         return added;
     }

@@ -3,19 +3,22 @@ package dev.nyon.magnetic.listeners
 import dev.nyon.magnetic.Animation
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
-import dev.nyon.magnetic.config.Config
+import dev.nyon.magnetic.common.AlertType
+import dev.nyon.magnetic.common.FullInventoryAlerts
+import dev.nyon.magnetic.config.conditions.checkAndReport
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.extensions.canAddItem
 import dev.nyon.magnetic.extensions.listen
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.sound.Sound
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.title.Title
 import org.bukkit.Statistic
 import org.bukkit.entity.Player
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Instant
 
 object DropEventListener {
+    private val inventoryAlerts = FullInventoryAlerts()
+    private val alertSound = Sound.sound(Key.key("block.note_block.pling"), Sound.Source.MASTER, 1f, 1f)
 
     @Suppress("unused")
     private val magneticListener = listen<DropEvent> {
@@ -49,22 +52,17 @@ object DropEventListener {
         }
     }
 
-    // Drop events run on each player's region thread on Folia, so the cooldowns must be thread-safe.
-    private val cooldowns: Map<Config.FullInventoryAlert.Alert, MutableMap<UUID, Instant>> = mapOf(
-        config.fullInventoryAlert.soundAlert to ConcurrentHashMap(),
-        config.fullInventoryAlert.textAlert to ConcurrentHashMap(),
-        config.fullInventoryAlert.titleAlert to ConcurrentHashMap()
-    )
-
     private fun tickInventoryAlert(player: Player) {
-        val currentTime = Clock.System.now()
-        val uuid = player.playerProfile.id ?: return
-        cooldowns.forEach { (alert, playerCooldowns) ->
-            if (!alert.enabled) return@forEach
-            val lastAlert = playerCooldowns[uuid]
-            if (lastAlert == null || currentTime > lastAlert + alert.cooldownInSeconds.seconds) {
-                playerCooldowns[uuid] = currentTime
-                alert.invoke(player)
+        inventoryAlerts.due(config.fullInventoryAlert, player.uniqueId).forEach { type ->
+            when (type) {
+                AlertType.SOUND -> player.playSound(alertSound)
+                AlertType.TEXT -> player.sendMessage(Component.translatable("chat.message.fullinventoryalert.text"))
+                AlertType.TITLE -> player.showTitle(
+                    Title.title(
+                        Component.translatable("chat.message.fullinventoryalert.title.main"),
+                        Component.translatable("chat.message.fullinventoryalert.title.subtitle")
+                    )
+                )
             }
         }
     }

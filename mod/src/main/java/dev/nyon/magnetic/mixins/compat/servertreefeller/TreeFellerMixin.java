@@ -3,6 +3,7 @@ package dev.nyon.magnetic.mixins.compat.servertreefeller;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.nyon.magnetic.holders.TreeFellerJobHolder;
+import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -83,12 +84,8 @@ public class TreeFellerMixin {
     ) {
         UUID playerUuid = magnetic$polledJobPlayer;
         magnetic$polledJobPlayer = null;
-        if (playerUuid == null || !(level instanceof ServerLevel serverLevel)) {
-            return original.call(level, pos, dropBlock);
-        }
-
-        ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(playerUuid);
-        if (player == null || player.level() != serverLevel) {
+        ServerPlayer player = level instanceof ServerLevel serverLevel ? MixinHelper.playerIn(serverLevel, playerUuid) : null;
+        if (player == null) {
             return original.call(level, pos, dropBlock);
         }
 

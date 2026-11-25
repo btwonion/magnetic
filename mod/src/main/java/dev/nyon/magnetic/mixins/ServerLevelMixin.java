@@ -107,7 +107,7 @@ public class ServerLevelMixin implements ServerLevelHolder {
             int value = ((ExperienceOrbInvoker) orb).invokeGetValue();
             if (value <= 0) return;
 
-            int remaining = MixinHelper.modifyExpressionValuePlayerExp(player, value, entity.blockPosition());
+            int remaining = MixinHelper.collectExperience(player, value, entity.blockPosition());
             if (remaining <= 0) {
                 cir.setReturnValue(false);
             } else {

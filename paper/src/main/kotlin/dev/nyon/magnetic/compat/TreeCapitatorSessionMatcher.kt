@@ -1,21 +1,6 @@
 package dev.nyon.magnetic.compat
 
-import java.util.UUID
-
-internal data class TreeCapitatorBlockKey(
-    val worldId: UUID,
-    val x: Int,
-    val y: Int,
-    val z: Int
-) {
-    fun distanceSquared(other: TreeCapitatorBlockKey): Long {
-        if (worldId != other.worldId) return Long.MAX_VALUE
-        val dx = x.toLong() - other.x
-        val dy = y.toLong() - other.y
-        val dz = z.toLong() - other.z
-        return dx * dx + dy * dy + dz * dz
-    }
-}
+import dev.nyon.magnetic.extensions.BlockKey
 
 private const val MAX_ROOT_TO_MARKER_DISTANCE_SQUARED = 3L
 
@@ -25,8 +10,8 @@ private const val MAX_ROOT_TO_MARKER_DISTANCE_SQUARED = 3L
  * creates its first log marker in one of the neighboring blocks.
  */
 internal fun selectTreeCapitatorSessionIndex(
-    sessionRoots: List<TreeCapitatorBlockKey>,
-    markerPositions: Set<TreeCapitatorBlockKey>
+    sessionRoots: List<BlockKey>,
+    markerPositions: Set<BlockKey>
 ): Int? {
     return sessionRoots.indices
         .asSequence()

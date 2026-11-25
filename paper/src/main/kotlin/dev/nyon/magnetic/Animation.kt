@@ -15,7 +15,6 @@ import org.bukkit.util.Vector
 import java.util.concurrent.ConcurrentHashMap
 
 object Animation {
-    private val blocksPerTick = config.animation.blocksPerSecond / 20
     private val trackedItemEntities = ConcurrentHashMap<Item, Player>()
 
     fun pullItemToPlayer(
@@ -25,7 +24,7 @@ object Animation {
         itemSpawnMarker: NamespacedKey? = null
     ) {
         val spawnPos = pos.clone()
-        val ownerId = player.playerProfile.id
+        val ownerId = player.uniqueId
         Main.INSTANCE.server.regionScheduler.execute(Main.INSTANCE, spawnPos) {
             spawnPos.world.dropItem(spawnPos, item) { itemEntity ->
                 if (itemSpawnMarker != null) {
@@ -66,6 +65,7 @@ object Animation {
                 val vec = targetPos.subtract(itemEntityPos).toVector()
                 val length = vec.length()
                 if (length == 0.0) return@execute
+                val blocksPerTick = config.animation.blocksPerSecond / mcEntity.level().tickRateManager().tickrate()
                 val tickPart = blocksPerTick / length
                 val tickVec = Vector(
                     vec.x * tickPart,

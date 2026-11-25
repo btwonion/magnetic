@@ -1,10 +1,6 @@
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonArray
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -32,7 +28,8 @@ val paperTargets = project(":paper").subprojects
 tasks {
     register("testFast") {
         group = "verification"
-        description = "Run JVM tests for every mod target"
+        description = "Run JVM tests for the shared module and every mod target"
+        dependsOn(":common:test")
         dependsOn(modTargets.map { "${it.path}:test" })
     }
 
@@ -52,6 +49,7 @@ tasks {
     register("testAll") {
         group = "verification"
         description = "Build every platform and run all automated test layers"
+        dependsOn(":common:build")
         dependsOn((modTargets + paperTargets).map { "${it.path}:build" })
         dependsOn("testGameLatest", "testGamePaper")
     }
@@ -64,76 +62,52 @@ tasks {
 
     register("postUpdate") {
         group = "publishing"
+        description = "Announce the release in Discord"
 
-        val url = providers.environmentVariable("DISCORD_WEBHOOK").orNull ?: return@register
-        val roleId = providers.environmentVariable("DISCORD_ROLE_ID").orNull ?: return@register
-        val changelogText = rootProject.file("changelog.md").readText()
-        val webhook = DiscordWebhook(
-            username = "${rootProject.name} Release Notifier",
-            avatarUrl = "https://raw.githubusercontent.com/btwonion/magnetic/master/mod/src/main/resources/assets/magnetic/icon.png",
-            embeds = listOf(
-                Embed(
-                    title = "v$featureVersion of ${rootProject.name} released!",
-                    description = "# Changelog\n$changelogText",
-                    timestamp = Instant.now().toString(),
-                    color = 0xff0080,
-                    fields = listOf(
-                        Field("Fabric & NeoForge versions", modTargets.flatMap { it.supportedMcVersions }.distinct().joinToString(), false),
-                        Field("Paper versions", paperTargets.flatMap { it.supportedMcVersions }.distinct().joinToString(), false),
-                        Field(
-                            "Supported loaders", "Fabric, Quilt, NeoForge, Paper, Folia, PurPur", false
-                        ),
-                        Field("Modrinth", "https://modrinth.com/mod/magnetic", true),
-                        Field("CurseForge", "https://www.curseforge.com/minecraft/mc-mods/magnetic-telekinesis", true),
-                        Field("GitHub", "https://github.com/btwonion/magnetic", true)
-                    ),
-                )
-            )
-        )
+        val webhookUrl = providers.environmentVariable("DISCORD_WEBHOOK")
+        val roleId = providers.environmentVariable("DISCORD_ROLE_ID")
+        val changelog = rootProject.file("changelog.md")
+        val title = "v$featureVersion of ${rootProject.name} released!"
+        val notifierName = "${rootProject.name} Release Notifier"
+        val modVersions = modTargets.flatMap { it.supportedMcVersions }.distinct().joinToString()
+        val paperVersions = paperTargets.flatMap { it.supportedMcVersions }.distinct().joinToString()
+        onlyIf("DISCORD_WEBHOOK and DISCORD_ROLE_ID are set") { webhookUrl.isPresent && roleId.isPresent }
 
-        @OptIn(ExperimentalSerializationApi::class)
-        val embedsJson = buildJsonArray {
-            webhook.embeds.map { embed ->
-                add(buildJsonObject {
-                    put("title", embed.title)
-                    put("description", embed.description)
-                    put("timestamp", embed.timestamp)
-                    put("color", embed.color)
-                    putJsonArray("fields") {
-                        addAll(embed.fields.map { field ->
-                            buildJsonObject {
-                                put("name", field.name)
-                                put("value", field.value)
-                                put("inline", field.inline)
-                            }
-                        })
-                    }
-                })
+        doLast {
+            fun field(name: String, value: String, inline: Boolean) = buildJsonObject {
+                put("name", name)
+                put("value", value)
+                put("inline", inline)
             }
-        }
 
-        val json = buildJsonObject {
-            put("username", webhook.username)
-            put("avatar_url", webhook.avatarUrl)
-            put("content", "<@&$roleId>")
-            put("embeds", embedsJson)
-        }
+            val embed = buildJsonObject {
+                put("title", title)
+                put("description", "# Changelog\n${changelog.readText()}")
+                put("timestamp", Instant.now().toString())
+                put("color", 0xff0080)
+                put("fields", JsonArray(listOf(
+                    field("Fabric & NeoForge versions", modVersions, false),
+                    field("Paper versions", paperVersions, false),
+                    field("Supported loaders", "Fabric, Quilt, NeoForge, Paper, Folia, PurPur", false),
+                    field("Modrinth", "https://modrinth.com/mod/magnetic", true),
+                    field("CurseForge", "https://www.curseforge.com/minecraft/mc-mods/magnetic-telekinesis", true),
+                    field("GitHub", "https://github.com/btwonion/magnetic", true)
+                )))
+            }
+            val message = buildJsonObject {
+                put("username", notifierName)
+                put("avatar_url", "https://raw.githubusercontent.com/btwonion/magnetic/master/mod/src/main/resources/assets/magnetic/icon.png")
+                put("content", "<@&${roleId.get()}>")
+                put("embeds", JsonArray(listOf(embed)))
+            }
 
-        val jsonString = Json.encodeToString(json)
-        HttpClient.newHttpClient().send(
-            HttpRequest.newBuilder(URI.create(url)).header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonString)).build(), HttpResponse.BodyHandlers.ofString()
-        )
+            HttpClient.newHttpClient().send(
+                HttpRequest.newBuilder(URI.create(webhookUrl.get()))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(message.toString()))
+                    .build(),
+                HttpResponse.BodyHandlers.ofString()
+            )
+        }
     }
 }
-
-
-data class Field(val name: String, val value: String, val inline: Boolean)
-
-data class Embed(
-    val title: String, val description: String, val timestamp: String, val color: Int, val fields: List<Field>
-)
-
-data class DiscordWebhook(
-    val username: String, val avatarUrl: String, val embeds: List<Embed>
-)

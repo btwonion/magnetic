@@ -14,15 +14,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Mixin(Level.class)
 public class LevelMixin {
-
-    @Unique
-    private Level instance = (Level) (Object) this;
 
     @WrapMethod(method = "destroyBlock")
     private boolean scopeDestroyBlock(
@@ -32,38 +28,26 @@ public class LevelMixin {
         int maxUpdateDepth,
         Operation<Boolean> original
     ) {
-        if (!(instance instanceof ServerLevel serverLevel)) {
+        if (!((Object) this instanceof ServerLevel level)) {
             return original.call(pos, dropBlock, entity, maxUpdateDepth);
         }
 
-        ServerPlayer player = threadLocal.get();
-        if (player == null) {
-            player = entity instanceof ServerPlayer serverPlayer
-                ? serverPlayer
-                : ((ServerLevelHolder) serverLevel).getPositionTracker().lookup(pos);
-        }
-        if (player == null) {
-            return original.call(pos, dropBlock, entity, maxUpdateDepth);
-        }
-
-        BlockState state = instance.getBlockState(pos);
+        BlockState state = level.getBlockState(pos);
         if (threadLocal.get() != null) {
-            return BlockDropScope.call(
-                state,
-                () -> original.call(pos, dropBlock, entity, maxUpdateDepth)
-            );
+            return BlockDropScope.call(state, () -> original.call(pos, dropBlock, entity, maxUpdateDepth));
         }
 
-        ServerPlayer scopedPlayer = player;
-        PositionTracker tracker = ((ServerLevelHolder) serverLevel).getPositionTracker();
-        tracker.recordNeighbors(pos, scopedPlayer, serverLevel);
+        PositionTracker tracker = ((ServerLevelHolder) level).getPositionTracker();
+        ServerPlayer player = entity instanceof ServerPlayer serverPlayer ? serverPlayer : tracker.lookup(pos);
+        if (player == null) {
+            return original.call(pos, dropBlock, entity, maxUpdateDepth);
+        }
+
+        tracker.recordNeighbors(pos, player, level);
         return ThreadLocalScope.call(
             threadLocal,
-            scopedPlayer,
-            () -> BlockDropScope.call(
-                state,
-                () -> original.call(pos, dropBlock, entity, maxUpdateDepth)
-            )
+            player,
+            () -> BlockDropScope.call(state, () -> original.call(pos, dropBlock, entity, maxUpdateDepth))
         );
     }
 }

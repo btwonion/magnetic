@@ -1,42 +1,40 @@
 package dev.nyon.magnetic.config
 
+import dev.nyon.magnetic.common.config.Identifier
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import io.papermc.paper.registry.tag.TagKey
+import org.bukkit.Keyed
 import org.bukkit.NamespacedKey
 
-var ignoredEntities: Set<NamespacedKey> = setOf()
-var ignoredBlocks: Set<NamespacedKey> = setOf()
+@Volatile
+private var ignoredEntitiesCache: Set<NamespacedKey>? = null
 
-private val entityRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.ENTITY_TYPE)
-private val blockRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.BLOCK)
+@Volatile
+private var ignoredBlocksCache: Set<NamespacedKey>? = null
 
-internal fun reloadIgnoredEntities() {
-    val ignored: MutableSet<NamespacedKey> = mutableSetOf()
-    config.ignoreEntities.forEach { (original, isTag) ->
-        if (!isTag) {
-            ignored.add(original)
-            return@forEach
-        }
-
-        val tagKey = TagKey.create(RegistryKey.ENTITY_TYPE, original)
-        val tag = entityRegistry.getTag(tagKey)
-        ignored.addAll(tag.values().map { NamespacedKey(it.key().namespace(), it.key().value()) })
+val ignoredEntities: Set<NamespacedKey>
+    get() = ignoredEntitiesCache ?: resolve(config.ignoreEntities, RegistryKey.ENTITY_TYPE).also {
+        ignoredEntitiesCache = it
     }
-    ignoredEntities = ignored
+
+val ignoredBlocks: Set<NamespacedKey>
+    get() = ignoredBlocksCache ?: resolve(config.ignoreBlocks, RegistryKey.BLOCK).also {
+        ignoredBlocksCache = it
+    }
+
+internal fun invalidateIgnoredCaches() {
+    ignoredEntitiesCache = null
+    ignoredBlocksCache = null
 }
 
-internal fun reloadIgnoredBlocks() {
-    val ignored: MutableSet<NamespacedKey> = mutableSetOf()
-    config.ignoreBlocks.forEach { (original, isTag) ->
-        if (!isTag) {
-            ignored.add(original)
-            return@forEach
-        }
+fun Identifier.toNamespacedKey() = NamespacedKey(namespace, path)
 
-        val tagKey = TagKey.create(RegistryKey.BLOCK, original)
-        val tag = blockRegistry.getTag(tagKey)
-        ignored.addAll(tag.values().map { NamespacedKey(it.key().namespace(), it.key().value()) })
+private fun <T : Keyed> resolve(entries: List<Identifier>, registryKey: RegistryKey<T>): Set<NamespacedKey> {
+    val registry = RegistryAccess.registryAccess().getRegistry(registryKey)
+    return entries.flatMapTo(mutableSetOf()) { entry ->
+        val key = entry.toNamespacedKey()
+        if (!entry.isTag) return@flatMapTo listOf(key)
+        registry.getTag(TagKey.create(registryKey, key)).values().map { NamespacedKey(it.key().namespace(), it.key().value()) }
     }
-    ignoredBlocks = ignored
 }

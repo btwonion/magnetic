@@ -7,8 +7,10 @@ import dev.nyon.magnetic.DropAuthorization
 import dev.nyon.magnetic.DropEntityDispatcher
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.BlockKey
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
+import dev.nyon.magnetic.extensions.toPositionKey
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -21,7 +23,6 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDamageEvent
 import org.bukkit.event.entity.ItemSpawnEvent
 import org.bukkit.persistence.PersistentDataType
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -47,8 +48,6 @@ object TimberZCompat {
     private const val DEFAULT_LEAF_SEARCH_RADIUS = 4
 
     private val handledDropKey = NamespacedKey("magnetic", "timberz_handled")
-
-    private data class BlockKey(val worldId: UUID, val x: Int, val y: Int, val z: Int)
 
     private class Claim(
         val authorization: DropAuthorization,
@@ -116,7 +115,7 @@ object TimberZCompat {
             }
 
             if (claims.isEmpty()) return@listen
-            val key = item.location.positionKey()
+            val key = item.location.toPositionKey()
             val claim = claims[key] ?: return@listen
             if (claim.expiresAt < System.currentTimeMillis()) {
                 claims.remove(key, claim)
@@ -145,7 +144,7 @@ object TimberZCompat {
         val deferToDatapack = SmeltingDatapackCompat.defersDrops(player)
         val logClaim = Claim(authorization, deferToDatapack, now + logs.size * MILLIS_PER_LOG + LOG_GRACE_MILLIS)
         logs.forEach { log ->
-            if (!log.type.isIgnored) claims[log.positionKey()] = logClaim
+            if (!log.type.isIgnored) claims[log.toPositionKey()] = logClaim
         }
 
         val leafMillis = leafDecayMillis(timberZ)
@@ -159,7 +158,7 @@ object TimberZCompat {
         logs.forEach { log ->
             for (x in -radius..radius) for (y in -radius..radius) for (z in -radius..radius) {
                 val leaf = log.getRelative(x, y, z)
-                val key = leaf.positionKey()
+                val key = leaf.toPositionKey()
                 if (!visited.add(key) || !ownership.owns(leaf)) continue
                 if (leaf.type in leafTypes && !leaf.type.isIgnored) claims.putIfAbsent(key, leafClaim)
             }
@@ -206,7 +205,4 @@ object TimberZCompat {
         }
     }
 
-    private fun Block.positionKey() = BlockKey(world.uid, x, y, z)
-
-    private fun Location.positionKey() = BlockKey(world.uid, blockX, blockY, blockZ)
 }

@@ -2,7 +2,9 @@ package dev.nyon.magnetic.config
 
 import net.kyori.adventure.key.Key
 import org.bukkit.Bukkit
-import java.util.*
+import java.nio.file.Path
+import java.util.Locale
+import java.util.Properties
 import kotlin.io.path.*
 //? if >=1.21.6 {
 import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator
@@ -19,42 +21,36 @@ object MiniMessageTranslator : MiniMessageTranslator() {
 //? if <1.21.6
 //object MiniMessageTranslator : Translator {
     private val supportedLanguages = listOf("en_us", "de_de")
-    private val translationEntries = mutableMapOf<String, MutableMap<String, String>>()
+    private val translations = mutableMapOf<String, Map<String, String>>()
 
     private val translationsDir = Bukkit.getPluginsFolder().resolve("magnetic/translations/").toPath().createDirectories()
 
     fun loadTranslations() {
         supportedLanguages.forEach { language ->
-            val inputStream =
-                this::class.java.classLoader.getResourceAsStream("assets/translations/$language.properties") ?: return@forEach
-            val original = inputStream.bufferedReader().use { it.readLines() }
+            val bundled = this::class.java.classLoader.getResourceAsStream("assets/translations/$language.properties")
+                ?.use { it.readBytes().decodeToString() } ?: return@forEach
             val destination = translationsDir.resolve("$language.properties")
             if (destination.notExists()) destination.createFile()
 
-            val destinationText = destination.readLines()
-            original.toMutableList().filter { originalLine ->
-                if (originalLine.isEmpty()) return@filter false
-                val key = originalLine.split('=').first()
-                destinationText.none { it.contains(key) }
-            }.also(destination::appendLines)
-        }
-
-        val entries = translationsDir.listDirectoryEntries()
-        entries.forEach { path ->
-            val language = path.nameWithoutExtension
-            path.readLines().forEach { line ->
-                val (key, value) = line.split('=')
-                if (translationEntries[key] == null) translationEntries[key] = mutableMapOf(language to value)
-                else translationEntries[key]?.put(language, value)
+            val existingKeys = readProperties(destination).stringPropertyNames()
+            val missingLines = bundled.lines().filter { line ->
+                line.isNotBlank() && line.substringBefore('=').trim() !in existingKeys
             }
+            if (missingLines.isEmpty()) return@forEach
+            val separator = if (destination.readText().let { it.isNotEmpty() && !it.endsWith('\n') }) "\n" else ""
+            destination.appendText(missingLines.joinToString("\n", prefix = separator, postfix = "\n"))
+        }
+
+        translationsDir.listDirectoryEntries("*.properties").forEach { path ->
+            val properties = readProperties(path)
+            translations[path.nameWithoutExtension] = properties.stringPropertyNames().associateWith(properties::getProperty)
         }
     }
 
-    private fun miniMessageString(key: String, locale: Locale): String? {
-        val values = translationEntries[key] ?: return null
-        val language = locale.toString().lowercase()
-        return values[language] ?: return values["en_us"]
-    }
+    private fun readProperties(path: Path) = Properties().apply { path.bufferedReader().use { load(it) } }
+
+    private fun miniMessageString(key: String, locale: Locale): String? =
+        translations[locale.toString().lowercase()]?.get(key) ?: translations["en_us"]?.get(key)
 
     //? if >=1.21.6 {
     override fun getMiniMessageString(key: String, locale: Locale): String? = miniMessageString(key, locale)

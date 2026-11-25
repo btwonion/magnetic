@@ -1,8 +1,6 @@
 package dev.nyon.magnetic.extensions
 
 import dev.nyon.magnetic.config.config
-import dev.nyon.magnetic.config.ensureIgnoredBlocksLoaded
-import dev.nyon.magnetic.config.ensureIgnoredEntitiesLoaded
 import dev.nyon.magnetic.config.ignoredBlocks
 import dev.nyon.magnetic.config.ignoredEntities
 import net.minecraft.core.registries.BuiltInRegistries
@@ -12,16 +10,10 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.block.state.BlockState
 
 val EntityType<*>.isIgnored: Boolean
-    get() {
-        ensureIgnoredEntitiesLoaded()
-        return ignoredEntities.contains(EntityType.getKey(this))
-    }
+    get() = EntityType.getKey(this) in ignoredEntities
 
 val BlockState.isIgnored: Boolean
-    get() {
-        ensureIgnoredBlocksLoaded()
-        return ignoredBlocks.contains(BuiltInRegistries.BLOCK.getKey(block))
-    }
+    get() = BuiltInRegistries.BLOCK.getKey(block) in ignoredBlocks
 
 fun Entity.failsLongRangeCheck(player: ServerPlayer): Boolean {
     if (config.ignoredEntitiesRangeMin == -1.0) return false

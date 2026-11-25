@@ -3,9 +3,9 @@ package dev.nyon.magnetic.gametest;
 import dev.nyon.magnetic.Animation;
 import dev.nyon.magnetic.DropEvent;
 import dev.nyon.magnetic.compat.SmeltingDatapackCompat;
-import dev.nyon.magnetic.config.Config;
+import dev.nyon.magnetic.common.conditions.ConditionChain;
+import dev.nyon.magnetic.common.config.Config;
 import dev.nyon.magnetic.config.ConfigKt;
-import dev.nyon.magnetic.config.conditions.ConditionChain;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.MixinHelper;
@@ -438,8 +438,8 @@ public final class MagneticGameTestScenario {
         }
     }
 
-    private static dev.nyon.magnetic.config.Identifier ignoreEntry(net.minecraft.resources.Identifier id) {
-        return new dev.nyon.magnetic.config.Identifier(id, false);
+    private static dev.nyon.magnetic.common.config.Identifier ignoreEntry(net.minecraft.resources.Identifier id) {
+        return new dev.nyon.magnetic.common.config.Identifier(id.getNamespace(), id.getPath(), false);
     }
 
     private static void clearDrops(GameTestHelper helper, ServerPlayer player) {

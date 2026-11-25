@@ -50,22 +50,12 @@ object BlockListeners {
 
     private val harvestBlockEvent = listen<PlayerHarvestBlockEvent> {
         if (harvestedBlock.type.isIgnored) return@listen
-        val itemStacks = itemsHarvested.toMutableList()
-        DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, harvestedBlock.location))
-
-        itemsHarvested.removeIf { item ->
-            itemStacks.none { stack -> stack.isSimilar(item) }
-        }
+        DropEventDispatcher.collect(itemsHarvested, player, harvestedBlock.location)
     }
 
     private val playerShearBlockEvent = listen<PlayerShearBlockEvent> {
         if (block.type.isIgnored) return@listen
-        val itemStacks = drops.toMutableList()
-        DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, block.location))
-
-        drops.removeIf { item ->
-            itemStacks.none { stack -> stack.isSimilar(item) }
-        }
+        DropEventDispatcher.collect(drops, player, block.location)
     }
 
     private val blockBreakEvent = listen<BlockBreakEvent> {

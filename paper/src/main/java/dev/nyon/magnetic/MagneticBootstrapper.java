@@ -1,5 +1,6 @@
 package dev.nyon.magnetic;
 
+import dev.nyon.magnetic.common.config.ConfigKt;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
@@ -20,9 +21,9 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,7 @@ public class MagneticBootstrapper implements PluginBootstrap {
     public void bootstrap(@NotNull BootstrapContext context) {
         LifecycleEventManager<@NotNull BootstrapContext> manager = context.getLifecycleManager();
 
-        if (!needsEnchantment()) return;
+        if (!needsEnchantment(context.getDataDirectory().resolve("magnetic.json"))) return;
 
         final TagKey<ItemType> TOOLS = TagKey.create(RegistryKey.ITEM, Key.key("magnetic:tools"));
 
@@ -88,15 +89,10 @@ public class MagneticBootstrapper implements PluginBootstrap {
         );
     }
 
-    private boolean needsEnchantment() {
+    private boolean needsEnchantment(Path configPath) {
         try {
-            List<String> configText = Files.readAllLines(Path.of("./plugins/magnetic/magnetic.json"));
-            if (configText.stream()
-                .anyMatch(line -> line.contains("ENCHANTMENT"))) return true;
-            return configText.stream()
-                .anyMatch(line -> (line.contains("needEnchantment") || line.contains("enchantmentRequired")) &&
-                    line.contains("true"));
-        } catch (Exception e) {
+            return ConfigKt.configRequiresEnchantment(Files.exists(configPath) ? Files.readString(configPath) : null);
+        } catch (IOException e) {
             return true;
         }
     }

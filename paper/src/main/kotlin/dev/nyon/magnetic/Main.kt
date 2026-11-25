@@ -1,8 +1,12 @@
 package dev.nyon.magnetic
 
 import dev.nyon.konfig.config.config
+import dev.nyon.magnetic.common.config.CONFIG_VERSION
+import dev.nyon.magnetic.common.config.Config
+import dev.nyon.magnetic.common.config.migrate
 import dev.nyon.magnetic.compat.PluginCompats
-import dev.nyon.magnetic.config.*
+import dev.nyon.magnetic.config.Command
+import dev.nyon.magnetic.config.MiniMessageTranslator
 import dev.nyon.magnetic.listeners.BlockListeners
 import dev.nyon.magnetic.listeners.DropEventListener
 import dev.nyon.magnetic.listeners.LeafDecayListeners
@@ -21,7 +25,6 @@ import kotlin.io.path.moveTo
 
 val magneticKey = NamespacedKey("magnetic", "magnetic")
 const val magneticPermission = "magnetic.ability.use"
-val configPath: Path = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
 
 class Main : JavaPlugin() {
     companion object {
@@ -30,13 +33,11 @@ class Main : JavaPlugin() {
 
     override fun onLoad() {
         INSTANCE = this
-        val configPath = Bukkit.getPluginsFolder().toPath().resolve("magnetic/magnetic.json")
+        val configPath = dataFolder.toPath().resolve("magnetic.json")
         moveConfigToNewPath(configPath)
-        config(dev.nyon.magnetic.configPath, 6, Config()) { _, element, version ->
+        config(configPath, CONFIG_VERSION, Config()) { _, element, version ->
             migrate(element, version)
         }
-        reloadIgnoredEntities()
-        reloadIgnoredBlocks()
         registerTranslations()
         registerCommand()
     }
@@ -68,8 +69,5 @@ class Main : JavaPlugin() {
         ) { event ->
             event.registrar().register(Command.root.build())
         }
-        Command.root
     }
 }
-
-val Plugin by lazy { Main.INSTANCE }

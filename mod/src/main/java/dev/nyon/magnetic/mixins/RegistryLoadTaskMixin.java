@@ -4,6 +4,7 @@ package dev.nyon.magnetic.mixins;
 /*import com.google.gson.JsonElement;
 import com.mojang.serialization.Decoder;
 *//*?}*/
+import dev.nyon.magnetic.common.conditions.ConditionType;
 import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.datagen.MagneticIdsKt;
 /*? if >=26.1.2 {*/
@@ -24,8 +25,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(/*? if >=26.1.2 {*/ RegistryLoadTask.class /*?} else {*/ /*RegistryDataLoader.class *//*?}*/)
 public class RegistryLoadTaskMixin {
 
-    private static boolean isMagneticKey(ResourceKey key) {
-        return /*? if >=1.21.11 {*/ key.identifier() /*?} else {*/ /*key.location() *//*?}*/
+    private static boolean isUnusedMagneticEnchantment(ResourceKey<?> key) {
+        return !ConfigKt.getConfig().getConditionStatement().references(ConditionType.ENCHANTMENT)
+            && /*? if >=1.21.11 {*/ key.identifier() /*?} else {*/ /*key.location() *//*?}*/
             .equals(MagneticIdsKt.getMagneticEnchantmentId());
     }
 
@@ -39,11 +41,7 @@ public class RegistryLoadTaskMixin {
         RegistryLoadTask.PendingRegistration element,
         CallbackInfo ci
     ) {
-        ResourceKey key = element.key();
-        if (!ConfigKt.getConfig()
-            .getConditionStatement()
-            .getRaw()
-            .contains("ENCHANTMENT") && isMagneticKey(key)) ci.cancel();
+        if (isUnusedMagneticEnchantment(element.key())) ci.cancel();
     }
     /*?} else {*/
     /*@Inject(method = "loadElementFromResource", at = @At("HEAD"), cancellable = true)
@@ -56,10 +54,7 @@ public class RegistryLoadTaskMixin {
         RegistrationInfo info,
         CallbackInfo ci
     ) {
-        if (!ConfigKt.getConfig().getConditionStatement().getRaw().contains("ENCHANTMENT")
-            && isMagneticKey(registryKey)) {
-            ci.cancel();
-        }
+        if (isUnusedMagneticEnchantment(registryKey)) ci.cancel();
     }
     *//*?}*/
 }

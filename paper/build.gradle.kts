@@ -40,19 +40,45 @@ repositories {
 
 paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
+val paperLibrary: Configuration by configurations.creating
+configurations.implementation { extendsFrom(paperLibrary) }
+
+val bundledCommon: Configuration by configurations.creating {
+    isTransitive = false
+}
+
 dependencies {
     paperweight.paperDevBundle(mcVersion)
 
-    implementation("dev.nyon:konfig:3.0.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    paperLibrary("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
+    paperLibrary(libs.konfig)
+    paperLibrary(libs.kotlinx.serialization.json)
+    implementation(project(":common")) { isTransitive = false }
+    bundledCommon(project(":common"))
 
     compileOnly("de.miraculixx:veinminer:2.4.7")
     compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.050-SNAPSHOT")
     compileOnly("dev.aurelium:auraskills-api-bukkit:2.3.5")
     compileOnly("maven.modrinth:thizzyz-tree-feller:1.33.0")
     compileOnly("maven.modrinth:timberz:TmpFEQ0J") // 1.3.0 for 1.21.9 to 26.2
+}
+
+val generatePaperLibraries = tasks.register("generatePaperLibraries") {
+    val coordinates = paperLibrary.dependencies.map { "${it.group}:${it.name}:${it.version}" }
+    val outputDir = layout.buildDirectory.dir("generated/paperLibraries")
+    inputs.property("coordinates", coordinates)
+    outputs.dir(outputDir)
+    doLast {
+        outputDir.get().file("magnetic-libraries.txt").asFile.writeText(coordinates.joinToString("\n"))
+    }
+}
+sourceSets.main { resources.srcDir(generatePaperLibraries) }
+
+tasks.jar {
+    dependsOn(bundledCommon)
+    from({ bundledCommon.map(::zipTree) }) {
+        exclude("META-INF/MANIFEST.MF")
+    }
 }
 
 val modId = property("modId").toString()

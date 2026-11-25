@@ -4,19 +4,20 @@ import dev.isxander.yacl3.api.ListOption
 import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.dsl.*
 import dev.nyon.konfig.config.saveConfig
-import dev.nyon.magnetic.config.Config
-import dev.nyon.magnetic.config.Identifier
-import dev.nyon.magnetic.config.conditions.ConditionChain
+import dev.nyon.magnetic.common.conditions.ConditionChain
+import dev.nyon.magnetic.common.config.Config
+import dev.nyon.magnetic.common.config.Identifier
 import dev.nyon.magnetic.config.config
 import dev.nyon.magnetic.config.invalidateIgnoredCaches
-import dev.nyon.magnetic.extensions.IdentifierSerializer
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
+
+private val defaults = Config()
 
 fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("magnetic") {
     val general by categories.registering {
         val conditionStatement by rootOptions.registering {
-            binding("ENCHANTMENT", { config.conditionStatement.raw }, { config.conditionStatement = ConditionChain(it) })
+            binding(defaults.conditionStatement.raw, { config.conditionStatement.raw }, { config.conditionStatement = ConditionChain(it) })
             controller = stringField()
             descriptionBuilder {
                 addDefaultText(1)
@@ -24,7 +25,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
         }
 
         val expAllowed by rootOptions.registering {
-            binding(false, { config.expAllowed }, { config.expAllowed = it })
+            binding(defaults.expAllowed, { config.expAllowed }, { config.expAllowed = it })
             controller = tickBox()
             descriptionBuilder {
                 addDefaultText(1)
@@ -32,7 +33,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
         }
 
         val itemsAllowed by rootOptions.registering {
-            binding(false, { config.itemsAllowed }, { config.itemsAllowed = it })
+            binding(defaults.itemsAllowed, { config.itemsAllowed }, { config.itemsAllowed = it })
             controller = tickBox()
             descriptionBuilder {
                 addDefaultText(1)
@@ -41,7 +42,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
 
         val buckets by groups.registering {
             val enabled by options.registering {
-                binding(true, { config.buckets.enabled }, { config.buckets.enabled = it })
+                binding(defaults.buckets.enabled, { config.buckets.enabled }, { config.buckets.enabled = it })
                 controller = tickBox()
                 descriptionBuilder {
                     addDefaultText(1)
@@ -49,7 +50,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val abilityTimeout by options.registering {
-                binding(30000L, { config.buckets.abilityTimeout }, { config.buckets.abilityTimeout = it })
+                binding(defaults.buckets.abilityTimeout, { config.buckets.abilityTimeout }, { config.buckets.abilityTimeout = it })
                 controller = numberField(-1, Long.MAX_VALUE)
                 descriptionBuilder {
                     addDefaultText(1)
@@ -59,7 +60,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
 
         val leafDecay by groups.registering {
             val enabled by options.registering {
-                binding(false, { config.leafDecay.enabled }, { config.leafDecay.enabled = it })
+                binding(defaults.leafDecay.enabled, { config.leafDecay.enabled }, { config.leafDecay.enabled = it })
                 controller = tickBox()
                 descriptionBuilder {
                     addDefaultText(1)
@@ -67,7 +68,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val abilityTimeout by options.registering {
-                binding(300000L, { config.leafDecay.abilityTimeout }, { config.leafDecay.abilityTimeout = it })
+                binding(defaults.leafDecay.abilityTimeout, { config.leafDecay.abilityTimeout }, { config.leafDecay.abilityTimeout = it })
                 controller = numberField(0, Long.MAX_VALUE)
                 descriptionBuilder {
                     addDefaultText(1)
@@ -76,17 +77,17 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
         }
 
         val ignoreEntities = rootOptions.register(
-            "ignoreKilledEntities",
+            "ignoreEntities",
             ListOption.createBuilder<String>()
                 .name(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreEntities"))
                 .description(OptionDescription.createBuilder().text(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreEntities.description")).build())
                 .controller(stringField())
                 .binding(
-                    Config().ignoreEntities.map(Identifier::toString),
+                    defaults.ignoreEntities.map(Identifier::toString),
                     { config.ignoreEntities.map(Identifier::toString) },
                     { list->
                         config.ignoreEntities = list.mapNotNull { entry ->
-                            runCatching { IdentifierSerializer.decodeFromString(entry) }.getOrNull()
+                            runCatching { Identifier.parse(entry) }.getOrNull()
                         }
                     }
                 )
@@ -101,11 +102,11 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
                 .description(OptionDescription.createBuilder().text(Component.translatable("yacl3.config.magnetic.category.general.root.option.ignoreBlocks.description")).build())
                 .controller(stringField())
                 .binding(
-                    emptyList(),
+                    defaults.ignoreBlocks.map(Identifier::toString),
                     { config.ignoreBlocks.map(Identifier::toString) },
                     { list ->
                         config.ignoreBlocks = list.mapNotNull { entry ->
-                            runCatching { IdentifierSerializer.decodeFromString(entry) }.getOrNull()
+                            runCatching { Identifier.parse(entry) }.getOrNull()
                         }
                     }
                 )
@@ -114,7 +115,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
         )
 
         val ignoredEntitiesRangeMin by rootOptions.registering {
-            binding(15.0, { config.ignoredEntitiesRangeMin }, { config.ignoredEntitiesRangeMin = it })
+            binding(defaults.ignoredEntitiesRangeMin, { config.ignoredEntitiesRangeMin }, { config.ignoredEntitiesRangeMin = it })
             controller = numberField(-1.0, Double.MAX_VALUE)
             descriptionBuilder {
                 addDefaultText(1)
@@ -123,7 +124,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
 
         val fullInventoryAlert by groups.registering {
             val soundAlertEnabled by options.registering {
-                binding(true, { config.fullInventoryAlert.soundAlert.enabled }, { config.fullInventoryAlert.soundAlert.enabled = it })
+                binding(defaults.fullInventoryAlert.soundAlert.enabled, { config.fullInventoryAlert.soundAlert.enabled }, { config.fullInventoryAlert.soundAlert.enabled = it })
                 controller = tickBox()
                 descriptionBuilder {
                     addDefaultText(1)
@@ -131,7 +132,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val soundAlertCooldownInSeconds by options.registering {
-                binding(5, { config.fullInventoryAlert.soundAlert.cooldownInSeconds }, { config.fullInventoryAlert.soundAlert.cooldownInSeconds = it })
+                binding(defaults.fullInventoryAlert.soundAlert.cooldownInSeconds, { config.fullInventoryAlert.soundAlert.cooldownInSeconds }, { config.fullInventoryAlert.soundAlert.cooldownInSeconds = it })
                 controller = numberField(0, Int.MAX_VALUE)
                 descriptionBuilder {
                     addDefaultText(1)
@@ -139,7 +140,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val textAlertEnabled by options.registering {
-                binding(true, { config.fullInventoryAlert.textAlert.enabled }, { config.fullInventoryAlert.textAlert.enabled = it })
+                binding(defaults.fullInventoryAlert.textAlert.enabled, { config.fullInventoryAlert.textAlert.enabled }, { config.fullInventoryAlert.textAlert.enabled = it })
                 controller = tickBox()
                 descriptionBuilder {
                     addDefaultText(1)
@@ -147,7 +148,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val textAlertCooldownInSeconds by options.registering {
-                binding(60, { config.fullInventoryAlert.textAlert.cooldownInSeconds }, { config.fullInventoryAlert.textAlert.cooldownInSeconds = it })
+                binding(defaults.fullInventoryAlert.textAlert.cooldownInSeconds, { config.fullInventoryAlert.textAlert.cooldownInSeconds }, { config.fullInventoryAlert.textAlert.cooldownInSeconds = it })
                 controller = numberField(0, Int.MAX_VALUE)
                 descriptionBuilder {
                     addDefaultText(1)
@@ -155,7 +156,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val titleAlertEnabled by options.registering {
-                binding(true, { config.fullInventoryAlert.titleAlert.enabled }, { config.fullInventoryAlert.titleAlert.enabled = it })
+                binding(defaults.fullInventoryAlert.titleAlert.enabled, { config.fullInventoryAlert.titleAlert.enabled }, { config.fullInventoryAlert.titleAlert.enabled = it })
                 controller = tickBox()
                 descriptionBuilder {
                     addDefaultText(1)
@@ -163,7 +164,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val titleAlertCooldownInSeconds by options.registering {
-                binding(5, { config.fullInventoryAlert.titleAlert.cooldownInSeconds }, { config.fullInventoryAlert.titleAlert.cooldownInSeconds = it })
+                binding(defaults.fullInventoryAlert.titleAlert.cooldownInSeconds, { config.fullInventoryAlert.titleAlert.cooldownInSeconds }, { config.fullInventoryAlert.titleAlert.cooldownInSeconds = it })
                 controller = numberField(0, Int.MAX_VALUE)
                 descriptionBuilder {
                     addDefaultText(1)
@@ -173,7 +174,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
 
         val animation by groups.registering {
             val enabled by options.registering {
-                binding(true, { config.animation.enabled }, { config.animation.enabled = it })
+                binding(defaults.animation.enabled, { config.animation.enabled }, { config.animation.enabled = it })
                 controller = tickBox()
                 descriptionBuilder {
                     addDefaultText(1)
@@ -181,7 +182,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val blocksPerSecond by options.registering {
-                binding(1.0, { config.animation.blocksPerSecond }, { config.animation.blocksPerSecond = it })
+                binding(defaults.animation.blocksPerSecond, { config.animation.blocksPerSecond }, { config.animation.blocksPerSecond = it })
                 controller = numberField(0.5, Double.MAX_VALUE)
                 descriptionBuilder {
                     addDefaultText(1)
@@ -189,7 +190,7 @@ fun generateConfigScreen(parent: Screen? = null): Screen = YetAnotherConfigLib("
             }
 
             val canOtherPlayersPickup by options.registering {
-                binding(false, { config.animation.canOtherPlayersPickup }, { config.animation.canOtherPlayersPickup = it })
+                binding(defaults.animation.canOtherPlayersPickup, { config.animation.canOtherPlayersPickup }, { config.animation.canOtherPlayersPickup = it })
                 controller = tickBox()
                 descriptionBuilder {
                     addDefaultText(1)

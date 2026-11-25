@@ -32,7 +32,7 @@ public class ItemEntityMixin {
         CallbackInfo ci
     ) {
         if (!(player instanceof ServerPlayer)) return;
-        Animation.INSTANCE.invokePickupItemEntity((ItemEntity) (Object) this);
+        Animation.INSTANCE.onPickup((ItemEntity) (Object) this);
     }
 
     /**
