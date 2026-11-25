@@ -70,7 +70,6 @@ internal object PluginCompats {
         ) { TimberZCompat.register() }
     )
 
-    /** Registers every available integration. A failing integration is logged and does not disable Magnetic. */
     fun registerAvailable() {
         compats.forEach { compat ->
             if (!compat.isAvailable()) return@forEach

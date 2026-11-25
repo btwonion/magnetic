@@ -40,7 +40,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Shared loader-independent gameplay assertions. Loader adapters only register this scenario. */
 public final class MagneticGameTestScenario {
     private static final BlockPos DROP_POS = new BlockPos(2, 1, 2);
 
@@ -264,7 +263,6 @@ public final class MagneticGameTestScenario {
         }
     }
 
-    /** A pickup filter refuses the drop, so it stays where it fell instead of entering the inventory. */
     private static void verifyRefusedPickupsStayOnTheGround(GameTestHelper helper, ServerPlayer player) {
         ConfigKt.setConfig(testConfig("", true, true));
         TestPickupHooks.run(
@@ -277,7 +275,6 @@ public final class MagneticGameTestScenario {
         helper.despawnItem(DROP_POS, 2.0);
     }
 
-    /** An animated item that a pickup filter keeps refusing must stop following its target. */
     private static void verifyRefusedAnimatedItemsAreReleased(GameTestHelper helper) {
         Config config = testConfig("", true, true);
         config.getAnimation().setEnabled(true);

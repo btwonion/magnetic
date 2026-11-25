@@ -55,7 +55,6 @@ object SupportBreakListeners {
         setWillDrop(false)
         DropEventDispatcher.callAuthorized(DropEvent(items, exp, player, block.location), mark.authorization)
 
-        // Drop whatever did not fit, as vanilla would have.
         items.forEach { block.world.dropItemNaturally(block.location, it) }
         if (exp.toInt() > 0) {
             block.world.spawn(block.location.toCenterLocation(), ExperienceOrb::class.java) { it.experience = exp.toInt() }

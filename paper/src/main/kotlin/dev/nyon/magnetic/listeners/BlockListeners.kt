@@ -18,7 +18,7 @@ object BlockListeners {
 
     // Runs late so plugins that rewrite the drops first, such as auto-smelt plugins, are respected.
     private val blockDropItemEvent =
-        listen<BlockDropItemEvent>(EventPriority.HIGHEST) { // Return before calling the DropEvent to prevent executing expensive logic
+        listen<BlockDropItemEvent>(EventPriority.HIGHEST) {
             if (isCancelled || blockState.type.isIgnored) return@listen
             val authorization = DropEventDispatcher.authorize(player) ?: return@listen
 
@@ -42,7 +42,6 @@ object BlockListeners {
                 authorization
             )
 
-            // Delete items that have been added to the inventory
             items.removeAll(magneticItems.toSet())
             itemStacks.forEach { stack ->
                 player.world.dropItemNaturally(block.location, stack)
@@ -54,7 +53,6 @@ object BlockListeners {
         val itemStacks = itemsHarvested.toMutableList()
         DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, harvestedBlock.location))
 
-        // Delete items that have been added to the inventory
         itemsHarvested.removeIf { item ->
             itemStacks.none { stack -> stack.isSimilar(item) }
         }
@@ -65,7 +63,6 @@ object BlockListeners {
         val itemStacks = drops.toMutableList()
         DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, block.location))
 
-        // Delete items that have been added to the inventory
         drops.removeIf { item ->
             itemStacks.none { stack -> stack.isSimilar(item) }
         }

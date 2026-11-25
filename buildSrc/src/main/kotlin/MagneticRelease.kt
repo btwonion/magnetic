@@ -10,28 +10,21 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.maven
 
-// Versioning and publishing shared by every released Magnetic artifact: the Fabric and NeoForge
-// targets in mod/ and the Paper targets in paper/. Platform-specific settings stay in their scripts.
-
 object Magnetic {
     const val GITHUB_REPO = "btwonion/magnetic"
     const val MODRINTH_PROJECT = "LLfA8jAD"
     const val MAVEN_REPO = "https://repo.nyon.dev/releases"
 }
 
-/** The pre-release number from `beta` in gradle.properties, or null for a stable release. */
 val Project.betaNumber: Int?
     get() = property("beta").toString().toIntOrNull()
 
-/** The release version shared by every platform, such as `3.15.1` or `3.15.1-beta2`. */
 val Project.featureVersion: String
     get() = property("featureVersion").toString() + (betaNumber?.let { "-beta$it" } ?: "")
 
-/** The Minecraft releases a Stonecutter target supports, from `vers.supportedMcVersions`. */
 val Project.supportedMcVersions: List<String>
     get() = property("vers.supportedMcVersions").toString().split(',').map(String::trim).filter(String::isNotEmpty)
 
-/** Versions this target as `<featureVersion>-<vers.versionName>+<platform>`, such as `3.15.1-26.1+paper`. */
 fun Project.useMagneticVersion(platform: String) {
     group = "dev.nyon"
     version = "$featureVersion-${property("vers.versionName")}+$platform"

@@ -11,7 +11,7 @@ authors = "${mod_author}"
 description = '''
 ${mod_description}
 '''
-logoFile = "${icon}"
+${icon_key} = "${icon}"
 
 [[dependencies.${mod_id}]]
 modId = "minecraft"

@@ -1,6 +1,5 @@
 package dev.nyon.magnetic.utils
 
-/** A small expiring map with an injectable clock for deterministic tests. */
 internal class ExpiringMap<K, V>(
     private val currentTimeMillis: () -> Long = System::currentTimeMillis
 ) {

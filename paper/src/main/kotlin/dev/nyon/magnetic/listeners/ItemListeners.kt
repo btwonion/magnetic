@@ -24,7 +24,6 @@ object ItemListeners {
         DropEventDispatcher.call(DropEvent(itemStacks, mutableInt, killer, entity.location))
         droppedExp = mutableInt.toInt()
 
-        // Delete items that have been added to the inventory
         drops.removeIf { item ->
             itemStacks.none { stack -> stack.isSimilar(item) }
         }
@@ -34,7 +33,6 @@ object ItemListeners {
         val itemStacks = drops.toMutableList()
         DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, entity.location))
 
-        // Delete items that have been added to the inventory
         drops.removeIf { item ->
             itemStacks.none { stack -> stack.isSimilar(item) }
         }

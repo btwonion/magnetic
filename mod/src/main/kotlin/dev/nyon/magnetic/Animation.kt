@@ -83,7 +83,6 @@ object Animation {
 
     fun tracksItem(itemEntity: ItemEntity) = trackedItemEntities.containsKey(itemEntity)
 
-    /** Leaves a refused item where it is, as an ordinary dropped item anyone can pick up. */
     private fun release(itemEntity: ItemEntity, tracked: TrackedItem) {
         if (!trackedItemEntities.remove(itemEntity, tracked)) return
         itemEntity.setTarget(null)

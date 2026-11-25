@@ -9,7 +9,6 @@ object McMMOCompat {
     fun listenForEvents() {
         listen<McMMOItemSpawnEvent> {
             val serverPlayer = player ?: return@listen
-            // Delete items that have been added to the inventory
             if (collectDrop(itemStack, serverPlayer, location) == null) isCancelled = true
         }
 

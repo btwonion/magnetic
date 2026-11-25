@@ -36,7 +36,6 @@ public class MagneticBootstrapper implements PluginBootstrap {
 
         final TagKey<ItemType> TOOLS = TagKey.create(RegistryKey.ITEM, Key.key("magnetic:tools"));
 
-        // Add tool tag
         manager.registerEventHandler(
             LifecycleEvents.TAGS.preFlatten(RegistryKey.ITEM), event -> {
                 final PreFlattenTagRegistrar<ItemType> registrar = event.registrar();
@@ -57,10 +56,8 @@ public class MagneticBootstrapper implements PluginBootstrap {
             }
         );
 
-        // Add enchantment
         final TypedKey<Enchantment> MAGNETIC = TypedKey.create(RegistryKey.ENCHANTMENT, Key.key("magnetic:magnetic"));
 
-        // Paper 1.21.6 renamed the registry's registration event from freeze() to compose().
         //? if >=1.21.6
         var enchantmentRegistration = RegistryEvents.ENCHANTMENT.compose();
         //? if <1.21.6
@@ -80,7 +77,6 @@ public class MagneticBootstrapper implements PluginBootstrap {
                         .activeSlots(EquipmentSlotGroup.HAND)
                 )));
 
-        // Add enchantment to enchantment table, etc.
         manager.registerEventHandler(
             LifecycleEvents.TAGS.preFlatten(RegistryKey.ENCHANTMENT), event -> {
                 final PreFlattenTagRegistrar<Enchantment> registrar = event.registrar();
@@ -95,10 +91,8 @@ public class MagneticBootstrapper implements PluginBootstrap {
     private boolean needsEnchantment() {
         try {
             List<String> configText = Files.readAllLines(Path.of("./plugins/magnetic/magnetic.json"));
-            // Check for the enchantment option in the current config format
             if (configText.stream()
                 .anyMatch(line -> line.contains("ENCHANTMENT"))) return true;
-            // Check for the enchantment option in the past config formats
             return configText.stream()
                 .anyMatch(line -> (line.contains("needEnchantment") || line.contains("enchantmentRequired")) &&
                     line.contains("true"));

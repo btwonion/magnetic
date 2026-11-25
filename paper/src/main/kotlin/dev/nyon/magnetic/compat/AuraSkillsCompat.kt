@@ -7,7 +7,6 @@ object AuraSkillsCompat {
 
     fun listenForEvents() {
         listen<LootDropEvent> {
-            // Delete items that have been added to the inventory
             if (collectDrop(item, player, location) == null) isCancelled = true
         }
     }

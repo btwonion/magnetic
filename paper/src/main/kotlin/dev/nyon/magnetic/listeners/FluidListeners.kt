@@ -91,7 +91,6 @@ object FluidListeners {
         }
     }
 
-    // Removes expired fluids and fluids that are no longer in place.
     private val cleanupTask = Main.INSTANCE.server.asyncScheduler.runAtFixedRate(
         Main.INSTANCE,
         {

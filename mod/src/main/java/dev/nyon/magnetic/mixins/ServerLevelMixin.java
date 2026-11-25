@@ -50,7 +50,6 @@ public class ServerLevelMixin implements ServerLevelHolder {
         return magnetic$leafDecayTracker;
     }
 
-    // Tick cleanup for position tracker
     @Inject(
         method = "tick",
         at = @At("TAIL")
@@ -62,7 +61,6 @@ public class ServerLevelMixin implements ServerLevelHolder {
         SmeltingDatapackCompat.collectDue(level, level.getGameTime());
     }
 
-    // Central interception: addFreshEntity
     @Inject(
         method = "addFreshEntity",
         at = @At("HEAD"),

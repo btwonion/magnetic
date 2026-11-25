@@ -11,12 +11,6 @@ class ConditionChain(val raw: String) {
     @Transient
     private val parsedStatements = extractStatements(raw)
 
-    /**
-     * Check for the result of the statement and report the error to the chat if the statement is misconfigured.
-     *
-     * @param player The player the checks should be run against.
-     * @return The result of the statement.
-     */
     fun checkAndReport(player: Player): Boolean {
         try {
             return validate(player)
@@ -30,21 +24,10 @@ class ConditionChain(val raw: String) {
         return false
     }
 
-    /**
-     * Validate a preprocessed set of statements for a single boolean. Currently just follows a start-to-end procedure,
-     * so no weights of operators are respected.
-     *
-     * @param player The player the checks should be run against.
-     * @return The result of the statement.
-     * @throws IllegalStateException If the statement has an invalid syntax. To check this, it will ignore empty spaces,
-     * illegal statements, but it won't accept two statements of the same type followed by one another.
-     */
+    /** Evaluates from left to right, without operator precedence. */
     fun validate(player: Player): Boolean {
-        // Will be instantiated as soon as the first condition is processed and will not be changed afterward
         var firstCondition: Condition? = null
-        // Will be changed everytime an operator is processed
         var operatorToApply: Operator? = null
-        // Always set the previously processed statement
         var previousBoolean = true
         parsedStatements.forEachIndexed { index, statement ->
             if (index == 0) if (statement !is Condition) throw IllegalStateException("A statement must start with a condition.")
@@ -69,12 +52,6 @@ class ConditionChain(val raw: String) {
         return previousBoolean
     }
 
-    /**
-     * Extract conditions and statements from the raw condition chain.
-     *
-     * @param rawStatement The raw condition chain as a string.
-     * @return A list of the statements.
-     */
     fun extractStatements(rawStatement: String): List<Statement> {
         val split = rawStatement.split(' ')
         return split.mapNotNull { s ->
