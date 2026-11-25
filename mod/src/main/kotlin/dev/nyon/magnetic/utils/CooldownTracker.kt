@@ -1,6 +1,5 @@
 package dev.nyon.magnetic.utils
 
-/** Tracks independent cooldowns without tying callers to the system clock. */
 internal class CooldownTracker<K>(
     private val currentTimeMillis: () -> Long = System::currentTimeMillis
 ) {

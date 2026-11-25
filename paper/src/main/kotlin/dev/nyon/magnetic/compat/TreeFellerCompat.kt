@@ -31,7 +31,6 @@ private class MagneticTreeFellerCompatibility : PluginCompatibility() {
     override fun dropItem(player: Player?, item: Item) {
         if (player == null || !item.isValid || item.itemStack.isEmpty) return
 
-        // Delete items that have been added to the inventory, keep the leftover otherwise
         collectDrop(item, player)
     }
 }

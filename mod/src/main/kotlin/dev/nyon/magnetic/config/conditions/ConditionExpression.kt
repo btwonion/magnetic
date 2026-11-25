@@ -1,11 +1,6 @@
 package dev.nyon.magnetic.config.conditions
 
-/**
- * A parsed Magnetic condition expression.
- *
- * Expressions intentionally evaluate from left to right to preserve the documented config format.
- * Keeping parsing independent from Minecraft makes syntax and truth tables cheap to test.
- */
+/** Evaluates from left to right to keep the documented config format. */
 internal class ConditionExpression private constructor(
     private val firstCondition: String?,
     private val remainingConditions: List<Pair<LogicalOperator, String>>

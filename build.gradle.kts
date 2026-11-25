@@ -26,7 +26,6 @@ repositories {
     mavenCentral()
 }
 
-// Stonecutter registers one project per target, such as :mod:26.3-fabric and :paper:26.1.
 val modTargets = project(":mod").subprojects
 val paperTargets = project(":paper").subprojects
 

@@ -11,12 +11,6 @@ class ConditionChain(val raw: String) {
     @Transient
     private val parsedExpression = runCatching { ConditionExpression.parse(raw) }
 
-    /**
-     * Check for the result of the statement and report the error to the chat if the statement is misconfigured.
-     *
-     * @param player The player the checks should be run against.
-     * @return The result of the statement.
-     */
     fun checkAndReport(player: ServerPlayer): Boolean {
         try {
             return validate(player)
@@ -30,13 +24,7 @@ class ConditionChain(val raw: String) {
         return false
     }
 
-    /**
-     * Validate a parsed expression from left to right, without operator precedence.
-     *
-     * @param player The player the checks should be run against.
-     * @return The result of the statement.
-     * @throws IllegalStateException If the expression contains an unknown token or invalid syntax.
-     */
+    /** Evaluates from left to right, without operator precedence. */
     fun validate(player: ServerPlayer): Boolean {
         return parsedExpression.getOrThrow().evaluate { identifier ->
             conditions.single { identifier in it.identifiers }.check(player)

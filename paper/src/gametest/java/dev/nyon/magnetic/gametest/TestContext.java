@@ -144,8 +144,6 @@ final class TestContext {
         complete(null);
     }
 
-    // Assertions
-
     static void check(boolean condition, String message) {
         if (!condition) throw new AssertionError(message);
     }
@@ -184,8 +182,6 @@ final class TestContext {
             radius
         ));
     }
-
-    // Lifecycle
 
     private void onTickEnd() {
         if (done || FOLIA && !Bukkit.isOwnedByCurrentRegion(origin)) return;

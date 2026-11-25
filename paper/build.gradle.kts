@@ -8,7 +8,6 @@ import xyz.jpenilla.resourcefactory.paper.PaperPluginYaml
 plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinx.serialization)
-    // On the build classpath through buildSrc, which shares its release setup with the mod.
     id("me.modmuss50.mod-publish-plugin")
     alias(libs.plugins.paper.userdev)
     alias(libs.plugins.run.paper)
@@ -17,7 +16,6 @@ plugins {
     `maven-publish`
 }
 
-// Stonecutter evaluates this script once per node; paper/versions/<node>/gradle.properties sets these.
 val mcVersion = property("vers.mcVersion").toString()
 val javaVersion = property("vers.javaVersion").toString().toInt()
 useMagneticVersion("paper")
@@ -82,8 +80,6 @@ runPaper.folia.registerTask {
     minecraftVersion(foliaVersion)
 }
 
-// Gameplay tests: a separate test plugin, never published, that joins client-less players on a
-// headless server, runs the scenarios in src/gametest and stops the server. See docs/TESTING.md.
 val gametest: SourceSet = sourceSets.create("gametest") {
     compileClasspath += sourceSets.main.get().output + sourceSets.main.get().compileClasspath
 }
@@ -110,7 +106,6 @@ fun registerGameTestServer(taskName: String, serverName: String, version: String
         runDirectory(runDir)
         val results = runDir.resolve("magnetic-gametest-results.txt")
         doFirst {
-            // Keep the downloaded libraries, but start every run from a fresh world and config.
             listOf("world", "world_nether", "world_the_end", "plugins", "logs", results.name)
                 .forEach { runDir.resolve(it).deleteRecursively() }
             runDir.mkdirs()

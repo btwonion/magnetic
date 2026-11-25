@@ -26,8 +26,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Every Stonecutter target registered in settings.gradle.kts. Mod gameplay tests run on
-        # the latest target; every Paper target runs its own on the newest release of its range.
         include:
           - { project: mod, target: 1.21.1-fabric }
           - { project: mod, target: 1.21.1-neoforge }

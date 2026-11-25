@@ -24,7 +24,6 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.moddev) apply false
     alias(libs.plugins.modstitch)
-    // On the build classpath through buildSrc, which shares its release setup with Paper.
     id("me.modmuss50.mod-publish-plugin")
     `maven-publish`
 }
@@ -60,10 +59,11 @@ modstitch {
 
         replacementProperties.put("github", Magnetic.GITHUB_REPO)
         replacementProperties.put("icon", "assets/magnetic/icon.png")
+        replacementProperties.put("icon_key", if (stonecutter.eval(mcVersion, ">=26.3")) "iconFile" else "logoFile")
         replacementProperties.put("mc", property("vers.mcVersionRange").toString())
         replacementProperties.put("fabric_loader", fabricLoader)
         replacementProperties.put("flk", fabricLanguageKotlin)
-        prop("vers.deps.fapi") { replacementProperties.put("fapi", it) }
+        (prop("vers.deps.fapiMin") { it } ?: prop("vers.deps.fapi") { it })?.let { replacementProperties.put("fapi", it) }
         prop("vers.deps.yacl") { replacementProperties.put("yacl", it) }
         prop("vers.deps.modMenu") { replacementProperties.put("modmenu", it) }
     }
@@ -250,27 +250,21 @@ dependencies {
 
     propModDependency("yacl", { "dev.isxander:yet-another-config-lib:$it" })
 
-    // Compatibility implementations
-    // RightClickHarvest
     propCompileOnlyDependency(
         "compat.rightClickHarvest"
     ) { "maven.modrinth:rightclickharvest:$it" }
-    // Veinminer
     propCompileOnlyDependency(
         "compat.veinminer"
     ) { "maven.modrinth:veinminer:$it" }
-    // FallingTree
     propCompileOnlyDependency(
         "compat.fallingTree"
     ) { "maven.modrinth:fallingtree:$it" }
-    // KleeSlabs
     propCompileOnlyDependency(
         "compat.kleeSlabs"
     ) { "maven.modrinth:kleeslabs:$it" }
     propCompileOnlyDependency(
         "compat.balm"
     ) { "maven.modrinth:balm:$it" }
-    // TreeHarvester
     propCompileOnlyDependency(
         "compat.treeHarvester"
     ) { "maven.modrinth:tree-harvester:$it" }

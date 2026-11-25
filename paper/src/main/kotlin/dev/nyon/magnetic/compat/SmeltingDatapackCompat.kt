@@ -22,7 +22,6 @@ import org.bukkit.persistence.PersistentDataType
  * has had time to smelt them.
  */
 internal object SmeltingDatapackCompat {
-    /** Enchantments of auto-smelt datapacks that act on item entities. */
     private val itemEntityEnchantments = setOf(
         // Smelting Enchantment and Veinmine & Autosmelt Enchantments
         "smelting_enchantment:smelting",
@@ -65,7 +64,6 @@ internal object SmeltingDatapackCompat {
         }
     }
 
-    /** Whether [player]'s drops must spawn first because the tool carries an item-entity auto-smelt enchantment. */
     fun defersDrops(player: Player): Boolean {
         if (!config.itemsAllowed) return false
         return player.inventory.itemInMainHand.enchantments.keys.any { it.key.asString() in itemEntityEnchantments }
@@ -73,7 +71,6 @@ internal object SmeltingDatapackCompat {
 
     fun isDeferred(item: Item): Boolean = item.persistentDataContainer.has(deferredDropKey)
 
-    /** Collects [item] for the authorized player once the datapack had time to smelt it. */
     fun collectAfterDatapack(item: Item, authorization: DropAuthorization) {
         item.persistentDataContainer.set(deferredDropKey, PersistentDataType.BYTE, 1.toByte())
         item.scheduler.execute(Main.INSTANCE, {
@@ -84,7 +81,6 @@ internal object SmeltingDatapackCompat {
         }, null, COLLECTION_DELAY_TICKS)
     }
 
-    /** Defers the drops Veinminer is about to spawn for the authorized player. */
     fun deferVeinminerDrops(items: List<ItemStack>, authorization: DropAuthorization) {
         if (items.isEmpty()) return
         pendingVeinminerDrops.set(

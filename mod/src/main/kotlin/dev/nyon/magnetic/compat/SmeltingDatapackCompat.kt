@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap
  * has had time to smelt them.
  */
 object SmeltingDatapackCompat {
-    /** Enchantments of auto-smelt datapacks that act on item entities. */
     private val itemEntityEnchantments = setOf(
         // Smelting Enchantment and Veinmine & Autosmelt Enchantments
         "smelting_enchantment:smelting",
@@ -38,10 +37,6 @@ object SmeltingDatapackCompat {
 
     private val pendingDrops = ConcurrentHashMap<ItemEntity, PendingDrop>()
 
-    /**
-     * Lets [itemEntity] spawn and schedules its collection when [player]'s tool has an item-entity auto-smelt
-     * enchantment. Returns whether the drop was deferred.
-     */
     @JvmStatic
     fun deferIfNeeded(itemEntity: ItemEntity, player: ServerPlayer, level: ServerLevel): Boolean {
         if (!config.itemsAllowed || !hasItemEntityEnchantment(player)) return false
@@ -49,7 +44,6 @@ object SmeltingDatapackCompat {
         return true
     }
 
-    /** Collects the deferred drops of [level] that are due at [gameTime]. */
     @JvmStatic
     fun collectDue(level: ServerLevel, gameTime: Long) {
         pendingDrops.forEach { (itemEntity, pending) ->

@@ -14,7 +14,6 @@ import net.kyori.adventure.translation.Translator
 import java.text.MessageFormat
 *///?}
 
-// Adventure added MiniMessageTranslator after the Adventure release that Paper 1.21.1 ships.
 //? if >=1.21.6
 object MiniMessageTranslator : MiniMessageTranslator() {
 //? if <1.21.6
@@ -25,7 +24,6 @@ object MiniMessageTranslator : MiniMessageTranslator() {
     private val translationsDir = Bukkit.getPluginsFolder().resolve("magnetic/translations/").toPath().createDirectories()
 
     fun loadTranslations() {
-        // Create all language files in the plugins folder or add missing keys
         supportedLanguages.forEach { language ->
             val inputStream =
                 this::class.java.classLoader.getResourceAsStream("assets/translations/$language.properties") ?: return@forEach
@@ -33,7 +31,6 @@ object MiniMessageTranslator : MiniMessageTranslator() {
             val destination = translationsDir.resolve("$language.properties")
             if (destination.notExists()) destination.createFile()
 
-            // Check which keys still have to be added
             val destinationText = destination.readLines()
             original.toMutableList().filter { originalLine ->
                 if (originalLine.isEmpty()) return@filter false
@@ -42,7 +39,6 @@ object MiniMessageTranslator : MiniMessageTranslator() {
             }.also(destination::appendLines)
         }
 
-        // Add all the configured language keys to local cache
         val entries = translationsDir.listDirectoryEntries()
         entries.forEach { path ->
             val language = path.nameWithoutExtension

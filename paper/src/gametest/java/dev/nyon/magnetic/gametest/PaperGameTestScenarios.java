@@ -644,8 +644,6 @@ final class PaperGameTestScenarios {
         return cells.toArray(int[][]::new);
     }
 
-    // Helpers
-
     private static Config testConfig(String condition) {
         Config config = new Config();
         config.setConditionStatement(new ConditionChain(condition));

@@ -128,7 +128,6 @@ internal object DropEntityDispatcher {
         item.persistentDataContainer.set(handledDropKey, PersistentDataType.BYTE, 1.toByte())
 
         // Other plugins already observed the original spawn, so restore without firing it twice.
-        // Use the server level directly: CraftWorld.addEntityToWorld was removed in Paper 26.3.
         world.handle.addFreshEntity(handle, null)
     }
 }
