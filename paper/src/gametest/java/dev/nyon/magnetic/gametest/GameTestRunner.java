@@ -1,7 +1,6 @@
 package dev.nyon.magnetic.gametest;
 
-import dev.nyon.magnetic.config.Config;
-import dev.nyon.magnetic.config.ConfigCacheKt;
+import dev.nyon.magnetic.common.config.Config;
 import dev.nyon.magnetic.config.ConfigKt;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -105,8 +104,6 @@ final class GameTestRunner {
 
     private void resetConfig() {
         ConfigKt.setConfig(originalConfig);
-        ConfigCacheKt.reloadIgnoredBlocks();
-        ConfigCacheKt.reloadIgnoredEntities();
     }
 
     private void finish(String abortReason) {

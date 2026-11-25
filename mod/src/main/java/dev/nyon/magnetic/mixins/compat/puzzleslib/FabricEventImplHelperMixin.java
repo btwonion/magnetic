@@ -1,14 +1,14 @@
 package dev.nyon.magnetic.mixins.compat.puzzleslib;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
+import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
@@ -16,26 +16,22 @@ import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 @Mixin(targets = "fuzs.puzzleslib.fabric.impl.event.FabricEventImplHelper", remap = false)
 public class FabricEventImplHelperMixin {
 
-    @Inject(method = "tryOnLivingDrops", at = @At("HEAD"), remap = false)
-    private static void setPlayerOnCapturedDrops(
+    @WrapMethod(method = "tryOnLivingDrops", remap = false)
+    private static boolean scopeCapturedDropsToPlayer(
         LivingEntity entity,
         DamageSource source,
         int lastHurtByPlayerMemoryTime,
-        CallbackInfoReturnable<Boolean> cir
+        Operation<Boolean> original
     ) {
-        if (!(entity.getKillCredit() instanceof ServerPlayer player)) return;
-        if (MagneticCheckKt.isIgnored(entity.getType())) return;
-        if (MagneticCheckKt.failsLongRangeCheck(entity, player)) return;
-        threadLocal.set(player);
-    }
-
-    @Inject(method = "tryOnLivingDrops", at = @At("RETURN"), remap = false)
-    private static void clearPlayerOnCapturedDrops(
-        LivingEntity entity,
-        DamageSource source,
-        int lastHurtByPlayerMemoryTime,
-        CallbackInfoReturnable<Boolean> cir
-    ) {
-        threadLocal.remove();
+        if (!(entity.getKillCredit() instanceof ServerPlayer player)
+            || MagneticCheckKt.isIgnored(entity.getType())
+            || MagneticCheckKt.failsLongRangeCheck(entity, player)) {
+            return original.call(entity, source, lastHurtByPlayerMemoryTime);
+        }
+        return ThreadLocalScope.call(
+            threadLocal,
+            player,
+            () -> original.call(entity, source, lastHurtByPlayerMemoryTime)
+        );
     }
 }

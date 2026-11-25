@@ -4,16 +4,17 @@ import com.destroystokyo.paper.event.block.BlockDestroyEvent
 import dev.nyon.magnetic.DropAuthorization
 import dev.nyon.magnetic.DropEvent
 import dev.nyon.magnetic.DropEventDispatcher
+import dev.nyon.magnetic.extensions.BlockKey
+import dev.nyon.magnetic.extensions.adjacentFaces
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
+import dev.nyon.magnetic.extensions.toPositionKey
 import org.apache.commons.lang3.mutable.MutableInt
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 import org.bukkit.entity.ExperienceOrb
 import org.bukkit.event.EventPriority
 import org.bukkit.event.block.BlockBreakEvent
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -29,13 +30,10 @@ import java.util.concurrent.ConcurrentHashMap
  */
 @Suppress("unused")
 object SupportBreakListeners {
-    private data class BlockKey(val worldId: UUID, val x: Int, val y: Int, val z: Int)
-
     private class Mark(val authorization: DropAuthorization, val expiresAt: Long)
 
     // Vanilla breaks unsupported blocks within a few ticks of losing their support.
     private const val MARK_LIFETIME_MILLIS = 1000L
-    private val directions = listOf(BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST)
     private val marks = ConcurrentHashMap<BlockKey, Mark>()
 
     private val blockBreakEvent = listen<BlockBreakEvent>(EventPriority.MONITOR) {
@@ -45,7 +43,7 @@ object SupportBreakListeners {
     }
 
     private val blockDestroyEvent = listen<BlockDestroyEvent>(EventPriority.HIGHEST) {
-        val mark = marks.remove(block.key()) ?: return@listen
+        val mark = marks.remove(block.toPositionKey()) ?: return@listen
         if (isCancelled || !willDrop() || mark.expiresAt < System.currentTimeMillis()) return@listen
         if (block.type.isIgnored || block.canPlace(block.blockData)) return@listen
         val player = Bukkit.getPlayer(mark.authorization.playerId) ?: return@listen
@@ -66,8 +64,6 @@ object SupportBreakListeners {
         val now = System.currentTimeMillis()
         if (marks.size > 4096) marks.values.removeIf { it.expiresAt < now }
         val mark = Mark(authorization, now + MARK_LIFETIME_MILLIS)
-        directions.forEach { marks[block.getRelative(it).key()] = mark }
+        adjacentFaces.forEach { marks[block.getRelative(it).toPositionKey()] = mark }
     }
-
-    private fun Block.key() = BlockKey(world.uid, x, y, z)
 }

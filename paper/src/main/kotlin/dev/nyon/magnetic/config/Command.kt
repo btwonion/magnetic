@@ -3,6 +3,7 @@ package dev.nyon.magnetic.config
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import dev.nyon.konfig.config.loadConfig
+import dev.nyon.magnetic.common.config.Config
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import net.kyori.adventure.text.Component
@@ -13,8 +14,6 @@ object Command {
             .requires { it.sender.isOp }
             .executes { ctx ->
                 config = loadConfig<Config>()
-                reloadIgnoredEntities()
-                reloadIgnoredBlocks()
                 ctx.source.sender.sendMessage(Component.text("Successfully reloaded config."))
                 return@executes Command.SINGLE_SUCCESS
             }

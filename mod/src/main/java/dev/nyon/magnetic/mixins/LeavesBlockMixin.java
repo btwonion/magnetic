@@ -6,6 +6,7 @@ import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.BlockDropScope;
 import dev.nyon.magnetic.utils.LeafDecayTracker;
+import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -54,13 +55,8 @@ public class LeavesBlockMixin {
 
         LeafDecayTracker tracker = ((ServerLevelHolder) level).getLeafDecayTracker();
         UUID playerUuid = tracker.take(pos);
-        if (!ConfigKt.getConfig().getLeafDecay().getEnabled() || playerUuid == null) {
-            original.call(state, level, pos, random);
-            return;
-        }
-
-        ServerPlayer player = level.getServer().getPlayerList().getPlayer(playerUuid);
-        if (player == null || player.level() != level) {
+        ServerPlayer player = MixinHelper.playerIn(level, playerUuid);
+        if (!ConfigKt.getConfig().getLeafDecay().getEnabled() || player == null) {
             original.call(state, level, pos, random);
             return;
         }

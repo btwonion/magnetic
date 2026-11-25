@@ -73,12 +73,13 @@ internal object PluginCompats {
     fun registerAvailable() {
         compats.forEach { compat ->
             if (!compat.isAvailable()) return@forEach
+            fun warn(e: Throwable) = Main.INSTANCE.logger.warning("Failed to enable ${compat.name} compatibility: $e")
             try {
                 compat.register()
             } catch (e: Exception) {
-                Main.INSTANCE.logger.warning("Failed to enable ${compat.name} compatibility: $e")
+                warn(e)
             } catch (e: LinkageError) {
-                Main.INSTANCE.logger.warning("Failed to enable ${compat.name} compatibility: $e")
+                warn(e)
             }
         }
     }

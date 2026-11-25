@@ -81,7 +81,7 @@ public class RightClickHarvestMixin {
         if (experience > 0
             && !MagneticCheckKt.isIgnored(state)
             && experiencePlayer instanceof ServerPlayer serverPlayer) {
-            remaining = MixinHelper.modifyExpressionValuePlayerExp(serverPlayer, experience, pos);
+            remaining = MixinHelper.collectExperience(serverPlayer, experience, pos);
         }
         original.call(experiencePlayer, remaining);
     }

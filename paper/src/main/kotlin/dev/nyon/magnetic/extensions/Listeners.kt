@@ -1,6 +1,6 @@
 package dev.nyon.magnetic.extensions
 
-import dev.nyon.magnetic.Plugin
+import dev.nyon.magnetic.Main
 import org.bukkit.Bukkit
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
@@ -21,7 +21,7 @@ inline fun <reified T : Event> listen(priority: EventPriority = EventPriority.NO
         listener,
         priority,
         { _, event -> (event as? T)?.let { listener.onEvent(it) } },
-        Plugin
+        Main.INSTANCE
     )
 
     return listener

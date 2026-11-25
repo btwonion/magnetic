@@ -1,25 +1,31 @@
 package dev.nyon.magnetic
 
-import dev.nyon.magnetic.config.Config
+import dev.nyon.magnetic.common.AlertType
+import dev.nyon.magnetic.common.FullInventoryAlerts
+import dev.nyon.magnetic.config.conditions.checkAndReport
 import dev.nyon.magnetic.config.config
-import dev.nyon.magnetic.extensions.centerVec
 import dev.nyon.magnetic.mixins.ExperienceOrbInvoker
-import dev.nyon.magnetic.utils.CooldownTracker
 import dev.nyon.magnetic.utils.MixinHelper
 import dev.nyon.magnetic.utils.MixinHelper.conditionAlreadyChecked
 import dev.nyon.magnetic.utils.ThreadLocalScope
+import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvents
 import net.minecraft.stats.Stats
 import net.minecraft.world.entity.ExperienceOrb
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.phys.Vec3
 import org.apache.commons.lang3.mutable.MutableInt
-import java.util.UUID
 
 object DropEvent {
-    @Suppress("KotlinConstantConditions")
+    private val inventoryAlerts = FullInventoryAlerts()
+
     operator fun invoke(
         items: MutableList<ItemStack>,
         exp: MutableInt,
@@ -30,51 +36,52 @@ object DropEvent {
 
         if (config.itemsAllowed) {
             items.removeIf { item ->
-                if (config.animation.enabled) {
-                    val canAddItem = try {
-                        canAddItem(item, player)
-                    } catch (_: RuntimeException) {
-                        return@removeIf false
-                    }
-                    if (canAddItem) {
-                        Animation.pullItemToPlayer(item, pos.centerVec(), player)
-                        return@removeIf true
-                    }
+                if (item.isEmpty) return@removeIf true
+                if (config.animation.enabled && canAddItemOrFalse(item, player)) {
+                    Animation.pullItemToPlayer(item, Vec3.atCenterOf(pos), player)
+                    return@removeIf true
                 }
 
-                if (item.isEmpty) return@removeIf true
                 val remaining = pickUp(item, player)
                 if (remaining.isEmpty) return@removeIf true
                 item.count = remaining.count
-                if (isInventoryFull(remaining, player)) tickInventoryAlert(player)
+                if (!canAddItemOrFalse(remaining, player)) tickInventoryAlert(player)
                 false
             }
         }
 
-        if (config.expAllowed) {
-            val fakeExperienceOrb = ExperienceOrb(player.level(), 0.0, 0.0, 0.0, exp.toInt())
-            player.take(fakeExperienceOrb, 1)
-            val leftExp = (fakeExperienceOrb as ExperienceOrbInvoker)
-                .invokeRepairPlayerItems(player, exp.toInt())
+        if (config.expAllowed && exp.toInt() > 0) {
+            val orb = ExperienceOrb(player.level(), 0.0, 0.0, 0.0, exp.toInt())
+            val leftExp = (orb as ExperienceOrbInvoker).invokeRepairPlayerItems(player, exp.toInt())
             if (leftExp > 0) player.giveExperiencePoints(leftExp)
             exp.value = 0
         }
     }
 
-    private val cooldowns = CooldownTracker<Pair<AlertType, UUID>>()
-
     private fun tickInventoryAlert(player: ServerPlayer) {
-        val alerts = config.fullInventoryAlert.let {
-            listOf(
-                AlertType.SOUND to it.soundAlert,
-                AlertType.TEXT to it.textAlert,
-                AlertType.TITLE to it.titleAlert
-            )
-        }
-        alerts.forEach { (type, alert) ->
-            if (!alert.enabled) return@forEach
-            if (cooldowns.tryAcquire(type to player.uuid, alert.cooldownInSeconds * 1_000L)) {
-                alert.invoke(player)
+        inventoryAlerts.due(config.fullInventoryAlert, player.uuid).forEach { type ->
+            when (type) {
+                AlertType.SOUND -> player.playSound(SoundEvents.NOTE_BLOCK_PLING.value(), 1f, 1f)
+                AlertType.TEXT -> player.sendSystemMessage(
+                    Component.translatableWithFallback(
+                        "chat.message.fullinventoryalert.text", "[Magnetic] Your inventory is full!"
+                    ).withStyle(ChatFormatting.GOLD)
+                )
+                AlertType.TITLE -> {
+                    player.connection.send(
+                        ClientboundSetTitleTextPacket(
+                            Component.translatableWithFallback("chat.message.fullinventoryalert.title.main", "!!!")
+                                .withStyle(ChatFormatting.RED)
+                        )
+                    )
+                    player.connection.send(
+                        ClientboundSetSubtitleTextPacket(
+                            Component.translatableWithFallback(
+                                "chat.message.fullinventoryalert.title.subtitle", "Your inventory is full!"
+                            ).withStyle(ChatFormatting.RED)
+                        )
+                    )
+                }
             }
         }
     }
@@ -97,23 +104,11 @@ object DropEvent {
         return if (itemEntity.isRemoved) ItemStack.EMPTY else itemEntity.item
     }
 
-    /** Distinguishes a full inventory from a pickup that another mod refused, such as a pickup filter. */
-    private fun isInventoryFull(stack: ItemStack, player: Player): Boolean = try {
-        !canAddItem(stack, player)
+    private fun canAddItemOrFalse(stack: ItemStack, player: Player): Boolean = try {
+        player.inventory.freeSlot >= 0 ||
+            player.hasInfiniteMaterials() ||
+            !stack.isDamaged && player.inventory.getSlotWithRemainingSpace(stack) > -1
     } catch (_: RuntimeException) {
-        true
-    }
-
-    private fun canAddItem(stack: ItemStack, player: Player): Boolean {
-        if (player.inventory.freeSlot >= 0) return true
-        if (player.hasInfiniteMaterials()) return true
-        if (stack.isDamaged) return false
-        return player.inventory.getSlotWithRemainingSpace(stack) > -1
-    }
-
-    private enum class AlertType {
-        SOUND,
-        TEXT,
-        TITLE
+        false
     }
 }

@@ -191,6 +191,17 @@ tasks.named<ProcessResources>("processResources") {
     }
 }
 
+val bundledCommon: Configuration by configurations.creating {
+    isTransitive = false
+}
+
+tasks.named<Jar>("jar") {
+    dependsOn(bundledCommon)
+    from({ bundledCommon.map(::zipTree) }) {
+        exclude("META-INF/MANIFEST.MF")
+    }
+}
+
 repositories {
     mavenCentral()
     // maven("https://maven.terraformersmc.com")
@@ -274,6 +285,8 @@ dependencies {
 
     modstitchApi(libs.konfig)
     modstitchJiJ(libs.konfig)
+    modstitchApi(project(":common")) { isTransitive = false }
+    bundledCommon(project(":common"))
 
     // Keep NeoForge's pure JVM suite independent of a loader launch. The
     // oldest supported NeoForge cannot load the current KotlinLangForge in

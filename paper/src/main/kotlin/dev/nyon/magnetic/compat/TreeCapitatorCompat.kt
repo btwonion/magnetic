@@ -4,9 +4,11 @@ import dev.nyon.magnetic.DropAuthorization
 import dev.nyon.magnetic.DropEntityDispatcher
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
+import dev.nyon.magnetic.extensions.BlockKey
 import dev.nyon.magnetic.extensions.SingleListener
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
+import dev.nyon.magnetic.extensions.toPositionKey
 import dev.nyon.magnetic.extensions.unregister
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import org.bukkit.Bukkit
@@ -36,7 +38,7 @@ object TreeCapitatorCompat {
     private data class PendingSession(
         val id: Long,
         val authorization: DropAuthorization,
-        val root: TreeCapitatorBlockKey,
+        val root: BlockKey,
         val expiresAtTick: Int
     )
 
@@ -98,7 +100,7 @@ object TreeCapitatorCompat {
             val session = PendingSession(
                 nextSessionId.incrementAndGet(),
                 authorization,
-                blockState.location.toMagneticBlockKey(),
+                blockState.location.toPositionKey(),
                 currentTick + SESSION_TTL_TICKS
             )
 
@@ -170,9 +172,9 @@ object TreeCapitatorCompat {
             MARKER_DISCOVERY_RANGE
         ).asSequence()
             .filter { it.isTreeCapitatorMarker() }
-            .map { it.location.toMagneticBlockKey() }
+            .map { it.location.toPositionKey() }
             .toMutableSet()
-            .also { it.add(marker.location.toMagneticBlockKey()) }
+            .also { it.add(marker.location.toPositionKey()) }
 
         val session = synchronized(stateLock) {
             val currentTick = Bukkit.getCurrentTick()
@@ -258,7 +260,4 @@ object TreeCapitatorCompat {
         }
     }
 
-    private fun Location.toMagneticBlockKey(): TreeCapitatorBlockKey {
-        return TreeCapitatorBlockKey(world.uid, blockX, blockY, blockZ)
-    }
 }

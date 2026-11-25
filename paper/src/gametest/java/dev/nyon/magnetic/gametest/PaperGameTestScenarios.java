@@ -1,10 +1,10 @@
 package dev.nyon.magnetic.gametest;
 
-import dev.nyon.magnetic.config.Config;
+import dev.nyon.magnetic.common.conditions.ConditionChain;
+import dev.nyon.magnetic.common.config.Config;
+import dev.nyon.magnetic.common.config.Identifier;
 import dev.nyon.magnetic.config.ConfigCacheKt;
 import dev.nyon.magnetic.config.ConfigKt;
-import dev.nyon.magnetic.config.Identifier;
-import dev.nyon.magnetic.config.conditions.ConditionChain;
 import dev.nyon.magnetic.gametest.GameTestRunner.GameTest;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
@@ -175,7 +175,7 @@ final class PaperGameTestScenarios {
 
     private static void ignoredBlockDropsNormally(TestContext ctx) {
         Config config = testConfig("ENCHANTMENT");
-        config.setIgnoreBlocks(List.of(new Identifier(NamespacedKey.minecraft("diamond_ore"), false)));
+        config.setIgnoreBlocks(List.of(new Identifier("minecraft", "diamond_ore", false)));
         apply(config);
         Player player = ctx.player(0, PLAYER_DZ);
         player.getInventory().setItemInMainHand(magnetic(Material.DIAMOND_PICKAXE));
@@ -208,7 +208,7 @@ final class PaperGameTestScenarios {
 
     private static void ignoredMobDropsNormally(TestContext ctx) {
         Config config = testConfig("ENCHANTMENT");
-        config.setIgnoreEntities(List.of(new Identifier(NamespacedKey.minecraft("cow"), false)));
+        config.setIgnoreEntities(List.of(new Identifier("minecraft", "cow", false)));
         apply(config);
         Player player = ctx.player(0, PLAYER_DZ);
         player.getInventory().setItemInMainHand(magnetic(Material.DIAMOND_SWORD));
@@ -656,8 +656,6 @@ final class PaperGameTestScenarios {
 
     private static void apply(Config config) {
         ConfigKt.setConfig(config);
-        ConfigCacheKt.reloadIgnoredBlocks();
-        ConfigCacheKt.reloadIgnoredEntities();
     }
 
     private static ItemStack magnetic(Material type) {

@@ -6,15 +6,16 @@ import dev.nyon.magnetic.DropEntityDispatcher
 import dev.nyon.magnetic.DropEventDispatcher
 import dev.nyon.magnetic.Main
 import dev.nyon.magnetic.config.config
+import dev.nyon.magnetic.extensions.BlockKey
+import dev.nyon.magnetic.extensions.adjacentFaces
 import dev.nyon.magnetic.extensions.isIgnored
 import dev.nyon.magnetic.extensions.listen
+import dev.nyon.magnetic.extensions.toPositionKey
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.NamespacedKey
 import org.bukkit.Tag
 import org.bukkit.World
-import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 import org.bukkit.block.data.type.Leaves
 import org.bukkit.entity.Item
 import org.bukkit.event.EventPriority
@@ -23,7 +24,6 @@ import org.bukkit.event.block.LeavesDecayEvent
 import org.bukkit.event.entity.ItemSpawnEvent
 import org.bukkit.persistence.PersistentDataType
 import java.util.ArrayDeque
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -34,13 +34,6 @@ internal val leafDecayHandledDropKey = NamespacedKey("magnetic", "leaf_decay_han
 
 @Suppress("unused")
 object LeafDecayListeners {
-
-    private data class BlockKey(
-        val worldId: UUID,
-        val x: Int,
-        val y: Int,
-        val z: Int
-    )
 
     private data class Entry(
         val authorization: DropAuthorization,
@@ -53,14 +46,6 @@ object LeafDecayListeners {
         val persistent: Boolean
     )
 
-    private val directions = listOf(
-        BlockFace.DOWN,
-        BlockFace.UP,
-        BlockFace.NORTH,
-        BlockFace.SOUTH,
-        BlockFace.WEST,
-        BlockFace.EAST
-    )
     private val trackedLeaves = ConcurrentHashMap<BlockKey, Entry>()
     private val pendingDecay = ConcurrentHashMap<BlockKey, Entry>()
     private val activeScans = ConcurrentHashMap<Long, CanopyScan>()
@@ -79,7 +64,7 @@ object LeafDecayListeners {
 
         CanopyScan(
             block.world,
-            block.key(),
+            block.toPositionKey(),
             Entry(authorization, expiresAt, generation.incrementAndGet())
         ).start()
     }
@@ -88,7 +73,7 @@ object LeafDecayListeners {
         if (isCancelled || !config.leafDecay.enabled) return@listen
         if (block.type.isIgnored) return@listen
 
-        val key = block.key()
+        val key = block.toPositionKey()
         val decayedAt = System.currentTimeMillis()
         val entry = activeEntry(key, decayedAt)
         val leafData = block.blockData as? Leaves ?: return@listen
@@ -118,7 +103,7 @@ object LeafDecayListeners {
         if (entity.persistentDataContainer.has(leafDecayHandledDropKey)) return@listen
 
         val dropLocation = entity.location.clone()
-        val key = dropLocation.key()
+        val key = dropLocation.toPositionKey()
         val entry = pendingDecay[key]
         val earlyDecay = earlyDecays[key]
         if (entry == null && earlyDecay == null) return@listen
@@ -269,7 +254,7 @@ object LeafDecayListeners {
         fun start() {
             activeScans[entry.generation] = this
             pendingReads.incrementAndGet()
-            directions.forEach { scheduleRead(removedLog.relative(it), 1) }
+            adjacentFaces.forEach { scheduleRead(removedLog.relative(it), 1) }
             if (pendingReads.decrementAndGet() == 0) finishIfReady()
         }
 
@@ -364,7 +349,7 @@ object LeafDecayListeners {
             leaves[key] = leafState
             if (depth >= CANOPY_SCAN_RADIUS) return
 
-            directions.forEach { scheduleRead(key.relative(it), depth + 1) }
+            adjacentFaces.forEach { scheduleRead(key.relative(it), depth + 1) }
         }
 
         private fun finish() {
@@ -411,7 +396,7 @@ object LeafDecayListeners {
                 val (current, depth) = queue.removeFirst()
                 if (depth >= maximumDistance - 1) continue
 
-                for (direction in directions) {
+                for (direction in adjacentFaces) {
                     val neighbor = current.relative(direction)
                     if (!visited.add(neighbor)) continue
                     if (logs.contains(neighbor)) return true
@@ -423,19 +408,6 @@ object LeafDecayListeners {
             return false
         }
     }
-
-    private fun Block.key() = BlockKey(world.uid, x, y, z)
-
-    private fun org.bukkit.Location.key() = BlockKey(world.uid, blockX, blockY, blockZ)
-
-    private fun BlockKey.relative(direction: BlockFace) = BlockKey(
-        worldId,
-        x + direction.modX,
-        y + direction.modY,
-        z + direction.modZ
-    )
-
-    private fun BlockKey.location(world: World) = Location(world, x.toDouble(), y.toDouble(), z.toDouble())
 
     private const val MAXIMUM_LEAF_DISTANCE = 7
     private const val CANOPY_SCAN_RADIUS = (MAXIMUM_LEAF_DISTANCE - 1) * 2

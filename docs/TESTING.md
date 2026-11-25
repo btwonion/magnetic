@@ -18,8 +18,9 @@ Run the smallest command that covers the change:
 ./gradlew testAll
 ```
 
-- `testFast` runs the JUnit suite for every Fabric and NeoForge target. It does
-  not start a server. Use it during normal mod development.
+- `testFast` runs the JUnit suites of the `common` module and of every Fabric
+  and NeoForge target. It does not start a server. Use it during normal mod
+  development.
 - `testGameLatest` starts headless servers for the latest Fabric and NeoForge
   targets. Use it for mod gameplay, mixin, loader, inventory, XP, entity, or
   configuration-reload behavior.
@@ -32,6 +33,7 @@ Run the smallest command that covers the change:
 Run a single target while diagnosing a failure:
 
 ```bash
+./gradlew :common:test
 ./gradlew :mod:26.3-fabric:test
 ./gradlew :mod:26.3-fabric:runGameTest
 ./gradlew :mod:26.3-neoforge:runGameTest
@@ -44,6 +46,8 @@ when verification fails.
 
 ## JVM tests
 
+Logic shared by the mod and the Paper plugin is tested in
+`common/src/test/kotlin` with plain JUnit and no Minecraft classes. Mod-only
 JVM tests are stored in `mod/src/test/kotlin`. Stonecutter preprocesses this
 source set for every target. Fabric uses Modstitch's loader-aware JUnit
 environment; NeoForge deliberately uses plain JUnit so its suite remains

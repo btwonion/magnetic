@@ -6,6 +6,7 @@ import dev.nyon.magnetic.config.ConfigKt;
 import dev.nyon.magnetic.extensions.MagneticCheckKt;
 import dev.nyon.magnetic.holders.ServerLevelHolder;
 import dev.nyon.magnetic.utils.BlockDropScope;
+import dev.nyon.magnetic.utils.MixinHelper;
 import dev.nyon.magnetic.utils.ThreadLocalScope;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,8 +23,6 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static dev.nyon.magnetic.utils.MixinHelper.conditionAlreadyChecked;
-import static dev.nyon.magnetic.utils.MixinHelper.ignoreBlockDrops;
-import static dev.nyon.magnetic.utils.MixinHelper.leafDecayAuthorizedPlayer;
 import static dev.nyon.magnetic.utils.MixinHelper.threadLocal;
 
 @Pseudo
@@ -58,13 +57,8 @@ public class LeafEventsMixin {
         }
 
         UUID playerUuid = ((ServerLevelHolder) serverLevel).getLeafDecayTracker().take(dropPos);
-        if (!ConfigKt.getConfig().getLeafDecay().getEnabled() || playerUuid == null) {
-            original.call(dropLevel, dropPos);
-            return;
-        }
-
-        ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(playerUuid);
-        if (player == null || player.level() != serverLevel) {
+        ServerPlayer player = MixinHelper.playerIn(serverLevel, playerUuid);
+        if (!ConfigKt.getConfig().getLeafDecay().getEnabled() || player == null) {
             original.call(dropLevel, dropPos);
             return;
         }
@@ -102,20 +96,11 @@ public class LeafEventsMixin {
         boolean moved
     ) {
         boolean added = original.call(leaves, element);
-        ServerPlayer player = threadLocal.get();
         if (added
             && level instanceof ServerLevel serverLevel
             && element instanceof BlockPos leafPos
-            && player != null
-            && player.getUUID().equals(leafDecayAuthorizedPlayer.get())
-            && !Boolean.TRUE.equals(ignoreBlockDrops.get())
             && !MagneticCheckKt.isIgnored(state)) {
-            long timeout = ConfigKt.getConfig().getLeafDecay().getAbilityTimeout();
-            ((ServerLevelHolder) serverLevel).getLeafDecayTracker().record(
-                leafPos,
-                player.getUUID(),
-                timeout
-            );
+            MixinHelper.recordLeafDecay(serverLevel, leafPos);
         }
         return added;
     }

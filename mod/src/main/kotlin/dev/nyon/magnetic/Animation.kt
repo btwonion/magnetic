@@ -17,7 +17,6 @@ object Animation {
      */
     const val RELEASE_AFTER_TICKS = 20
 
-    private val blocksPerTick = config.animation.blocksPerSecond / 20
     private val trackedItemEntities = ConcurrentHashMap<ItemEntity, TrackedItem>()
 
     private class TrackedItem(val target: UUID) {
@@ -67,6 +66,7 @@ object Animation {
             val length = vec.length()
             if (length == 0.0) return@forEach
 
+            val blocksPerTick = config.animation.blocksPerSecond / itemEntity.level().tickRateManager().tickrate()
             val tickPart = blocksPerTick / length
             val tickVec = vec.multiply(
                 tickPart,
@@ -77,7 +77,7 @@ object Animation {
         }
     }
 
-    fun invokePickupItemEntity(itemEntity: ItemEntity) {
+    fun onPickup(itemEntity: ItemEntity) {
         trackedItemEntities.remove(itemEntity)
     }
 

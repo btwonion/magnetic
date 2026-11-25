@@ -61,9 +61,10 @@ Artifacts are written below each target's `build/libs` directory.
 
 ## Automated testing
 
-Unit tests live in `mod/src/test` and are Stonecutter-generated for every
-loader/version target. Keep parsing, timing, migration, and policy tests here;
-use injected clocks rather than sleeps. Run all of them with:
+Config, condition, identifier and cooldown logic lives in the root `common`
+module and is tested there. Mod-only unit tests live in `mod/src/test` and are
+Stonecutter-generated for every loader/version target; use injected clocks
+rather than sleeps. Run all of them with:
 
 ```bash
 ./gradlew testFast

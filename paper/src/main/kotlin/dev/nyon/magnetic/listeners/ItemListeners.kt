@@ -19,29 +19,17 @@ object ItemListeners {
         if (entityType.isIgnored) return@listen
         val killer = entity.killer ?: return@listen
         if (entity.failsLongRangeCheck(killer)) return@listen
-        val mutableInt = MutableInt(droppedExp)
-        val itemStacks = drops.toMutableList()
-        DropEventDispatcher.call(DropEvent(itemStacks, mutableInt, killer, entity.location))
-        droppedExp = mutableInt.toInt()
-
-        drops.removeIf { item ->
-            itemStacks.none { stack -> stack.isSimilar(item) }
-        }
+        droppedExp = DropEventDispatcher.collect(drops, killer, entity.location, droppedExp)
     }
 
     private val playerShearEvent = listen<PlayerShearEntityEvent> {
-        val itemStacks = drops.toMutableList()
-        DropEventDispatcher.call(DropEvent(itemStacks, MutableInt(), player, entity.location))
-
-        drops.removeIf { item ->
-            itemStacks.none { stack -> stack.isSimilar(item) }
-        }
+        DropEventDispatcher.collect(drops, player, entity.location)
     }
 
     private val playerFishEvent = listen<PlayerFishEvent> {
-        if (caught == null) return@listen
+        val caughtEntity = caught ?: return@listen
         val mutableInt = MutableInt(expToDrop)
-        DropEventDispatcher.call(DropEvent(mutableListOf(), mutableInt, player, caught!!.location))
+        DropEventDispatcher.call(DropEvent(mutableListOf(), mutableInt, player, caughtEntity.location))
         expToDrop = mutableInt.toInt()
     }
 }

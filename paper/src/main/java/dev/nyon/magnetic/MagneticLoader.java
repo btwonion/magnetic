@@ -8,7 +8,11 @@ import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @SuppressWarnings({ "UnstableApiUsage", "unused" })
 public class MagneticLoader implements PluginLoader {
@@ -30,19 +34,20 @@ public class MagneticLoader implements PluginLoader {
             //"https://maven-central.storage-download.googleapis.com/maven2"
         ).build());
 
-        var dependencies = Arrays.asList(
-            "dev.nyon:konfig:3.0.0",
-            "org.jetbrains.kotlin:kotlin-stdlib:2.1.21",
-            "org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0",
-            "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0",
-            "org.jetbrains.kotlinx:kotlinx-datetime:0.7.1",
-            "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2"
-        );
-        dependencies.forEach(dependency -> resolver.addDependency(new Dependency(
+        libraries().forEach(dependency -> resolver.addDependency(new Dependency(
             new DefaultArtifact(dependency),
             null
         )));
 
         builder.addLibrary(resolver);
+    }
+
+    private static List<String> libraries() {
+        try (InputStream stream = MagneticLoader.class.getResourceAsStream("/magnetic-libraries.txt")) {
+            if (stream == null) throw new IllegalStateException("The plugin jar does not list its libraries.");
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8).lines().filter(line -> !line.isBlank()).toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

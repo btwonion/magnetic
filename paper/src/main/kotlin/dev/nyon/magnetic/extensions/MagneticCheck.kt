@@ -12,12 +12,10 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 val EntityType.isIgnored: Boolean
-    get() {
-        return ignoredEntities.contains(key)
-    }
+    get() = key in ignoredEntities
 
 val Material.isIgnored: Boolean
-    get() = ignoredBlocks.contains(key)
+    get() = key in ignoredBlocks
 
 fun Entity.failsLongRangeCheck(player: Player): Boolean {
     if (config.ignoredEntitiesRangeMin == -1.0) return false
@@ -29,7 +27,5 @@ fun Player.canAddItem(stack: ItemStack): Boolean {
     if (nmsPlayer.inventory.freeSlot >= 0) return true
     if (nmsPlayer.hasInfiniteMaterials()) return true
     val nmsItem = (stack as CraftItemStack).handle
-    if (nmsItem.isDamaged) return false
-    if (nmsPlayer.inventory.getSlotWithRemainingSpace(nmsItem) > -1) return true
-    return false
+    return !nmsItem.isDamaged && nmsPlayer.inventory.getSlotWithRemainingSpace(nmsItem) > -1
 }

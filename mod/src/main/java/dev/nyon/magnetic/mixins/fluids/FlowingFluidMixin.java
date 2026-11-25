@@ -42,7 +42,7 @@ public class FlowingFluidMixin {
             .getBuckets()
             .getAbilityTimeout();
         BlockPos sourcePos = pos.relative(direction.getOpposite());
-        ServerPlayer player = tracker.lookupFluid(sourcePos, timeout);
+        ServerPlayer player = tracker.lookup(sourcePos);
         if (player == null) {
             BlockDropScope.run(state, action);
             return;
