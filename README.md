@@ -1,12 +1,8 @@
-# Magnetic
-
-> Auto-pickup for Minecraft: block drops, mob loot, and XP go straight into your inventory.
+![Magnetic: drops and XP go straight into your inventory](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-banner.png)
 
 **Mine, chop, farm, and fight without the cleanup.** Magnetic sends the drops and experience you cause directly to you. Mining above a lava lake, in a cave or in the Nether? The blocks and loot you break go into your inventory instead of falling into the lava and burning.
 
 Use it as a survival enchantment, like Telekinesis from Hypixel SkyBlock, or switch it on for everyone with no enchantment needed. It works in singleplayer and on Fabric, NeoForge, and Paper servers.
-
-![Magnetic auto-pickup demo](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-demo-cave.gif)
 
 ## Features
 
