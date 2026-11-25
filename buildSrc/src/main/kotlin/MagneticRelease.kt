@@ -41,9 +41,9 @@ fun Project.configureMagneticRelease(
     configure: ModPublishExtension.() -> Unit = {}
 ) {
     extensions.configure<ModPublishExtension> {
-        displayName.set("v$version")
+        displayName.set("v${project.version}")
         file.set(jar)
-        changelog.set("# v$version\n" + rootProject.file("changelog.md").readText())
+        changelog.set("# v${project.version}\n" + rootProject.file("changelog.md").readText())
         type.set(if (betaNumber != null) ReleaseType.BETA else ReleaseType.STABLE)
         modLoaders.addAll(loaders)
 
