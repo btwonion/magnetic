@@ -15,8 +15,6 @@ Use it as a survival enchantment, like Telekinesis from Hypixel SkyBlock, or swi
 - **Bucket-aware pickup:** Collect drops caused by fluids from a bucket you placed.
 - **Full-inventory alerts:** Choose a sound, chat message, or title, each with its own cooldown.
 
-![Mining comparison: vanilla pickup followed by Magnetic](https://raw.githubusercontent.com/btwonion/magnetic/refs/heads/master/media/magnetic-mining-compare.gif)
-
 ## Choose how it works
 
 By default, Magnetic is an enchantment you earn through the enchantment table, loot, and librarian trades. Put it on a tool, break a block or kill a mob, and the drops travel straight to you.
