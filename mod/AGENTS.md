@@ -119,11 +119,15 @@ all-version generation does not mix outputs. Review and commit generated JSON;
    metadata, Fabric API, YACL, and Mod Menu. Use
    `modstitch.platform=fabric-loom-remap` for obfuscated Minecraft releases
    and `modstitch.platform=fabric-loom` for unobfuscated 26.x releases.
+   Give the previous Fabric target's `vers.mcVersionRange` an upper bound
+   such as `<26.4-`, which also excludes 26.4 snapshots and pre-releases;
+   an open range lets the older jar load and crash on the new version.
 3. Add `mod/versions/<version>-neoforge/gradle.properties` with Minecraft
    metadata, NeoForge, YACL, KotlinLangForge, and
    `modstitch.platform=moddevgradle`.
 4. Compile both targets, using the narrowest Stonecutter condition only when
-   Minecraft APIs differ.
+   Minecraft APIs differ. A pre-release sorts below its release, so
+   `>=26.4` is false for a `26.4-pre-1` target; write `>26.3` instead.
 5. Run the Fabric target's `runDatagen` task.
 6. Build both targets and confirm their jars contain identical generated
    resources.

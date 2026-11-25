@@ -4,6 +4,8 @@ import com.mojang.brigadier.Command
 import com.mojang.brigadier.CommandDispatcher
 import dev.nyon.konfig.config.loadConfig
 import dev.nyon.magnetic.common.config.Config
+//? if >26.3
+//import net.minecraft.commands.CommandPermissionLevels
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
@@ -13,7 +15,7 @@ object ConfigCommand {
         dispatcher.register(
             Commands.literal("magnetic").then(
                 Commands.literal("reload")
-                    .requires(/*? if >=1.21.11 {*/ Commands.hasPermission(Commands.LEVEL_ADMINS) /*?} else {*/ /*{ it.hasPermission(2) } *//*?}*/)
+                    .requires(/*? if >26.3 {*/ /*Commands.hasPermission(CommandPermissionLevels.LEVEL_ADMINS) *//*?} else if >=1.21.11 {*/ Commands.hasPermission(Commands.LEVEL_ADMINS) /*?} else {*/ /*{ it.hasPermission(2) } *//*?}*/)
                     .executes { ctx ->
                         config = loadConfig<Config>()
                         ctx.source.sendSystemMessage(Component.literal("Successfully reloaded config."))
